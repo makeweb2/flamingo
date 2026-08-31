@@ -82,7 +82,7 @@ sin emojis.
 | # | Sección | Bloque de la referencia |
 |---|---------|-------------------------|
 | 1 | Portada | El titular con la foto dentro, y debajo la fila de tres piezas |
-| 2 | El local | El bloque grande con tres miniaturas + foto alta + tarjeta de claim |
+| 2 | El local | El bloque con tres miniaturas y el vídeo al lado, y el claim en banda ancha debajo |
 | 3 | Es tu sitio si… | La rejilla 3×2 con la pieza destacada en el centro |
 | 4 | La carta | El bloque ancho con el panel interior que sobresale y los puntos |
 | 5 | Lo más pedido | El bloque de precios: lista a la izquierda, foto a la derecha |
@@ -170,6 +170,16 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
 - **El viewBox de los churretes del botón guarda la proporción de su caja CSS**
   (80:90 y 62:70). Con `preserveAspectRatio` por defecto, si no coincidieran el SVG
   se centraría y los churretes se saldrían de su sitio.
+- **`.local__ph` lleva `.ph--fill`.** Sus medios van en absoluto para que no
+  impongan su alto natural: un reel vertical, si no, estira su columna a 864px y
+  deja tres cuartos de bloque en rosa vacío.
+- **`.deliv .btn:hover` no puede usar `background:currentColor`.** En `:hover` se
+  resolvería contra el color ya cambiado a blanco y el fondo saldría blanco; el
+  color de cada servicio va en `--svc`.
+- **Los enlaces de reparto no llevan los logos de verdad.** Son ficheros de marca
+  que hay que pedir o descargar. Van con el color de cada servicio y un punto; para
+  poner los reales, sustituir la `<i>` por un `<img>` de 18px de alto y quitarle el
+  `background`.
 - **El nav no lleva el logo en JPEG.** A 34px era un borrón con un cerco claro
   alrededor y al lado del rótulo en Cooper cantaba. El rótulo ya es la marca.
 - **`stroke-dasharray` va a `100 101`, no a `100`.** Un solo valor significa "raya
