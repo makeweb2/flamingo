@@ -3,5 +3,6 @@
 
 User-agent: *
 Allow: /
+Disallow: /_fuentes/
 
 Sitemap: https://www.flamingobrunchfood.es/sitemap.xml

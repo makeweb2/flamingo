@@ -1,6 +1,23 @@
 /* ============================================================
-   FLAMINGO — interaccion (GSAP + ScrollTrigger + Lenis)
-   Sin pantalla de carga y sin cursor personalizado.
+   FLAMINGO BRUNCH & FOOD — interacción
+   ------------------------------------------------------------
+   Un solo fichero, sin build, sin dependencias obligatorias:
+   GSAP y Lenis mejoran la página, pero si el CDN no responde
+   todo sigue funcionando (la carta se pinta, las pestañas
+   cambian, el acordeón abre y el formulario envía).
+
+   Índice
+     1. Motor de tinta (trazos SVG)
+     2. Botones
+     3. Subrayados, tachones y nav
+     4. Carta: datos, pestañas y JSON-LD
+     5. Lo más pedido
+     6. Estado abierto / cerrado
+     7. Acordeón de preguntas (+ FAQPage)
+     8. Reserva por WhatsApp
+     9. Scroll, nav y menú móvil
+    10. Vídeos
+    11. Animaciones
    ============================================================ */
 (function () {
   'use strict';
@@ -9,18 +26,18 @@
   var hasGSAP = !!window.gsap;
   if (hasGSAP && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
 
-  /* ================= Botones =================================
-     Cada botón se traza como si alguien lo hubiera rodeado con un
-     rotulador: el contorno se genera a partir de un superelipse con
-     una ondulación determinista (misma semilla = mismo trazo), la
-     segunda pasada se dibuja al pasar por encima y los goterones
-     caen con su propio retardo. El movimiento magnético y el cambio
-     de etiqueta van por variables CSS para no pisarse entre sí.
-     ========================================================== */
-  var NS = 'http://www.w3.org/2000/svg';
-  var BOX = { w: 220, h: 66 };
+  var $  = function (s, c) { return (c || document).querySelector(s); };
+  var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
 
-  // Ondulación suave y reproducible: tres senos desfasados por semilla.
+
+  /* ══ 1. MOTOR DE TINTA ═══════════════════════════════════════
+     Cada trazo se genera a partir de un superelipse con una
+     ondulación determinista: misma semilla, mismo gesto. Así no
+     hay dos botones iguales, pero sí son iguales entre recargas. */
+  var NS  = 'http://www.w3.org/2000/svg';
+  var BOX = { w: 220, h: 66 };
+  var TAU = Math.PI * 2;
+
   function wobble(a, seed, amp) {
     return 1 + amp * (
       Math.sin(a * 3 + seed) * 0.5 +
@@ -49,26 +66,6 @@
     return d + (close ? 'Z' : '');
   }
 
-  function svgEl(cls, viewBox, stretch) {
-    var el = document.createElementNS(NS, 'svg');
-    el.setAttribute('class', cls);
-    el.setAttribute('viewBox', viewBox);
-    if (stretch) el.setAttribute('preserveAspectRatio', 'none');
-    el.setAttribute('aria-hidden', 'true');
-    el.setAttribute('focusable', 'false');
-    return el;
-  }
-  function pathEl(parent, d, cls) {
-    var p = document.createElementNS(NS, 'path');
-    p.setAttribute('d', d);
-    if (cls) p.setAttribute('class', cls);
-    p.setAttribute('pathLength', '100');
-    parent.appendChild(p);
-    return p;
-  }
-
-  var TAU = Math.PI * 2;
-
   // Brochazo horizontal: cae y remonta un poco, como un gesto de verdad.
   function swipe(seed, amp, rise) {
     var steps = 26, d = '';
@@ -88,10 +85,28 @@
       var t = i / steps;
       var x = -2 + t * 104;
       var base = dir > 0 ? 21 - t * 12 : 9 + t * 12;
-      var y = base + Math.sin(t * 6 + seed) * 1.5;
-      d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+      d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + (base + Math.sin(t * 6 + seed) * 1.5).toFixed(1);
     }
     return d;
+  }
+
+  function svgEl(cls, viewBox, stretch) {
+    var s = document.createElementNS(NS, 'svg');
+    s.setAttribute('class', cls);
+    s.setAttribute('viewBox', viewBox);
+    s.setAttribute('aria-hidden', 'true');
+    s.setAttribute('focusable', 'false');
+    if (stretch) s.setAttribute('preserveAspectRatio', 'none');
+    return s;
+  }
+
+  function pathEl(parent, d, cls) {
+    var p = document.createElementNS(NS, 'path');
+    p.setAttribute('d', d);
+    if (cls) p.setAttribute('class', cls);
+    p.setAttribute('pathLength', '100');
+    parent.appendChild(p);
+    return p;
   }
 
   // Anillo de rotulador reutilizable (pestañas, precios, etiquetas)
@@ -105,7 +120,11 @@
   }
 
 
-  document.querySelectorAll('.btn').forEach(function (btn, n) {
+  /* ══ 2. BOTONES ══════════════════════════════════════════════
+     Contorno trazado, etiqueta que rota, goterones y un imán que
+     acerca el botón al cursor. Todo por variables CSS para que
+     los estados no se pisen entre sí.                            */
+  function inkButton(btn, n) {
     if (btn.querySelector('.btn__ink')) return;
     var seed = 1.3 + n * 2.11;
 
@@ -125,7 +144,7 @@
     label.appendChild(t2);
     btn.appendChild(label);
 
-    // Contorno: relleno + primera pasada + segunda pasada (se dibuja al hover)
+    // Relleno + primera pasada + segunda pasada (esta se dibuja al señalar)
     var ink = svgEl('btn__ink', '0 0 ' + BOX.w + ' ' + BOX.h, true);
     pathEl(ink, trace(seed, 0.022, 0, TAU, true, 104, 28), 'btn__fill');
     pathEl(ink, trace(seed, 0.030, -0.5, TAU + 0.22, false, 104, 28), 'btn__stroke btn__stroke--1');
@@ -156,12 +175,11 @@
     drips.appendChild(g);
     btn.appendChild(drips);
 
-    // Imán: el botón se acerca un poco al cursor y vuelve a su sitio.
-    // Lerp propio para escribir las variables con unidades y parar el bucle
-    // en cuanto se asienta: nada corriendo de fondo sin necesidad.
+    // Imán: lerp propio para escribir las variables con unidades y parar
+    // el bucle en cuanto se asienta. Nada corriendo de fondo sin motivo.
     if (window.matchMedia('(hover:hover) and (pointer:fine)').matches && !REDUCED) {
       var cur = { x: 0, y: 0 }, aim = { x: 0, y: 0 }, raf = 0;
-      function tick() {
+      var tick = function () {
         cur.x += (aim.x - cur.x) * 0.16;
         cur.y += (aim.y - cur.y) * 0.16;
         btn.style.setProperty('--mx', cur.x.toFixed(2) + 'px');
@@ -173,8 +191,8 @@
           btn.style.setProperty('--mx', aim.x.toFixed(2) + 'px');
           btn.style.setProperty('--my', aim.y.toFixed(2) + 'px');
         }
-      }
-      function nudge() { if (!raf) raf = requestAnimationFrame(tick); }
+      };
+      var nudge = function () { if (!raf) raf = requestAnimationFrame(tick); };
       btn.addEventListener('pointermove', function (e) {
         var r = btn.getBoundingClientRect();
         aim.x = ((e.clientX - r.left) / r.width - 0.5) * 14;
@@ -183,11 +201,13 @@
       });
       btn.addEventListener('pointerleave', function () { aim.x = 0; aim.y = 0; nudge(); });
     }
-  });
+  }
+  $$('.btn').forEach(inkButton);
 
-  /* ---------------- Brochazos y tachones ----------------
-     Cada uno se traza aparte: ningún subrayado repite el mismo gesto.  */
-  document.querySelectorAll('.paint').forEach(function (el, i) {
+
+  /* ══ 3. SUBRAYADOS, TACHONES Y NAV ═══════════════════════════
+     Cada uno se traza aparte: ningún gesto se repite.            */
+  $$('.paint').forEach(function (el, i) {
     var seed = 0.7 + i * 2.9;
     var sv = svgEl('ink-ul ink-ul--big', '0 0 100 20', true);
     pathEl(sv, swipe(seed, 1.4, 3), 'ink-ul__p ink-ul__p--1');
@@ -195,7 +215,7 @@
     el.appendChild(sv);
   });
 
-  document.querySelectorAll('.strike').forEach(function (el, i) {
+  $$('.strike').forEach(function (el, i) {
     var seed = 1.9 + i * 3.4;
     var sv = svgEl('ink-x', '0 0 100 30', true);
     pathEl(sv, slash(seed, 1), 'ink-x__p ink-x__p--1');
@@ -203,14 +223,16 @@
     el.appendChild(sv);
   });
 
-  /* Subrayado a mano en los enlaces del nav */
-  document.querySelectorAll('.nav__links a').forEach(function (a, i) {
+  $$('.nav__links a').forEach(function (a, i) {
     var sq = svgEl('squig', '0 0 100 12', true);
     pathEl(sq, swipe(4.3 + i * 2.6, 1.6, 1.8), 'squig__p');
     a.appendChild(sq);
   });
 
-  /* ---------------- Carta ---------------- */
+
+  /* ══ 4. LA CARTA ═════════════════════════════════════════════
+     Un único array alimenta la lista, las pestañas, el bloque de
+     "lo más pedido" y el JSON-LD del menú: nunca se desincronizan. */
   var MENU = [
     { label: 'Brunch', items: [
       { n: 'Huevos Benedict', d: 'Pan brioche, bacón, aguacate, huevo poché y salsa holandesa.', p: '15,00', tag: 'top' },
@@ -278,8 +300,9 @@
     ]}
   ];
 
-  var tabsEl = document.getElementById('menuTabs');
-  var listEl = document.getElementById('menuList');
+  var tabsEl = $('#menuTabs');
+  var listEl = $('#menuList');
+  var dotsEl = $('#menuDots');
   var current = 0;
 
   function dishMarkup(it, i) {
@@ -293,18 +316,15 @@
 
   function inkDish(dish, n) {
     var seed = 2.4 + n * 1.77;
-    // el precio se rodea a rotulador
-    var price = dish.querySelector('.dish__price');
+    var price = $('.dish__price', dish);
     if (price) ring(price, 'ink-ring ink-ring--price', seed, 0.05, 96, 24, 1);
-    // el nombre se subraya
-    var name = dish.querySelector('.dish__n');
+    var name = $('.dish__n', dish);
     if (name) {
       var u = svgEl('ink-ul', '0 0 100 20', true);
       pathEl(u, swipe(seed, 1.1, 2.2), 'ink-ul__p');
       name.appendChild(u);
     }
-    // la etiqueta va rodeada
-    var flag = dish.querySelector('.flag');
+    var flag = $('.flag', dish);
     if (flag) ring(flag, 'ink-ring ink-ring--flag', seed + 3, 0.07, 92, 22, 1);
   }
 
@@ -312,8 +332,10 @@
     current = i;
     listEl.innerHTML = MENU[i].items.map(dishMarkup).join('');
     listEl.setAttribute('aria-labelledby', 'tab-' + i);
-    var dishes = listEl.querySelectorAll('.dish');
+    listEl.scrollLeft = 0;
+    var dishes = $$('.dish', listEl);
     dishes.forEach(inkDish);
+    if (dotsEl) $$('i', dotsEl).forEach(function (d, k) { d.classList.toggle('is-on', k === i); });
     if (hasGSAP && !REDUCED) {
       gsap.fromTo(dishes,
         { opacity: 0, y: 14, clipPath: 'inset(0 0 100% 0)' },
@@ -333,11 +355,12 @@
              ' role="tab" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? 0 : -1) + '"' +
              ' data-i="' + i + '"><span>' + c.label + '</span></button>';
     }).join('');
+    if (dotsEl) dotsEl.innerHTML = MENU.map(function () { return '<i></i>'; }).join('');
 
-    var tabs = Array.prototype.slice.call(tabsEl.querySelectorAll('.tab'));
+    var tabs = $$('.tab', tabsEl);
     tabs.forEach(function (t, i) { ring(t, 'ink-ring ink-ring--tab', 5.1 + i * 1.4, 0.055, 100, 26, 2); });
 
-    function select(i, focus) {
+    var select = function (i, focus) {
       if (i === current) { if (focus) tabs[i].focus(); return; }
       tabs.forEach(function (t, k) {
         var on = k === i;
@@ -347,7 +370,7 @@
       });
       renderMenu(i);
       if (focus) tabs[i].focus();
-    }
+    };
 
     tabsEl.addEventListener('click', function (e) {
       var b = e.target.closest('.tab');
@@ -371,11 +394,10 @@
     renderMenu(0);
   }
 
-  /* ---------------- Schema.org de la carta ----------------
-     Se genera desde MENU para que nunca se desincronice del contenido.
-     El dominio sale del canonical, así no hay que tocarlo dos veces.   */
+  /* JSON-LD del menú: se genera desde MENU y toma el dominio del
+     canonical, así el dominio solo se toca en un sitio. */
   (function () {
-    var canon = document.querySelector('link[rel="canonical"]');
+    var canon = $('link[rel="canonical"]');
     var base = canon ? canon.href.replace(/\/$/, '') : '';
     var data = {
       '@context': 'https://schema.org',
@@ -392,11 +414,7 @@
               '@type': 'MenuItem',
               'name': it.n,
               'description': it.d,
-              'offers': {
-                '@type': 'Offer',
-                'price': it.p.replace(',', '.'),
-                'priceCurrency': 'EUR'
-              }
+              'offers': { '@type': 'Offer', 'price': it.p.replace(',', '.'), 'priceCurrency': 'EUR' }
             };
           })
         };
@@ -408,10 +426,177 @@
     document.head.appendChild(tag);
   })();
 
-  /* ---------------- Fondo WebGL ---------------- */
-  if (window.FlamingoScene) window.FlamingoScene.init(document.getElementById('gl'));
 
-  /* ---------------- Scroll suave ---------------- */
+  /* ══ 5. LO MÁS PEDIDO ════════════════════════════════════════
+     Se saca de MENU por nombre: si un plato desaparece de la
+     carta, desaparece también de aquí en vez de quedarse colgado. */
+  (function () {
+    var host = $('#dealList');
+    if (!host) return;
+    var PICK = ['Huevos Benedict', 'Puglia', 'Flamingo Burger', 'Bowl de Açaí', 'Matilda'];
+    var byName = {};
+    MENU.forEach(function (s) { s.items.forEach(function (it) { byName[it.n] = it; }); });
+
+    var rows = PICK.map(function (n) { return byName[n]; })
+      .filter(Boolean)
+      .map(function (it) {
+        return '<li><b>' + it.n + '</b><span class="dot" aria-hidden="true"></span>' +
+               '<span class="p">' + it.p + ' €</span></li>';
+      });
+    host.innerHTML = rows.join('');
+  })();
+
+
+  /* ══ 6. ABIERTO / CERRADO ════════════════════════════════════
+     El horario vive en los data- del propio elemento, que son los
+     mismos que el JSON-LD del <head>. */
+  (function () {
+    var el = $('#status');
+    if (!el) return;
+    var word = $('.status__word', el);
+    var mins = function (hhmm) {
+      var p = String(hhmm).split(':');
+      return (+p[0]) * 60 + (+p[1] || 0);
+    };
+    function paint() {
+      var now = new Date();
+      var t = now.getHours() * 60 + now.getMinutes();
+      var open = mins(el.dataset.open), close = mins(el.dataset.close);
+      var isOpen = t >= open && t < close;
+      el.classList.toggle('is-closed', !isOpen);
+      if (!word) return;
+      if (isOpen) word.textContent = t >= close - 60 ? 'Cerramos pronto' : 'Abierto ahora';
+      else word.textContent = t < open ? 'Abrimos a las 9:00' : 'Cerrado por hoy';
+    }
+    paint();
+    setInterval(paint, 60000);
+  })();
+
+
+  /* ══ 7. ACORDEÓN ═════════════════════════════════════════════
+     Altura animada en píxeles y devuelta a `auto` al terminar,
+     para que el texto siga fluyendo si cambia el ancho.          */
+  (function () {
+    var acc = $('#acc');
+    if (!acc) return;
+    var items = $$('.acc__item', acc).map(function (item, i) {
+      var btn = $('.acc__btn', item);
+      var panel = $('.acc__panel', item);
+      panel.id = 'acc-p-' + i;
+      btn.id = 'acc-b-' + i;
+      btn.setAttribute('aria-controls', panel.id);
+      panel.setAttribute('role', 'region');
+      panel.setAttribute('aria-labelledby', btn.id);
+      panel.hidden = true;
+      return { btn: btn, panel: panel };
+    });
+
+    function close(it) {
+      if (it.btn.getAttribute('aria-expanded') !== 'true') return;
+      it.btn.setAttribute('aria-expanded', 'false');
+      var h = it.panel.scrollHeight;
+      it.panel.style.height = h + 'px';
+      requestAnimationFrame(function () { it.panel.style.height = '0px'; });
+      var done = function () {
+        it.panel.hidden = true;
+        it.panel.style.height = '';
+        it.panel.removeEventListener('transitionend', done);
+      };
+      if (REDUCED) done();
+      else it.panel.addEventListener('transitionend', done);
+    }
+
+    function open(it) {
+      it.btn.setAttribute('aria-expanded', 'true');
+      it.panel.hidden = false;
+      it.panel.style.height = '0px';
+      var h = it.panel.scrollHeight;
+      requestAnimationFrame(function () { it.panel.style.height = h + 'px'; });
+      var done = function () {
+        it.panel.style.height = 'auto';
+        it.panel.removeEventListener('transitionend', done);
+        if (window.ScrollTrigger) ScrollTrigger.refresh();
+      };
+      if (REDUCED) done();
+      else it.panel.addEventListener('transitionend', done);
+    }
+
+    // La transición se pone aquí y no en el CSS: así, sin JS, los
+    // paneles quedan abiertos y legibles en vez de recortados a cero.
+    items.forEach(function (it) {
+      if (!REDUCED) it.panel.style.transition = 'height .42s cubic-bezier(.22,1,.36,1)';
+      it.btn.addEventListener('click', function () {
+        var wasOpen = it.btn.getAttribute('aria-expanded') === 'true';
+        items.forEach(close);
+        if (!wasOpen) open(it);
+      });
+    });
+
+    /* FAQPage: se lee del propio acordeón, igual que el menú se lee de
+       MENU. Si se edita una pregunta en el HTML, el schema va detrás. */
+    var faq = items.map(function (it) {
+      return {
+        '@type': 'Question',
+        'name': it.btn.textContent.replace(/\s+/g, ' ').trim(),
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': it.panel.textContent.replace(/\s+/g, ' ').trim()
+        }
+      };
+    });
+    if (faq.length) {
+      var tag = document.createElement('script');
+      tag.type = 'application/ld+json';
+      tag.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'inLanguage': 'es-ES',
+        'mainEntity': faq
+      });
+      document.head.appendChild(tag);
+    }
+  })();
+
+
+  /* ══ 8. RESERVA POR WHATSAPP ═════════════════════════════════
+     Sin servidor y sin promesas falsas: el formulario compone el
+     mensaje y abre WhatsApp, que es por donde el local atiende.   */
+  (function () {
+    var form = $('#bookForm');
+    if (!form) return;
+    var TEL = '34607020554';
+    var err = $('#formError');
+
+    function fail(msg, field) {
+      if (err) { err.textContent = msg; err.hidden = false; }
+      if (field) { field.classList.add('is-bad'); field.focus(); }
+    }
+
+    form.addEventListener('input', function (e) {
+      e.target.classList.remove('is-bad');
+      if (err) err.hidden = true;
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = form.elements.nombre, day = form.elements.dia, pax = form.elements.personas, msg = form.elements.mensaje;
+
+      if (!name.value.trim())        return fail('Dinos tu nombre para saber a quién guardamos la mesa.', name);
+      if (!day.value.trim())         return fail('¿Qué día y a qué hora te esperamos?', day);
+      var n = parseInt(pax.value, 10);
+      if (!n || n < 1 || n > 30)     return fail('Pon cuántas personas sois (de 1 a 30).', pax);
+
+      var text = 'Hola Flamingo, soy ' + name.value.trim() + '.\n' +
+                 'Quería mesa para ' + n + (n === 1 ? ' persona' : ' personas') + ' el ' + day.value.trim() + '.' +
+                 (msg.value.trim() ? '\n' + msg.value.trim() : '') +
+                 '\n\n(Enviado desde la web)';
+
+      window.open('https://wa.me/' + TEL + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
+    });
+  })();
+
+
+  /* ══ 9. SCROLL, NAV Y MENÚ MÓVIL ═════════════════════════════ */
   var lenis = null;
   if (window.Lenis && !REDUCED) {
     lenis = new Lenis({ duration: 1.1, smoothWheel: true });
@@ -423,21 +608,10 @@
       (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
     }
   }
-  document.addEventListener('click', function (e) {
-    var a = e.target.closest('a[href^="#"]');
-    if (!a) return;
-    var el = document.querySelector(a.getAttribute('href'));
-    if (!el) return;
-    e.preventDefault();
-    closeDrawer();
-    if (lenis) lenis.scrollTo(el, { duration: 1.2 });
-    else el.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
-  });
 
-  /* ---------------- Nav ---------------- */
-  var nav = document.getElementById('nav');
-  var burger = document.getElementById('burger');
-  var drawer = document.getElementById('drawer');
+  var nav = $('#nav');
+  var burger = $('#burger');
+  var drawer = $('#drawer');
 
   function closeDrawer() {
     if (!drawer) return;
@@ -447,6 +621,18 @@
     if (burger) { burger.setAttribute('aria-expanded', 'false'); burger.setAttribute('aria-label', 'Abrir menú'); }
     if (lenis) lenis.start();
   }
+
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href^="#"]');
+    if (!a) return;
+    var el = document.querySelector(a.getAttribute('href'));
+    if (!el) return;
+    e.preventDefault();
+    closeDrawer();
+    if (lenis) lenis.scrollTo(el, { duration: 1.2, offset: -70 });
+    else el.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
+  });
+
   if (burger) {
     burger.addEventListener('click', function () {
       var open = !drawer.classList.contains('is-open');
@@ -458,42 +644,39 @@
       if (lenis) { open ? lenis.stop() : lenis.start(); }
       if (open) {
         nav.classList.remove('is-hidden');
-        var first = drawer.querySelector('a');
+        var first = $('a', drawer);
         if (first) setTimeout(function () { first.focus(); }, 260);
       }
     });
   }
-  // Filo inferior trazado a mano, se dibuja al despegarse del hero
-  if (nav) {
-    var edge = svgEl('nav__edge', '0 0 100 8', true);
-    pathEl(edge, swipe(9.4, 1.1, 1.2), 'nav__edge__p');
-    nav.appendChild(edge);
-  }
 
   // Se esconde al bajar y vuelve al subir; arriba del todo siempre está.
-  var lastY = window.scrollY, ticking = false;
-  function onScroll() {
-    var y = window.scrollY;
-    nav.classList.toggle('is-stuck', y > 50);
-    if (!drawer.classList.contains('is-open')) {
-      var down = y > lastY && y > 220;
-      nav.classList.toggle('is-hidden', down);
-    }
-    lastY = y;
-    ticking = false;
+  if (nav) {
+    var lastY = window.scrollY, ticking = false;
+    var onScroll = function () {
+      var y = window.scrollY;
+      nav.classList.toggle('is-stuck', y > 40);
+      if (!drawer || !drawer.classList.contains('is-open')) {
+        nav.classList.toggle('is-hidden', y > lastY && y > 240);
+      }
+      lastY = y;
+      ticking = false;
+    };
+    window.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
+    }, { passive: true });
   }
-  window.addEventListener('scroll', function () {
-    if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
-  }, { passive: true });
 
   // Esc cierra el menú y el foco no se escapa del panel abierto
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && drawer.classList.contains('is-open')) {
+    if (!drawer || !drawer.classList.contains('is-open')) return;
+    if (e.key === 'Escape') {
       closeDrawer();
       if (burger) burger.focus();
+      return;
     }
-    if (e.key === 'Tab' && drawer.classList.contains('is-open')) {
-      var f = drawer.querySelectorAll('a');
+    if (e.key === 'Tab') {
+      var f = $$('a', drawer);
       if (!f.length) return;
       var first = f[0], last = f[f.length - 1];
       if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
@@ -501,9 +684,8 @@
     }
   });
 
-  /* ---------------- Titulares por palabras ----------------
-     Envuelve palabra a palabra sin destruir los <span> internos
-     (los brochazos y tachones sobreviven).                      */
+  /* Titulares por palabras: envuelve palabra a palabra sin destruir
+     los <span> internos, así los brochazos y tachones sobreviven. */
   function wrapWords(el) {
     var out = document.createDocumentFragment();
     Array.prototype.slice.call(el.childNodes).forEach(function (node) {
@@ -530,166 +712,73 @@
     el.innerHTML = '';
     el.appendChild(out);
   }
-  document.querySelectorAll('[data-split]').forEach(wrapWords);
+  $$('[data-split]').forEach(wrapWords);
 
-  /* ---------------- Vídeos ---------------- */
-  document.querySelectorAll('.clip video').forEach(function (v) {
+  var yEl = $('#year');
+  if (yEl) yEl.textContent = new Date().getFullYear();
+
+
+  /* ══ 10. VÍDEOS ══════════════════════════════════════════════
+     Solo se descargan y se reproducen cuando entran en pantalla. */
+  $$('video').forEach(function (v) {
+    if (!('IntersectionObserver' in window)) { v.preload = 'auto'; return; }
     new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
-        if (en.isIntersecting) { v.preload = 'auto'; var p = v.play(); if (p && p.catch) p.catch(function () {}); }
-        else v.pause();
+        if (en.isIntersecting) {
+          v.preload = 'auto';
+          var p = v.play();
+          if (p && p.catch) p.catch(function () {});
+        } else {
+          v.pause();
+        }
       });
-    }, { threshold: .3 }).observe(v);
+    }, { threshold: .25 }).observe(v);
   });
 
-  /* ---------------- Momentos ----------------
-     Tira arrastrable con inercia, barra de avance trazada a mano y
-     un marco de rotulador que se dibuja sobre el clip señalado.      */
-  (function () {
-    var strip = document.querySelector('.strip');
-    if (!strip) return;
 
-    strip.setAttribute('tabindex', '0');
-    strip.setAttribute('role', 'region');
-    strip.setAttribute('aria-label', 'Fotos y vídeos del local, desplazable en horizontal');
-
-    // marco de rotulador en cada clip
-    strip.querySelectorAll('.clip').forEach(function (c, i) {
-      var cb = { w: 90, h: 160 };
-      var f = svgEl('clip__frame', '0 0 90 160', true);
-      pathEl(f, trace(7.7 + i * 1.9, 0.010, -0.3, TAU + 0.22, false, 44, 79, cb, 7), 'clip__frame__p');
-      c.appendChild(f);
-    });
-
-    // avance
-    var bar = document.querySelector('.strip-progress');
-    if (bar) {
-      var line = svgEl('strip-progress__ink', '0 0 100 10', true);
-      pathEl(line, swipe(3.3, 0.9, 0), 'strip-progress__track');
-      pathEl(line, swipe(3.3, 0.9, 0), 'strip-progress__fill');
-      bar.appendChild(line);
-    }
-    var host = strip.closest('.moments') || strip;
-    function progress() {
-      var max = strip.scrollWidth - strip.clientWidth;
-      host.style.setProperty('--p', max > 0 ? (strip.scrollLeft / max).toFixed(4) : 1);
-    }
-    strip.addEventListener('scroll', progress, { passive: true });
-    window.addEventListener('resize', progress);
-    progress();
-
-    if (REDUCED) return;
-
-    // arrastre con inercia
-    var down = false, moved = 0, startX = 0, startScroll = 0, lastX = 0, vel = 0, raf = 0;
-    function glide() {
-      vel *= 0.94;
-      strip.scrollLeft -= vel;
-      if (Math.abs(vel) > 0.4) raf = requestAnimationFrame(glide);
-      else raf = 0;
-    }
-    strip.addEventListener('pointerdown', function (e) {
-      if (e.pointerType === 'touch') return;      // el táctil ya va nativo
-      down = true; moved = 0; vel = 0;
-      startX = lastX = e.clientX;
-      startScroll = strip.scrollLeft;
-      if (raf) { cancelAnimationFrame(raf); raf = 0; }
-      strip.classList.add('is-dragging');
-      strip.setPointerCapture(e.pointerId);
-    });
-    strip.addEventListener('pointermove', function (e) {
-      if (!down) return;
-      var dx = e.clientX - startX;
-      moved = Math.max(moved, Math.abs(dx));
-      vel = e.clientX - lastX;
-      lastX = e.clientX;
-      strip.scrollLeft = startScroll - dx;
-    });
-    function release(e) {
-      if (!down) return;
-      down = false;
-      strip.classList.remove('is-dragging');
-      try { strip.releasePointerCapture(e.pointerId); } catch (err) {}
-      if (Math.abs(vel) > 1) raf = requestAnimationFrame(glide);
-    }
-    strip.addEventListener('pointerup', release);
-    strip.addEventListener('pointercancel', release);
-    // tras arrastrar, el clic no debe contar
-    strip.addEventListener('click', function (e) { if (moved > 6) { e.preventDefault(); e.stopPropagation(); } }, true);
-
-    // rueda vertical -> avance horizontal cuando el cursor está encima
-    strip.addEventListener('wheel', function (e) {
-      if (Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
-      var max = strip.scrollWidth - strip.clientWidth;
-      var next = strip.scrollLeft + e.deltaY;
-      if (next <= 0 || next >= max) return;        // en los extremos, sigue la página
-      e.preventDefault();
-      strip.scrollLeft = next;
-    }, { passive: false });
-  })();
-
-  var y = document.getElementById('year');
-  if (y) y.textContent = new Date().getFullYear();
-
-  /* ---------------- Animaciones ---------------- */
+  /* ══ 11. ANIMACIONES ═════════════════════════════════════════ */
   if (hasGSAP && !REDUCED) {
     // Entrada del hero
-    gsap.from('.hero__title .ch', { yPercent: 110, duration: 1.1, stagger: .04, ease: 'power4.out', delay: .1 });
-    gsap.from('.hero__place', { opacity: 0, y: -10, duration: .8, ease: 'power2.out', delay: .2 });
-    gsap.from('.hero__sub', { opacity: 0, y: 18, duration: .9, ease: 'power3.out', delay: .55 });
-    gsap.from('.hero__actions .btn', { opacity: 0, y: 18, duration: .8, stagger: .08, ease: 'power3.out', delay: .7 });
-    gsap.from('.hero__logo', { opacity: 0, scale: .7, rotate: -14, duration: 1, ease: 'back.out(1.7)' });
-    gsap.from('.hero__veil', { opacity: 0, duration: 1.4, ease: 'power2.out' });
+    gsap.from('.hero__lead > *', { opacity: 0, y: 22, duration: .9, stagger: .07, ease: 'power3.out', delay: .1 });
+    gsap.from('.hero__media, .hero__ph1, .hero__status, .hero__ph2', {
+      opacity: 0, y: 26, scale: .985, duration: 1, stagger: .07, ease: 'power3.out', delay: .25
+    });
 
-    // Titulares
-    document.querySelectorAll('[data-split]').forEach(function (h) {
-      gsap.from(h.querySelectorAll('.w i'), {
+    // Titulares, palabra a palabra
+    $$('[data-split]').forEach(function (h) {
+      gsap.from($$('.w i', h), {
         yPercent: 110, duration: .95, ease: 'power4.out', stagger: .05,
-        scrollTrigger: { trigger: h, start: 'top 88%' }
+        scrollTrigger: { trigger: h, start: 'top 90%' }
       });
     });
 
-    // Bloques
-    gsap.utils.toArray('.eyebrow, .local__txt p, .facts, .info, .visit__actions, .note, .deliv, .foot__claim').forEach(function (el) {
-      gsap.from(el, { opacity: 0, y: 20, duration: .9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 92%' } });
+    // Tarjetas: entran desde abajo, escalonadas dentro de su rejilla
+    gsap.utils.toArray('.local__grid, .reasons__grid, .gallery, .deal__grid, .visit__grid, .faq__grid, .bubbles').forEach(function (grid) {
+      gsap.from(grid.children, {
+        opacity: 0, y: 26, duration: .85, stagger: .06, ease: 'power3.out',
+        scrollTrigger: { trigger: grid, start: 'top 88%' }
+      });
     });
 
-    // Brochazos y tachones: el trazo se dibuja, no aparece recortado
+    gsap.utils.toArray('.carta__shell, .head > *, .carta__foot > *').forEach(function (el) {
+      gsap.from(el, { opacity: 0, y: 20, duration: .85, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 92%' } });
+    });
+
+    // Los trazos se dibujan, no aparecen recortados
     gsap.utils.toArray('.paint, .strike').forEach(function (el) {
-      gsap.fromTo(el.querySelectorAll('path'),
+      gsap.fromTo($$('path', el),
         { strokeDashoffset: 100 },
-        {
-          strokeDashoffset: 0, duration: .5, stagger: .1, ease: 'power2.out',
-          scrollTrigger: { trigger: el, start: 'top 92%' }
-        });
+        { strokeDashoffset: 0, duration: .5, stagger: .1, ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 92%' } });
     });
 
-    // Fotos
-    gsap.utils.toArray('.local__ph img').forEach(function (img) {
-      gsap.from(img, { scale: 1.12, duration: 1.4, ease: 'power3.out', scrollTrigger: { trigger: img, start: 'top 94%' } });
-    });
-
-    // Los clips entran con un barrido, no con un fundido
-    gsap.fromTo('.strip .clip',
-      { clipPath: 'inset(0 0 100% 0)', y: 26 },
-      {
-        clipPath: 'inset(0 0 0% 0)', y: 0, duration: 1, stagger: .07, ease: 'power3.out',
-        scrollTrigger: { trigger: '.strip', start: 'top 88%' }
-      });
-    gsap.from('.strip-progress', { opacity: 0, duration: .8, scrollTrigger: { trigger: '.strip', start: 'top 88%' } });
-
-    // Pintada de la pared
-    gsap.from('.wall__txt > *', {
-      opacity: 0, y: 30, duration: 1, stagger: .09, ease: 'power4.out',
-      scrollTrigger: { trigger: '.wall', start: 'top 70%' }
-    });
-    gsap.from('.doodle', {
-      opacity: 0, scale: .4, rotate: -25, duration: .8, stagger: .12, ease: 'back.out(2)',
-      scrollTrigger: { trigger: '.wall', start: 'top 65%' }
+    // Las fotos se asientan: entran con un pelín de zoom de más
+    gsap.utils.toArray('.card--media > img').forEach(function (img) {
+      gsap.from(img, { scale: 1.1, duration: 1.4, ease: 'power3.out', scrollTrigger: { trigger: img, start: 'top 95%' } });
     });
 
     // El enlace de la sección en la que estás se queda subrayado
-    var links = Array.prototype.slice.call(document.querySelectorAll('.nav__links a'));
+    var links = $$('.nav__links a');
     links.forEach(function (a) {
       var id = a.getAttribute('href');
       var sec = id && id.length > 1 ? document.querySelector(id) : null;

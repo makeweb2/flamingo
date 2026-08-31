@@ -3,98 +3,131 @@
 Landing de una sola página para Flamingo Brunch & Food (Pl. de España 3, Elche).
 HTML + CSS + JS sin build: se sube tal cual a cualquier hosting.
 
-Abriéndolo con doble clic (`file://`) también se ve bien, pero el navegador no deja
-usar los vídeos como textura WebGL desde el disco: en ese caso el mural del hero se
-pinta con CSS en vez de con el shader. Para verlo tal cual quedará publicado, sirve
-la carpeta por HTTP, por ejemplo con `python -m http.server` y abriendo
-`http://localhost:8000`.
+Se ve igual abriéndolo con doble clic (`file://`) que servido por HTTP. Si quieres
+comprobarlo sobre servidor: `python -m http.server` y abrir `http://localhost:8000`.
 
-## Estructura
+## Estructura de la página
+
+La página está montada sobre **una sola primitiva (`.card`) y una rejilla de 12
+columnas (`.bento`)**. Cada sección coloca sus piezas con `grid-column` /
+`grid-row` explícitos, así que el orden del HTML es el orden de lectura y el
+responsive solo tiene que recolocar, nunca reordenar el marcado.
+
+| # | Sección | Qué hace |
+|---|---------|----------|
+| 1 | Hero | Bloque de marca + tarjeta de vídeo alta + tres fichas cortas: dónde, si está abierto y qué se come |
+| 2 | El local | Tarjeta negra con el relato y tres miniaturas, foto grande y tarjeta de claim |
+| 3 | Es tu sitio si… | Cuatro razones en las esquinas y la tarjeta rosa destacada en el centro |
+| 4 | La carta | Tarjeta ancha con las pestañas y un panel interior que sobresale por abajo |
+| 5 | Lo más pedido | Lista de los cinco de siempre con su precio real, sacada de `MENU` |
+| 6 | Momentos | Bento de seis fotos y vídeos del local |
+| 7 | Las paredes hablan | Bocadillos alternados con los carteles del local + la nota de Google |
+| 8 | Visítanos | Formulario que abre WhatsApp, cuatro fichas de contacto y el mapa |
+| 9 | Preguntas | Acordeón + foto de los carteles |
+| — | Pie | Marca, redes, dos columnas de enlaces y el claim |
+
+## Ficheros
 
 ```
-index.html          Todo el marcado + datos SEO (JSON-LD de Restaurant)
-css/style.css       Estilos y paleta (variables CSS en :root)
-assets/fonts        Cooper Black (woff2 + woff) para los titulares gordos
-js/scene.js         Mural three.js del hero: los 3 vídeos virados a rosa
-js/main.js          GSAP + ScrollTrigger + Lenis, datos de la carta, aros de los botones
-assets/img          Fotos del local y posters de los vídeos
+index.html          Marcado + SEO (JSON-LD de Restaurant)
+css/style.css       Tokens, tarjetas, rejillas y secciones (índice numerado arriba)
+js/main.js          Tinta SVG, carta, acordeón, formulario y animaciones
+assets/img          Fotos del local y pósters de los vídeos
 assets/video        Reels (mp4, sin sonido, en bucle)
+assets/fonts        Cooper Black (woff2 + woff)
 robots.txt          Reglas de rastreo + ruta del sitemap
 sitemap.xml         Sitemap con las imágenes principales
+_fuentes/           Material original (fotos sin recortar, vídeos sin comprimir,
+                    la referencia de estructura). No se publica: está en robots.txt.
 ```
 
-Librerías por CDN (three.js r160, GSAP 3.12 + ScrollTrigger, Lenis). Requiere conexión.
+Librerías por CDN (GSAP 3.12 + ScrollTrigger, Lenis). **Son opcionales**: si el CDN
+no responde, la carta se pinta igual, las pestañas cambian, el acordeón abre y el
+formulario envía. Solo se pierden las animaciones de entrada y el scroll suave.
+
+## Lenguaje visual
+
+Todo sale de las fotos del propio local, no de una plantilla:
+
+- **Color.** `--rose` (#C2798A) es el rosa polvo de los carteles que ellos mismos
+  publican; `--blush` es el rosa de la fachada; `--ink` es el negro de la
+  carpintería y el rótulo; `--spray` es el fucsia de las pintadas del baño.
+  Todo en `:root` de `css/style.css`.
+- **Tipografía.** Dos registros, los dos suyos. El elegante empareja una cursiva
+  de contraste alto (**Bodoni Moda**, en `<em>`) con un palo seco en caja alta
+  (**Jost**) — que es exactamente el lockup de sus posts. El callejero es
+  **Cooper Black** (`<span class="coop">`) y rotulador (`<span class="mark">`),
+  que es lo que hay pintado en las paredes.
+- **Forma.** Tarjetas redondeadas (`--r-xl` … `--r-sm`), que es lo que pedía la
+  referencia de estructura guardada en `_fuentes/referencia-estructura.jpg`.
 
 ## Editar lo habitual
 
-- **Carta**: array `MENU` al principio de `js/main.js`. Cada plato es
-  `{ n: nombre, d: descripción, p: 'precio', tag: 'top' | 'nuevo' }` (`tag` es opcional).
-- **Colores**: variables en `:root` de `css/style.css` (azulejo, rosa de fachada, fucsia
-  de las pintadas) y los uniforms `uBase` / `uPink` / `uSpray` de `js/scene.js`.
-- **Botones**: el contorno no es un `border-radius`, se traza en `js/main.js` a partir de
-  un superelipse con una ondulación determinista (`wobble` / `trace`). Cada botón usa una
-  semilla distinta, así que no hay dos trazos iguales, pero siempre son los mismos entre
-  recargas. Para cambiar el carácter del trazo: la amplitud en las llamadas a `trace()`
-  (más alto = más tembloroso) y el exponente `3.6` de `point()` (más alto = más rectangular).
-  Estados, imán y goterones se controlan con las variables `--rot`, `--sc`, `--mx`, `--my`,
-  `--ink-1`, `--ink-2` y `--bg` del bloque `.btn` en el CSS.
-
-  Nota para tocar los trazos: ninguno usa `vector-effect: non-scaling-stroke`. Con él,
-  el patrón de guiones se mide en pantalla y deja de coincidir con `pathLength`, así que
-  la animación de dibujado se rompe. El grosor va en unidades del viewBox y está
-  calibrado según cuánto se escala cada SVG; si cambias el tamaño de una caja, ajusta
-  su `stroke-width`.
-- **Brochazos y tachones**: envuelve la palabra en `<span class="paint">` para el
-  subrayado de pintura o `<span class="strike">` para el tachón. El trazo se genera
-  en `js/main.js` (`swipe` y `slash`), uno distinto por elemento, y se dibuja de un
-  extremo a otro al entrar en pantalla.
-- **Pestañas de la carta**: patrón de tablist completo — `role`/`aria-selected`,
-  tabulación móvil y navegación con flechas, Inicio y Fin. La activa se rodea con un
-  anillo de rotulador de dos pasadas.
-- **Tarjetas de la carta**: al señalar una entra un papel rosa desde la izquierda, se
-  subraya el nombre y se rodea el precio. Todo con el mismo motor de trazo.
-- **Momentos**: la tira se arrastra con el ratón y sigue por inercia, la rueda vertical
-  la desplaza en horizontal (y suelta el control en los extremos para no secuestrar la
-  página), tiene barra de avance trazada a mano y un marco de rotulador sobre el clip
-  señalado. Accesible con teclado.
-- **Nav**: se esconde al bajar y vuelve al subir, marca con un subrayado la sección en
-  la que estás, y el menú móvil cierra con Esc y no deja escapar el foco.
-- **Cooper Black**: `<span class="coop">` en la palabra que quieras. Está en la pared,
-  en el "brunch" del hero y en el pie.
-- **Mural del hero**: los `<video id="v0|v1|v2">` de `.hero__bg` alimentan el shader.
-  Cámbialos por otros clips verticales y listo. El viraje se ajusta con `uShadow` /
-  `uLight` en `js/scene.js` y el velo que da legibilidad, con `.hero__veil` en el CSS.
-- **Textos, dirección, horario y enlaces**: directamente en `index.html`.
-  El horario también está duplicado en el bloque JSON-LD del `<head>`.
+- **Carta**: array `MENU` al principio del bloque 4 de `js/main.js`. Cada plato es
+  `{ n: nombre, d: descripción, p: 'precio', tag: 'top' | 'nuevo' }` (`tag` opcional).
+  De ahí salen también las pestañas, el bloque "Lo más pedido" y el JSON-LD del menú.
+- **Lo más pedido**: array `PICK` (bloque 5). Son nombres de platos de `MENU`; si un
+  plato desaparece de la carta, desaparece de aquí en vez de quedarse colgado.
+- **Preguntas**: se escriben en el HTML. El `FAQPage` de schema.org se genera leyendo
+  el propio acordeón, así que no hay que tocarlo dos veces.
+- **Horario**: en tres sitios que deben decir lo mismo — el JSON-LD del `<head>`, la
+  ficha "Cuándo" y los `data-open` / `data-close` del `#status`, que es de donde sale
+  el "Abierto ahora / Cerramos pronto / Cerrado por hoy".
+- **Teléfono de reservas**: constante `TEL` del bloque 8 de `js/main.js` (formato
+  internacional sin `+`), además de los `tel:` del HTML.
+- **Textos, dirección y enlaces**: directamente en `index.html`.
 - **Fotos y vídeos**: sustituir los archivos de `assets/` manteniendo el nombre.
+
+## Detalles que conviene no romper
+
+- **Los trazos de tinta** (botones, subrayados, tachones, anillos de precio y de
+  pestaña) se generan en JS a partir de un superelipse con una ondulación
+  determinista: misma semilla, mismo gesto, así que no hay dos iguales pero sí son
+  iguales entre recargas. Para cambiar el carácter: la amplitud de `trace()` (más
+  alto = más tembloroso) y el exponente `3.6` de `point()` (más alto = más recto).
+- **Ningún trazo usa `vector-effect: non-scaling-stroke`.** Con él, el patrón de
+  guiones se mide en pantalla y deja de casar con `pathLength`, y la animación de
+  dibujado se rompe. El grosor va en unidades del viewBox, calibrado por contexto.
+- **`stroke-dasharray` va a `100 101`, no a `100`.** Un solo valor significa "raya
+  100 / hueco 100": con el offset a 100 el trazo cae justo en la costura del patrón
+  y el remate redondo asoma como un puntito suelto al lado de cada precio y de cada
+  pestaña. La unidad de holgura lo evita.
+- **Los goterones de los botones caen unos 30 px por debajo.** Por eso `.row` lleva
+  `row-gap: 36px`: en línea no molestan, apilados en móvil sí.
+- **El acordeón no lleva `height: 0` en el CSS.** Si el JS no llega, los paneles se
+  leen abiertos en vez de quedarse recortados a cero; es el JS quien los cierra.
+- **Cooper Black va incrustada en base64.** Las fuentes se piden siempre en modo
+  CORS y un `@font-face` con `url()` no cargaría al abrir el HTML con doble clic.
 
 ## SEO — lo primero al publicar
 
 **Sustituye `https://www.flamingobrunchfood.es` por el dominio real** en tres sitios:
-`index.html` (canonical, `og:url`, `og:image`, `twitter:image` y el bloque JSON-LD),
-`sitemap.xml` y `robots.txt`. El schema de la carta toma el dominio del canonical,
-así que ese no hay que tocarlo.
+`index.html` (canonical, `og:url`, `og:image`, `twitter:image` y el JSON-LD),
+`sitemap.xml` y `robots.txt`. Los schemas de la carta y de las preguntas toman el
+dominio del canonical, así que esos no hay que tocarlos.
 
-Después: dar de alta el dominio en Google Search Console, enviar el sitemap y
-enlazar la web desde el perfil de Google Business y desde la bio de Instagram.
+Después: alta en Google Search Console, enviar el sitemap y enlazar la web desde el
+perfil de Google Business y desde la bio de Instagram.
 
 Lo que ya lleva montado:
 
-- Title y meta description optimizados para "brunch en Elche", canonical y
-  `robots` con `max-image-preview:large`.
+- Title y meta description para "brunch en Elche", canonical y `robots` con
+  `max-image-preview:large`.
 - Open Graph y Twitter Card completos, con medidas y `alt` de la imagen.
 - JSON-LD en `@graph`: `WebSite`, `WebPage`, `ImageObject` y `Restaurant` con
-  dirección, horario, teléfono, valoración (4,2 · 776 reseñas), servicios,
-  `hasMap`, `OrderAction` de reparto y perfiles en `sameAs`.
-- Schema `Menu` con las 8 secciones y los 48 platos, generado en `js/main.js`
-  desde el array `MENU` para que nunca se desincronice de lo que se ve.
-- Un solo `h1` (con el nombre completo para lectores de pantalla y buscadores),
-  jerarquía de encabezados correcta y `alt` descriptivo en todas las imágenes.
+  dirección, horario, teléfono, valoración (4,2 · 776 reseñas), servicios, `hasMap`,
+  `OrderAction` de reparto y perfiles en `sameAs`.
+- `Menu` con las 8 secciones y los 48 platos, y `FAQPage` con las 6 preguntas, los
+  dos generados desde el propio contenido para que no se desincronicen.
+- Un solo `h1`, jerarquía de encabezados correcta y `alt` descriptivo en todas las
+  imágenes que aportan información (las decorativas van con `alt=""`).
 - `width` y `height` en imágenes y vídeos para no provocar saltos de layout,
-  `loading="lazy"` + `decoding="async"`, `preconnect` a fuentes y CDN, `preload`
-  del primer póster y `defer` en todos los scripts.
-- Enlace para saltar al contenido, foco visible y `aria-label` en los controles.
-- Vídeos recomprimidos: 3,3 MB → 1,3 MB en total.
+  `loading="lazy"` + `decoding="async"`, `preconnect` a fuentes y CDN, `preload` del
+  primer póster y `defer` en todos los scripts.
+- Enlace para saltar al contenido, foco visible, pestañas con patrón `tablist`
+  completo (flechas, Inicio y Fin), acordeón con `aria-expanded` / `aria-controls`,
+  menú móvil que cierra con Esc y no deja escapar el foco, y respeto a
+  `prefers-reduced-motion`.
 
 ## Datos del negocio usados
 
@@ -104,35 +137,18 @@ Lo que ya lleva montado:
 - Instagram: [@flamingo.bf](https://www.instagram.com/flamingo.bf/)
 - Reparto: Uber Eats, Glovo y Just Eat
 
-Los precios de la carta se tomaron de las plataformas de reparto, por lo que pueden
-ser algo superiores a los de sala. Conviene confirmarlos con el local antes de publicar.
-
-## Detalles técnicos
-
-- Sin pantalla de carga y sin cursor personalizado.
-- El hero es un tríptico de vídeo pintado por WebGL con duotono rosa, grano y viñeta.
-  En pantallas estrechas pasa a una sola columna y los otros dos vídeos ni se descargan.
-  Sin WebGL — o al abrirlo desde el disco — `.no-webgl` los muestra a pantalla completa
-  con el mismo viraje resuelto en CSS (gris + rosa en `multiply`).
-- Cooper Black va incrustada en el CSS en base64: las fuentes se piden siempre en modo
-  CORS y un `@font-face` con `url()` no cargaría al abrir el HTML con doble clic.
-- Respeta `prefers-reduced-motion`: sin animaciones ni bucle de render.
-- La escena WebGL se pausa al ocultar la pestaña y degrada a fondo plano si no hay WebGL.
-- Los vídeos solo se cargan y reproducen cuando entran en pantalla.
-- Responsive hasta 360 px; menú lateral en móvil.
-
 ## Pendiente
 
-1. **Dominio.** Sustituir `https://www.flamingobrunchfood.es` por el real en `index.html`
-   (canonical, `og:url`, `og:image`, `twitter:image` y el JSON-LD), `sitemap.xml` y
-   `robots.txt`. El schema de la carta lo toma del canonical, ese no se toca.
-2. **Precios.** Los de la carta salen de Glovo y suelen ir por encima de los de sala.
-   Confirmarlos con el local antes de publicar.
+1. **Dominio.** Sustituirlo en `index.html`, `sitemap.xml` y `robots.txt`.
+2. **Precios.** Los de la carta salen de las plataformas de reparto y suelen ir por
+   encima de los de sala. Confirmarlos con el local antes de publicar.
 3. **Horario.** Google y RutaCulinaria dan 9:00–21:00; Enjoty daba 11:00–23:00 entre
-   semana y hasta las 02:00 en fin de semana. Está puesto el de Google, en la web y en
-   el JSON-LD. Confirmar cuál es el bueno.
-4. Al terminar, alta en Google Search Console, enviar el sitemap y enlazar la web desde
-   el perfil de Google Business y la bio de Instagram.
-
-Para revisar el hero como quedará publicado hay que servirlo por HTTP; con doble clic
-el navegador no deja usar los vídeos como textura y cae al modo CSS.
+   semana y hasta las 02:00 en fin de semana. Está puesto el de Google. Confirmar.
+4. **WhatsApp.** El formulario da por hecho que el 607 02 05 54 tiene WhatsApp.
+   Si no lo tiene, cambiar `TEL` por el número que sí lo tenga, o sustituir el
+   `wa.me` por un `mailto:`.
+5. **"Las paredes hablan".** Las tres citas son carteles reales del local, no
+   reseñas inventadas. Si el local quiere reseñas de verdad ahí, se cambian los
+   `<blockquote>` por reseñas de Google con su nombre y su fecha.
+6. Alta en Search Console, enviar el sitemap y enlazar desde Google Business e
+   Instagram.
