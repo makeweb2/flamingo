@@ -16,15 +16,28 @@ servidor: `python -m http.server` y abrir `http://localhost:8000`.
   filos, ese mismo rosa rebajado. El negro `#14100F` es el del logo, y se usa solo
   en el texto y en el botón principal — **no hay bloques negros**, igual que en la
   referencia.
-- **La tipografía** sale del rótulo de la puerta: una Didone (Bodoni Moda) para los
-  titulares, y una geométrica (Jost) para lo demás. Dos fuentes y ninguna más.
-- **Lo urbano** lo ponen las fotos del propio local —el baño pintado, los carteles
-  de espray— y no una tipografía de grafiti.
+- **La tipografía** son **tres voces con una tarea cada una**, y las tres están en
+  el local. Si alguna se sale de su papel, la página vuelve a parecer hecha por
+  varias personas:
 
-Reglas que mantienen el conjunto de una pieza: **dos fuentes, dos radios
-(`--r` y `--r-s`) más el círculo y la píldora, una sombra (`--sh`) y un filo
-(`--hair`)**. Sin degradados, sin iconos y sin emojis. Está comprobado en el
-render: la página entera usa exactamente dos familias tipográficas.
+  | Token | Fuente | Dónde se usa |
+  |-------|--------|--------------|
+  | `--dis`  | Bodoni Moda | Titulares de sección. Es la Didone del rótulo de la puerta y del logo. |
+  | `--coop` | Cooper Black (`COOPBL`) | La voz de sus carteles: la marca del nav, **una** palabra por titular, las citas de la pared, las etiquetas de plato, el claim del pie y el rótulo de los botones. |
+  | `--ui`   | Jost | Todo el texto corriente y las etiquetas. |
+
+- **Lo urbano** sale de la pared del baño, y está hecho a código en el bloque 0 de
+  `js/main.js`: corazones, destellos y aureolas, el brochazo de espray bajo una
+  palabra, el subrayado de los enlaces del nav y la pintada que rodea un botón
+  cuando lo señalas, con sus goterones. Todos los trazos salen del mismo par de
+  funciones con una ondulación determinista: misma semilla, mismo gesto, así que
+  ningún trazo repite a otro pero todos son iguales entre recargas — y ninguno es
+  una imagen que haya que descargar.
+
+Reglas que mantienen el conjunto de una pieza: **tres fuentes con su papel, un solo
+fucsia de espray (`--spray`), dos radios (`--r` y `--r-s`) más el círculo y la
+píldora, una sombra (`--sh`) y un filo (`--hair`)**. Sin degradados, sin iconos y
+sin emojis.
 
 ## Estructura
 
@@ -52,6 +65,7 @@ css/style.css       Tokens, piezas y secciones (índice numerado arriba)
 js/main.js          Carta, acordeón, formulario, nav y entradas
 assets/img          Fotos del local, carteles de la marca y pósters de los vídeos
 assets/video        Los cuatro reels (mp4, sin sonido, en bucle)
+assets/fonts        Cooper Black (woff2 + woff), por si se sirve por HTTP
 robots.txt          Reglas de rastreo + ruta del sitemap
 sitemap.xml         Sitemap con las imágenes principales
 _fuentes/           Material original que no se publica: fotos sin recortar,
@@ -74,7 +88,11 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   acordeón, así que no hay que tocarlo dos veces.
 - **Teléfono de reservas**: constante `TEL` del bloque 4 (formato internacional sin
   `+`), además de los `tel:` del HTML.
-- **Titulares**: se parten por líneas con los `<br>` del HTML y `data-lines`.
+- **Titulares**: se parten por líneas con los `<br>` del HTML y `data-lines`. Para
+  que una palabra vaya en Cooper Black, envuélvela en `<span class="coop">`; para
+  que lleve el brochazo de espray, en `<span class="spray">`. Una por titular.
+- **Pintadas**: `<span class="doodle doodle--heart|--star|--halo">` vacío, más una
+  regla de posición en el CSS de esa sección. El SVG lo dibuja el JS.
 - **Fotos y vídeos**: sustituir los archivos de `assets/` manteniendo el nombre.
 
 ## Detalles que conviene no romper
@@ -92,7 +110,21 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
 - **El acordeón no lleva `height:0` en el CSS.** Si el JS no llega, los paneles se
   leen abiertos en vez de recortados a cero; es el JS quien los cierra.
 - **`button{ font:inherit }`.** Los botones no heredan la tipografía: sin esa línea
-  el `burger` cae al Arial del navegador y aparece una tercera fuente.
+  el `burger` cae al Arial del navegador y aparece una cuarta fuente.
+- **El brochazo de `.spray` se pinta en el bloque 7, no en el 0.** `splitLines`
+  reconstruye el titular entero, así que decorarlo antes dejaría el SVG y su
+  observador colgando de un nodo ya reemplazado.
+- **El brochazo lleva tres pasadas.** Una ancha y casi transparente que hace de nube
+  de aerosol, el trazo, y una segunda más fina desplazada. Con una sola pasada
+  gruesa queda una barra plana, no una pintada.
+- **El destello es una astroide (`cos³/sen³`).** Con pétalos de rosa polar salía un
+  trébol de cuatro hojas en vez de un brillo.
+- **`stroke-dasharray` va a `100 101`, no a `100`.** Un solo valor significa "raya
+  100 / hueco 100": con el offset a 100 el trazo cae justo en la costura del patrón
+  y el remate redondo asoma como un puntito suelto.
+- **Cooper Black va incrustada en base64.** Las fuentes se piden siempre en modo
+  CORS y un `@font-face` con `url()` no cargaría al abrir el HTML con doble clic,
+  que es como se revisa. Los ficheros sueltos están en `assets/fonts`.
 
 ## SEO — lo primero al publicar
 

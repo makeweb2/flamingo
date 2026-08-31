@@ -7,6 +7,7 @@
    formulario envía igual.
 
    Índice
+     0. La pared: pintadas, brochazos y botones a espray
      1. Carta: datos, pestañas y JSON-LD
      2. Lo más pedido
      3. Acordeon de preguntas (+ FAQPage)
@@ -24,6 +25,159 @@
 
   var $  = function (s, c) { return (c || document).querySelector(s); };
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
+
+
+
+  /* == 0. LA PARED ==========================================
+     Las pintadas del baño, hechas a código. Todos los trazos —los
+     corazones, los destellos, el brochazo bajo una palabra y el
+     contorno de los botones— salen del mismo par de funciones: una
+     ondulación determinista (misma semilla, mismo gesto) sobre una
+     figura base. Así ningún trazo repite a otro, pero todos son
+     iguales entre recargas y ninguno es una imagen que descargar.
+     ─────────────────────────────────────────────────────────── */
+  var NS = 'http://www.w3.org/2000/svg';
+  var TAU = Math.PI * 2;
+
+  function wobble(a, seed, amp) {
+    return 1 + amp * (
+      Math.sin(a * 3 + seed) * 0.5 +
+      Math.sin(a * 5 + seed * 1.7) * 0.3 +
+      Math.sin(a * 7 + seed * 2.3) * 0.2
+    );
+  }
+
+  function svgEl(cls, viewBox, stretch) {
+    var el = document.createElementNS(NS, 'svg');
+    el.setAttribute('class', cls);
+    el.setAttribute('viewBox', viewBox);
+    el.setAttribute('aria-hidden', 'true');
+    el.setAttribute('focusable', 'false');
+    if (stretch) el.setAttribute('preserveAspectRatio', 'none');
+    return el;
+  }
+
+  function pathEl(parent, d, cls) {
+    var el = document.createElementNS(NS, 'path');
+    el.setAttribute('d', d);
+    if (cls) el.setAttribute('class', cls);
+    // pathLength normaliza el trazo a 100 para que el dibujado no dependa
+    // de cuánto se estire el SVG.
+    el.setAttribute('pathLength', '100');
+    parent.appendChild(el);
+    return el;
+  }
+
+  // Superelipse ondulado: es como se rodea algo con un espray.
+  function ringPath(seed, amp, from, to, rx, ry, box, sq) {
+    var steps = 74, d = '', e = 2 / (sq || 3.6);
+    for (var i = 0; i <= steps; i++) {
+      var a = from + (to - from) * (i / steps);
+      var ca = Math.cos(a), sa = Math.sin(a), k = wobble(a, seed, amp);
+      var x = box.w / 2 + Math.sign(ca) * Math.pow(Math.abs(ca), e) * rx * k;
+      var y = box.h / 2 + Math.sign(sa) * Math.pow(Math.abs(sa), e) * ry * k;
+      d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
+    }
+    return d;
+  }
+
+  // Brochazo horizontal: cae y remonta un poco, como un gesto de verdad.
+  function swipePath(seed, amp, rise) {
+    var steps = 26, d = '';
+    for (var i = 0; i <= steps; i++) {
+      var t = i / steps;
+      var y = 13 - rise * t + Math.sin(t * 7 + seed) * amp + Math.sin(t * 13 + seed * 1.6) * amp * 0.45;
+      d += (i ? 'L' : 'M') + (1 + t * 98).toFixed(1) + ' ' + y.toFixed(1);
+    }
+    return d;
+  }
+
+  /* Los tres garabatos de la pared, con su ondulación propia */
+  var DOODLE = {
+    heart: function (seed) {
+      var steps = 60, d = '';
+      for (var i = 0; i <= steps; i++) {
+        var t = i / steps * TAU;
+        var k = wobble(t, seed, 0.05);
+        var x = 16 * Math.pow(Math.sin(t), 3);
+        var y = 13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t);
+        d += (i ? 'L' : 'M') + (50 + x * 2.6 * k).toFixed(1) + ' ' + (46 - y * 2.6 * k).toFixed(1);
+      }
+      return [d];
+    },
+    star: function (seed) {
+      // Destello de cuatro puntas. Es una astroide (cos^3 / sen^3): los
+      // lados salen cóncavos y las puntas afiladas, que es como se pinta
+      // un brillo. Con petalos de rosa polar salia un trebol.
+      var d = '';
+      for (var i = 0; i <= 72; i++) {
+        var t = i / 72 * TAU;
+        var k = wobble(t, seed, 0.07);
+        var c = Math.cos(t), sn = Math.sin(t);
+        d += (i ? 'L' : 'M') +
+             (50 + 46 * c * c * c * k).toFixed(1) + ' ' +
+             (50 + 46 * sn * sn * sn * k).toFixed(1);
+      }
+      return [d + 'Z'];
+    },
+    halo: function (seed) {
+      // La aureola que hay sobre el tag del baño: una elipse abierta
+      return [ringPath(seed, 0.06, 0.35, TAU - 0.35, 44, 15, { w: 100, h: 40 }, 2)];
+    }
+  };
+
+  $$('.doodle').forEach(function (host, i) {
+    var kind = host.className.indexOf('--heart') > -1 ? 'heart'
+             : host.className.indexOf('--halo') > -1 ? 'halo' : 'star';
+    var vb = kind === 'halo' ? '0 0 100 40' : '0 0 100 100';
+    var sv = svgEl('doodle__svg', vb, false);
+    sv.setAttribute('width', '100%');
+    sv.style.display = 'block';
+    DOODLE[kind](3.1 + i * 2.7).forEach(function (d) { pathEl(sv, d); });
+    host.appendChild(sv);
+  });
+
+  /* El brochazo bajo una palabra se pinta más abajo, en el bloque 7:
+     `splitLines` reconstruye el titular entero, así que decorarlo antes
+     dejaría el SVG y su observador colgando de un nodo ya reemplazado. */
+
+  /* Botones: alguien los rodea a espray y les caen dos goterones */
+  var BOX = { w: 220, h: 66 };
+  $$('.btn').forEach(function (btn, n) {
+    if (btn.querySelector('.btn__spray')) return;
+    var seed = 1.4 + n * 2.11;
+
+    var ring = svgEl('btn__spray', '0 0 ' + BOX.w + ' ' + BOX.h, true);
+    pathEl(ring, ringPath(seed, 0.03, -0.45, TAU + 0.3, 104, 28, BOX));
+    btn.appendChild(ring);
+
+    var drips = svgEl('btn__drip', '0 0 74 34', false);
+    [0, 1, 2].forEach(function (i) {
+      var x = 11 + i * 21 + (wobble(i * 2.1, seed, 1) - 1) * 5;
+      var len = [7, 17, 11][i] * (0.8 + Math.abs(wobble(i * 1.4, seed, 1) - 1) * 0.5);
+      var r = 3.1 + i * 0.45;
+      var g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', 'd');
+      g.style.setProperty('--i', i);
+      var line = document.createElementNS(NS, 'path');
+      line.setAttribute('d', 'M' + x.toFixed(1) + ' 0v' + len.toFixed(1));
+      g.appendChild(line);
+      var c = document.createElementNS(NS, 'circle');
+      c.setAttribute('cx', x.toFixed(1));
+      c.setAttribute('cy', (len + r * 0.7).toFixed(1));
+      c.setAttribute('r', r);
+      g.appendChild(c);
+      drips.appendChild(g);
+    });
+    btn.appendChild(drips);
+  });
+
+  /* Nav: cada enlace lleva su propio brochazo */
+  $$('.nav__links a, .nav__tel').forEach(function (a, i) {
+    var sv = svgEl('nav__sq', '0 0 100 12', true);
+    pathEl(sv, swipePath(4.1 + i * 2.4, 1.5, 1.6));
+    a.appendChild(sv);
+  });
 
 
   /* == 1. LA CARTA ==========================================
@@ -471,6 +625,23 @@
   }
   var lined = $$('[data-lines]');
   lined.forEach(splitLines);
+
+  /* Ahora sí: brochazo de espray bajo la palabra marcada, que se dibuja
+     de un extremo a otro cuando entra en pantalla. */
+  $$('.spray').forEach(function (el, i) {
+    var seed = 0.9 + i * 2.6;
+    var sv = svgEl('spray__ink', '0 0 100 20', true);
+    pathEl(sv, swipePath(seed, 1.1, 2.4));        // nube de aerosol
+    pathEl(sv, swipePath(seed, 1.3, 2.6));        // trazo
+    pathEl(sv, swipePath(seed + 1.2, 2.1, 1.1));  // segunda pasada
+    el.appendChild(sv);
+    if (REDUCED || !('IntersectionObserver' in window)) { el.classList.add('is-on'); return; }
+    new IntersectionObserver(function (en, ob) {
+      if (!en[0].isIntersecting) return;
+      el.classList.add('is-on');
+      ob.disconnect();
+    }, { threshold: .55 }).observe(el);
+  });
 
   if (hasGSAP && !REDUCED) {
     lined.forEach(function (h) {
