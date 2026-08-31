@@ -1,0 +1,7 @@
+# Flamingo Brunch & Food — Elche
+# Sustituye el dominio por el real antes de publicar.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://www.flamingobrunchfood.es/sitemap.xml
