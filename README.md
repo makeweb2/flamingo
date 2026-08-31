@@ -46,6 +46,10 @@ inundaría la forma en vez de doblarle el filo.
 es un gesto; puesto en seis enlaces pequeños seguidos deja de ser un gesto y es
 ruido. `.btn--sm` es una pastilla limpia con el rótulo en Cooper y se acabó.
 
+**Y solo gotea el macizo** (`.btn--ink`). Uno de contorno está hueco: no tiene masa
+de pintura de la que caiga nada, y ponerle churretes es justo lo que lo hace parecer
+un dibujo en vez de un tag.
+
 **Los churretes** son lo que hace que la cosa se lea como pintura y no como adorno,
 y tienen cuatro reglas:
 

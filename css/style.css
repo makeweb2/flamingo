@@ -322,10 +322,11 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
 .btn:hover::before,.btn:focus-visible::before{ opacity:.36; }
 
 /* Variantes: cambia el relleno y lo que gotea, nunca la forma.
-   `--drip` es siempre el color de la masa que tiene encima. */
-.btn{ color:var(--on-pink); --drip:var(--spray); }
+   `--drip` es siempre el color de la masa que tiene encima, y solo lo
+   necesita el macizo, que es el único que gotea. */
+.btn{ color:var(--on-pink); }
 .btn:hover .btn__fill{ fill:var(--ink); }
-.btn:hover{ color:var(--pink); --drip:var(--ink); }
+.btn:hover{ color:var(--pink); }
 
 .btn--ink{ color:var(--pink); --drip:var(--ink); }
 .btn--ink .btn__fill{ fill:var(--ink); }

@@ -253,6 +253,11 @@
     pathEl(blob, ringPath(seed, 0.034, -0.4, TAU + 0.26, 104, 28, BOX), 'btn__line');
     btn.appendChild(blob);
 
+    // Solo gotea el botón macizo. Uno de contorno está hueco: no tiene
+    // masa de pintura de la que caiga nada, y ponerle churretes es
+    // justo lo que lo hace parecer un dibujo y no un tag.
+    if (!btn.classList.contains('btn--ink')) return;
+
     // El SVG de los churretes monta sobre el blob: al compartir color, la
     // unión no se ve y parece que la pintura cae de la propia mancha.
     // El viewBox y la caja del CSS guardan la misma proporción (80:90 y
