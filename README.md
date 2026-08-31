@@ -176,10 +176,19 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
 - **`.deliv .btn:hover` no puede usar `background:currentColor`.** En `:hover` se
   resolvería contra el color ya cambiado a blanco y el fondo saldría blanco; el
   color de cada servicio va en `--svc`.
-- **Los enlaces de reparto no llevan los logos de verdad.** Son ficheros de marca
-  que hay que pedir o descargar. Van con el color de cada servicio y un punto; para
-  poner los reales, sustituir la `<i>` por un `<img>` de 18px de alto y quitarle el
-  `background`.
+- **Los logos de reparto están recortados a mano** (`assets/img/svc-*.png`, 120px).
+  Los originales, en `_fuentes/logos/`. El del Just Eat venía con 75px de margen
+  transparente y el de Uber Eats con un marco blanco: el script de recorte quita
+  primero lo transparente y después el blanco opaco, y cuadra sin deformar. Su
+  radio de 7px es la esquina del propio icono, no un radio de interfaz.
+- **La pastilla de reparto se rellena de negro al señalarla, no del color del
+  servicio.** Pintada de su color, el logo de Glovo —amarillo— quedaba sobre fondo
+  amarillo.
+- **El aviso de `scrollRestoration` va en un `<script>` en línea en el `<head>`.**
+  El navegador programa la restauración del scroll muy temprano y desde un script
+  con `defer` ya se le avisa tarde: la página abría a media altura al recargar.
+  Además hay que subir también el contador propio de Lenis, que si no devuelve la
+  página a donde estaba.
 - **El nav no lleva el logo en JPEG.** A 34px era un borrón con un cerco claro
   alrededor y al lado del rótulo en Cooper cantaba. El rótulo ya es la marca.
 - **`stroke-dasharray` va a `100 101`, no a `100`.** Un solo valor significa "raya

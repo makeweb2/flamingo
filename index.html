@@ -43,6 +43,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 
+<!-- En línea y lo más arriba posible, a propósito: el navegador programa
+     la restauración del scroll muy temprano, y desde un script con
+     `defer` ya se le avisa tarde. Si la URL trae un ancla, manda el ancla. -->
+<script>
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  if (!location.hash) window.scrollTo(0, 0);
+</script>
+
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -284,9 +292,9 @@
     <div class="dots" id="menuDots" aria-hidden="true"></div>
     <p class="mut">Carta orientativa. La completa y actualizada, en el local.</p>
     <p class="btns btns--c deliv">
-      <a href="https://www.ubereats.com/es/store/flamingo-brunch-%26-food/E3RRudG6U4SG1LSSIhD-Qg" target="_blank" rel="noopener" class="btn btn--sm deliv--uber"><i aria-hidden="true"></i>Uber Eats</a>
-      <a href="https://glovoapp.com/es/es/elche/stores/flamingo-brunch-and-food-elche" target="_blank" rel="noopener" class="btn btn--sm deliv--glovo"><i aria-hidden="true"></i>Glovo</a>
-      <a href="https://www.just-eat.es/restaurants-flamingo-brunch-and-food-elche/menu" target="_blank" rel="noopener" class="btn btn--sm deliv--justeat"><i aria-hidden="true"></i>Just Eat</a>
+      <a href="https://www.ubereats.com/es/store/flamingo-brunch-%26-food/E3RRudG6U4SG1LSSIhD-Qg" target="_blank" rel="noopener" class="btn btn--sm deliv--uber"><img class="deliv__logo" src="assets/img/svc-ubereats.png" width="120" height="120" alt="" loading="lazy" decoding="async">Uber Eats</a>
+      <a href="https://glovoapp.com/es/es/elche/stores/flamingo-brunch-and-food-elche" target="_blank" rel="noopener" class="btn btn--sm deliv--glovo"><img class="deliv__logo" src="assets/img/svc-glovo.png" width="120" height="120" alt="" loading="lazy" decoding="async">Glovo</a>
+      <a href="https://www.just-eat.es/restaurants-flamingo-brunch-and-food-elche/menu" target="_blank" rel="noopener" class="btn btn--sm deliv--justeat"><img class="deliv__logo" src="assets/img/svc-justeat.png" width="120" height="120" alt="" loading="lazy" decoding="async">Just Eat</a>
     </p>
   </div>
 </section>

@@ -28,6 +28,7 @@
 
 
 
+
   /* == 0. LA PARED ==========================================
      Las pintadas del baño, hechas a código. Todos los trazos —los
      corazones, los destellos, el brochazo bajo una palabra y el
@@ -643,6 +644,10 @@
   var lenis = null;
   if (window.Lenis && !REDUCED) {
     lenis = new Lenis({ duration: 1.05, smoothWheel: true });
+    // Lenis lleva su propio contador de scroll. El <head> ya ha subido el
+    // nativo; si no se le sube también a él, arranca con la posición que
+    // encuentre y devuelve la página a media altura.
+    if (!location.hash) lenis.scrollTo(0, { immediate: true, force: true });
     if (hasGSAP) {
       lenis.on('scroll', ScrollTrigger.update);
       gsap.ticker.add(function (t) { lenis.raf(t * 1000); });

@@ -594,19 +594,13 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
 }
 
 
-/* Reparto: cada enlace lleva el color de su servicio. No son los logos
-   —esos son ficheros de marca que hay que pedir o descargar— pero el
-   color ya los distingue de un vistazo. Para poner los de verdad:
-   sustituir la `i` por un <img> de 18px de alto y quitar el `background`. */
-.deliv .btn{ gap:9px; }
-.deliv i{ width:11px; height:11px; border-radius:50%; flex:none; background:currentColor; }
-.deliv--uber{ --svc:#06864B; color:var(--svc); }
-.deliv--glovo{ --svc:#B07A00; color:var(--svc); }
-.deliv--justeat{ --svc:#D2401E; color:var(--svc); }
-/* Ojo: aquí no vale `background:currentColor` — en :hover se resolvería
-   contra el color ya cambiado a blanco y el fondo saldría blanco. */
-.deliv .btn:hover{ background:var(--svc); border-color:var(--svc); color:#fff; }
-.deliv .btn:hover i{ background:#fff; }
+/* Reparto: el color lo pone el logo y la pastilla se queda neutra —con
+   el texto y el filo también de color, tres seguidas eran un semáforo—.
+   Al señalar se rellena de negro como el resto de pastillas pequeñas:
+   pintarla del color del servicio dejaba el logo de Glovo, amarillo,
+   encima de un fondo amarillo. */
+.deliv .btn{ gap:10px; padding-left:12px; }
+.deliv__logo{ width:26px; height:26px; border-radius:7px; flex:none; }
 
 
 /* ══ 10. LO MÁS PEDIDO ═══════════════════════════════════════ */
