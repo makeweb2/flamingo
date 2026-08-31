@@ -599,17 +599,16 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
      #31B466  #F1CC38  #FB8C00
    El rótulo va en negro y no en blanco porque contra esos tres el negro
    contrasta 7.1, 12.1 y 8.0 — y el blanco, 2.7, 1.6 y 2.4.
-   El logo lleva un filo blanco: sin él, el badge de Uber Eats se funde
-   con la pastilla y deja flotando su propio "Uber Eats" al lado del
-   nuestro. */
+   El logo va a hueso, sin filo. Los badges de Glovo y Just Eat se funden
+   con la pastilla —comparten color— y dejan flotando solo su marca, que
+   es justo lo que se busca. El de Uber Eats es un logotipo escrito, así
+   que ahí se queda su propio texto en pequeño: si molesta, se le quita
+   el <img> a esa pastilla y se queda con el rótulo. */
 .deliv .btn{
   gap:10px; padding-left:12px;
   background:var(--svc); border-color:var(--svc); color:var(--ink);
 }
-.deliv__logo{
-  width:26px; height:26px; flex:none;
-  border-radius:8px; padding:2px; background:#fff;
-}
+.deliv__logo{ width:26px; height:26px; flex:none; border-radius:7px; }
 .deliv--uber{ --svc:#31B466; }
 .deliv--glovo{ --svc:#F1CC38; }
 .deliv--justeat{ --svc:#FB8C00; }

@@ -185,8 +185,10 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   sacados del píxel del propio badge (`#31B466`, `#F1CC38`, `#FB8C00`), no a ojo.
   El rótulo va en negro y no en blanco: contra esos tres, el negro contrasta 7.1,
   12.1 y 8.0, y el blanco 2.7, 1.6 y 2.4.
-- **El logo lleva un filo blanco.** Sin él, el badge de Uber Eats se funde con la
-  pastilla y deja flotando su propio "Uber Eats" al lado del nuestro.
+- **Los logos van a hueso, sin filo.** Los badges de Glovo y Just Eat comparten
+  color con su pastilla, así que se funden y dejan flotando solo su marca. El de
+  Uber Eats es un logotipo escrito y ahí se queda su propio texto en pequeño; si
+  molesta, se le quita el `<img>` a esa pastilla y se queda solo con el rótulo.
 - **El aviso de `scrollRestoration` va en un `<script>` en línea en el `<head>`.**
   El navegador programa la restauración del scroll muy temprano y desde un script
   con `defer` ya se le avisa tarde: la página abría a media altura al recargar.
