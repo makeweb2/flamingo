@@ -6,85 +6,93 @@ HTML + CSS + JS sin build: se sube tal cual a cualquier hosting.
 Se ve igual con doble clic (`file://`) que servido por HTTP. Para comprobarlo sobre
 servidor: `python -m http.server` y abrir `http://localhost:8000`.
 
-## El sistema visual
+## De dónde sale cada cosa
 
-Todo sale de las fotos del local, y el local tiene **tres materiales y nada más**:
-pared rosa plana, carpintería negra en retícula y mármol blanco. La web no añade
-nada que no esté ahí.
+- **La estructura** sale de `_fuentes/referencia-estructura.jpg`: bloques
+  redondeados sobre fondo rosa pálido, alternando piezas rosas y blancas, con los
+  titulares en una Didone de caja baja. Las nueve secciones son las de esa
+  referencia, en su mismo orden.
+- **El color** sale del logo: `#F3CACE`. El fondo es ese mismo rosa aclarado y los
+  filos, ese mismo rosa rebajado. El negro `#14100F` es el del logo, y se usa solo
+  en el texto y en el botón principal — **no hay bloques negros**, igual que en la
+  referencia.
+- **La tipografía** sale del rótulo de la puerta: una Didone (Bodoni Moda) para los
+  titulares, y una geométrica (Jost) para lo demás. Dos fuentes y ninguna más.
+- **Lo urbano** lo ponen las fotos del propio local —el baño pintado, los carteles
+  de espray— y no una tipografía de grafiti.
 
-| | |
-|---|---|
-| **Color** | Dos: `#F3CACE` (el rosa del logo y de la fachada) y `#14100F` (el negro del logo y de la carpintería). Más el blanco del mármol, solo en la carta. Ningún gris nuevo: los tonos intermedios son el negro rebajado. |
-| **Tipografía** | Dos: **Bodoni Moda** en caja alta —la Didone del rótulo de la fachada—, y **Jost** ligera para textos pequeños y versalitas. Ninguna más. |
-| **Forma** | Esquinas vivas y filos de 1 px. Los filos son la carpintería: no son bordes de cada caja, son el fondo negro de la rejilla asomando por un `gap` de 1 px, así nunca se doblan ni se descuadran al recolocarse. |
-| **Prohibido** | Sombras, degradados, esquinas redondeadas, iconos, emojis y cualquier tercera fuente. Si aparece algo de eso, se ha colado. |
+Reglas que mantienen el conjunto de una pieza: **dos fuentes, dos radios
+(`--r` y `--r-s`) más el círculo y la píldora, una sombra (`--sh`) y un filo
+(`--hair`)**. Sin degradados, sin iconos y sin emojis. Está comprobado en el
+render: la página entera usa exactamente dos familias tipográficas.
 
-**Lo urbano no lo pone una tipografía de grafiti**: lo ponen la foto del baño a
-tamaño grande, la franja de rótulo que corre en negro y el titular pegado al filo
-de la página.
+## Estructura
 
-## Estructura — cuatro secciones
+| # | Sección | Bloque de la referencia |
+|---|---------|-------------------------|
+| 1 | Portada | El titular con la foto dentro, y debajo la fila de tres piezas |
+| 2 | El local | El bloque grande con tres miniaturas + foto alta + tarjeta de claim |
+| 3 | Es tu sitio si… | La rejilla 3×2 con la pieza destacada en el centro |
+| 4 | La carta | El bloque ancho con el panel interior que sobresale y los puntos |
+| 5 | Lo más pedido | El bloque de precios: lista a la izquierda, foto a la derecha |
+| 6 | Momentos | La galería de tamaños mezclados |
+| 7 | Se dice por aquí | Los testimonios desplazados a un lado y a otro |
+| 8 | Reserva | El formulario con la rejilla de fichas al lado |
+| 9 | Preguntas | El acordeón con la foto al lado |
+| — | Pie | La franja rosa con los círculos y las columnas de enlaces |
 
-| # | Sección | Qué hace |
-|---|---------|----------|
-| 1 | Rótulo | El nombre en Didone pegado al filo izquierdo, la entrada a la derecha y la franja de datos debajo. Montado como la fachada. |
-| 2 | El local | Cuatro fotos y un texto en la misma retícula que las ventanas. |
-| 3 | La carta | Sobre el mármol: fondo blanco, pestañas y precios a la derecha. |
-| 4 | Visítanos | Dirección, horario, contacto y mapa. |
-| — | Pie | Rosa sobre negro: el centro del logo, a página completa. |
-
-Entre la 1 y la 2 corre la franja de rótulo. Es lo único que se mueve solo.
+Se usa **todo el material**: los cuatro reels, las siete fotos del local, los dos
+carteles de la marca (`allday.jpg` y `planes.jpg`) y el logo.
 
 ## Ficheros
 
 ```
 index.html          Marcado + SEO (JSON-LD de Restaurant)
-css/style.css       Tokens, retícula y secciones (índice numerado arriba)
-js/main.js          Carta, franja, nav y entradas
-assets/img          Las seis imágenes que se usan, ni una más
-assets/video        El reel del hero
+css/style.css       Tokens, piezas y secciones (índice numerado arriba)
+js/main.js          Carta, acordeón, formulario, nav y entradas
+assets/img          Fotos del local, carteles de la marca y pósters de los vídeos
+assets/video        Los cuatro reels (mp4, sin sonido, en bucle)
 robots.txt          Reglas de rastreo + ruta del sitemap
 sitemap.xml         Sitemap con las imágenes principales
-_fuentes/           Material original y lo que no se publica:
-                    fotos sin recortar, vídeos sin comprimir, la fuente
-                    Cooper Black y `sin-usar/` con las fotos y reels que
-                    quedaron fuera. Excluido en robots.txt.
+_fuentes/           Material original que no se publica: fotos sin recortar,
+                    vídeos sin comprimir, la Cooper Black y la referencia de
+                    estructura. Excluido en robots.txt.
 ```
 
 Librerías por CDN (GSAP 3.12 + ScrollTrigger, Lenis). **Son opcionales**: si el CDN
-no responde, la carta se pinta igual y las pestañas siguen funcionando. Solo se
-pierden la entrada de los titulares y el scroll suave.
+no responde, la carta se pinta, las pestañas cambian, el acordeón abre y el
+formulario envía igual. Solo se pierden la entrada y el scroll suave.
 
 ## Editar lo habitual
 
 - **Carta**: array `MENU` al principio del bloque 1 de `js/main.js`. Cada plato es
   `{ n: nombre, d: descripción, p: 'precio', tag: 'top' | 'nuevo' }` (`tag` opcional).
-  De ahí salen la lista, las pestañas y el JSON-LD del menú.
-- **Franja**: array `WORDS` del bloque 2. El JS duplica el contenido porque la
-  animación desplaza exactamente la mitad; duplicarlo a mano invita a olvidarse.
-- **Horario**: en dos sitios que deben decir lo mismo — el JSON-LD del `<head>` y
-  las secciones 1 y 4 del HTML.
-- **Titulares**: se parten por líneas con los `<br>` del HTML y el atributo
-  `data-lines`. Cada línea entra recortada por su propia caja.
-- **Textos, dirección y enlaces**: directamente en `index.html`.
-- **Fotos y vídeo**: sustituir los archivos de `assets/` manteniendo el nombre.
+  De ahí salen la lista, las pestañas, "lo más pedido" y el JSON-LD del menú.
+- **Lo más pedido**: array `PICK` del bloque 2. Son nombres de platos de `MENU`: si
+  un plato desaparece de la carta, desaparece de aquí en vez de quedarse colgado.
+- **Preguntas**: se escriben en el HTML. El `FAQPage` se genera leyendo el propio
+  acordeón, así que no hay que tocarlo dos veces.
+- **Teléfono de reservas**: constante `TEL` del bloque 4 (formato internacional sin
+  `+`), además de los `tel:` del HTML.
+- **Titulares**: se parten por líneas con los `<br>` del HTML y `data-lines`.
+- **Fotos y vídeos**: sustituir los archivos de `assets/` manteniendo el nombre.
 
 ## Detalles que conviene no romper
 
-- **Los filos van por `gap`, no por `border`.** La rejilla lleva `background` negro
-  y `gap:1px`, y cada celda su propio fondo. Si se cambian por bordes, en cuanto una
-  celda se recoloque en móvil habrá filos dobles y huecos sin filo.
-- **`.ln` lleva `padding` arriba y margen negativo.** Con el interlineado a `.92` la
-  caja es más baja que la letra, y sin ese respiro la tilde de DÍA o de ESPAÑA se
-  queda fuera del `overflow:hidden`.
-- **`.ln` no está anidada dentro de `.display`.** El JS la pone en cualquier titular
-  con `data-lines`, y el claim del pie no es `.display`.
-- **El titular grande solo cabe a ancho completo.** En las celdas estrechas
-  (`.local__txt`, `.visit__txt`) baja de escalón, que además es la jerarquía correcta.
+- **`.ln` lleva `padding` arriba y margen negativo.** Sin ese respiro, el recorte
+  del titular se come la tilde de "día" y el asta de la "b".
+- **`.ln` no está anidada dentro de `.dis`.** El JS la pone en cualquier titular con
+  `data-lines`, y el claim del pie no es `.dis`.
+- **`.why__it` se coloca con `nth-of-type` 1, 2, 4 y 5.** `nth-of-type` cuenta divs y
+  el tercero es la pieza destacada del centro.
+- **`.hero__row` fija su altura con `grid-auto-rows`.** Sin ella cada foto impone su
+  alto natural y las tres piezas dejan de medir lo mismo.
+- **`.local__story` ocupa las dos filas.** Si no, la mitad izquierda de la fila de
+  abajo se queda vacía.
+- **El acordeón no lleva `height:0` en el CSS.** Si el JS no llega, los paneles se
+  leen abiertos en vez de recortados a cero; es el JS quien los cierra.
 - **`button{ font:inherit }`.** Los botones no heredan la tipografía: sin esa línea
-  el `burger` cae al Arial del navegador y aparece una tercera fuente en la página.
-- **`.local__grid` mide su primera fila por contenido en móvil.** Ahí el texto deja
-  de ir a caballo de dos filas altas; con la altura fija de las fotos, se saldría.
+  el `burger` cae al Arial del navegador y aparece una tercera fuente.
 
 ## SEO — lo primero al publicar
 
@@ -128,5 +136,11 @@ Lo que ya lleva montado:
    encima de los de sala. Confirmarlos con el local antes de publicar.
 3. **Horario.** Google y RutaCulinaria dan 9:00–21:00; Enjoty daba 11:00–23:00 entre
    semana y hasta las 02:00 en fin de semana. Está puesto el de Google. Confirmar.
-4. Alta en Search Console, enviar el sitemap y enlazar desde Google Business e
+4. **WhatsApp.** El formulario da por hecho que el 607 02 05 54 tiene WhatsApp. Si
+   no, cambiar `TEL` por el número que sí lo tenga o sustituir el `wa.me` por un
+   `mailto:`.
+5. **"Se dice por aquí".** Las citas son carteles reales del local, no reseñas
+   inventadas. Si el local quiere reseñas de verdad ahí, se cambian los
+   `<blockquote>` por reseñas de Google con su nombre y su fecha.
+6. Alta en Search Console, enviar el sitemap y enlazar desde Google Business e
    Instagram.

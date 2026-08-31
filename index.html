@@ -38,9 +38,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="preload" as="image" href="assets/img/reel4-poster.jpg" fetchpriority="high">
-<!-- Dos fuentes y ninguna más: la Didone del rótulo de la fachada
-     y una geométrica para los textos pequeños. -->
-<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Jost:wght@300;400&display=swap" rel="stylesheet">
+<!-- Dos fuentes y ninguna más: la Didone del logo y una geométrica
+     para los textos pequeños. -->
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;1,6..96,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 
 <script type="application/ld+json">
@@ -151,10 +151,14 @@
 <a class="skip" href="#top">Saltar al contenido</a>
 
 <header class="nav" id="nav">
-  <a href="#top" class="nav__brand">Flamingo</a>
+  <a href="#top" class="nav__brand">
+    <img src="assets/img/logo.jpg" width="1057" height="1057" alt="" fetchpriority="high">
+    <span>Flamingo</span>
+  </a>
   <nav class="nav__links" aria-label="Principal">
     <a href="#local">El local</a>
     <a href="#carta">La carta</a>
+    <a href="#momentos">Momentos</a>
     <a href="#visitanos">Visítanos</a>
   </nav>
   <a href="tel:+34607020554" class="nav__tel">607 02 05 54</a>
@@ -166,141 +170,310 @@
 <div class="drawer" id="drawer" aria-hidden="true">
   <a href="#local">El local</a>
   <a href="#carta">La carta</a>
+  <a href="#momentos">Momentos</a>
   <a href="#visitanos">Visítanos</a>
   <a href="tel:+34607020554">607 02 05 54</a>
 </div>
 
 <main id="top" tabindex="-1">
 
-<!-- ══ 1. RÓTULO ═════════════════════════════════════════════
-     Montado como la fachada: el nombre en Didone de caja alta a
-     la izquierda, el hueco de la entrada a la derecha y, debajo,
-     la franja de datos partida por la misma carpintería negra. -->
+<!-- ══ 1. PORTADA ════════════════════════════════════════════
+     Bloque rosa con el titular y el vídeo dentro, y debajo la
+     fila de piezas cortas. Es el primer bloque de la referencia. -->
 <section class="hero">
-  <div class="hero__main">
-    <div class="cell hero__word">
-      <p class="label">Pl. de España, 3 · Elche</p>
-      <h1 class="display" data-lines>Brunch<br>todo<br>el día</h1>
+  <div class="box box--pink hero__box">
+    <div class="hero__txt">
+      <p class="tag">Elche · Plaza de España, 3</p>
+      <h1 class="dis" data-lines>Brunch todo el día<br>en el centro<br>de Elche</h1>
       <p class="hero__sub">Café de especialidad, huevos benedict a las cinco de la tarde y tarta hecha esta mañana. Abrimos a las nueve y no miramos el reloj.</p>
-      <p class="hero__cta">
-        <a href="#carta" class="btn btn--fill">Ver la carta</a>
+      <p class="btns">
+        <a href="#carta" class="btn btn--ink">Ver la carta</a>
         <a href="https://www.ubereats.com/es/store/flamingo-brunch-%26-food/E3RRudG6U4SG1LSSIhD-Qg" target="_blank" rel="noopener" class="btn">Pedir a domicilio</a>
       </p>
     </div>
-    <figure class="cell cell--media hero__media">
-      <video src="assets/video/reel4.mp4" poster="assets/img/reel4-poster.jpg" width="480" height="854" muted loop playsinline autoplay preload="auto" aria-label="Arco de flores rosas en la entrada de Flamingo Brunch &amp; Food"></video>
+    <figure class="ph hero__ph">
+      <video src="assets/video/reel4.mp4" poster="assets/img/reel4-poster.jpg" width="480" height="854" muted loop playsinline autoplay preload="auto" aria-label="Arco de flores rosas en la entrada de Flamingo"></video>
     </figure>
   </div>
-  <dl class="hero__facts">
-    <div class="cell"><dt>Horario</dt><dd>Todos los días · <time datetime="09:00">9:00</time> — <time datetime="21:00">21:00</time></dd></div>
-    <div class="cell"><dt>Google</dt><dd>4,2 sobre 776 reseñas</dd></div>
-    <div class="cell"><dt>Terraza</dt><dd>A pie de plaza, sin reserva</dd></div>
-  </dl>
-</section>
 
-<!-- Franja de rótulo, con el mismo aire que el cartel de la puerta -->
-<div class="ticker" aria-hidden="true"><div class="ticker__row" id="ticker"></div></div>
+  <div class="hero__row">
+    <figure class="ph hero__a">
+      <img src="assets/img/terraza.webp" width="382" height="510" alt="Sombrilla de rayas y sillas rosas en la terraza de Flamingo" loading="lazy" decoding="async">
+    </figure>
+    <div class="box box--white hero__b">
+      <p class="tag">Hoy</p>
+      <p class="big">9:00 — 21:00</p>
+      <p class="mut">Todos los días, sin cerrar al mediodía.</p>
+      <a href="https://www.google.com/maps/search/?api=1&amp;query=Flamingo+Brunch+%26+Food+Plaza+de+Espa%C3%B1a+3+Elche" target="_blank" rel="noopener" class="lnk">Cómo llegar</a>
+    </div>
+    <figure class="ph hero__c">
+      <img src="assets/img/barra.webp" width="382" height="510" alt="Barra de mármol con flores y lámparas de aro" loading="lazy" decoding="async">
+    </figure>
+  </div>
+</section>
 
 <!-- ══ 2. EL LOCAL ═══════════════════════════════════════════
-     Las fotos van montadas en la misma retícula que las
-     ventanas: sin esquinas redondas y separadas por un filo
-     negro de un píxel.                                        -->
+     Bloque rosa grande con tres miniaturas dentro, y a la
+     derecha una foto alta y la tarjeta del claim.               -->
 <section class="local" id="local" aria-labelledby="h-local">
   <div class="local__grid">
-    <div class="cell local__txt">
-      <p class="label">El local</p>
-      <h2 class="display" data-lines id="h-local">Rosa por<br>fuera</h2>
-      <p>Mármol, carpintería negra, sillas de ratán en la plaza y un baño lleno de pintadas que acaba en todas las fotos. Servimos brunch desde que abrimos hasta que cerramos.</p>
+    <div class="box box--pink local__story">
+      <p class="tag">El local</p>
+      <h2 class="dis" data-lines id="h-local">Rosa por fuera,<br>flores en la puerta</h2>
+      <p>Mármol, carpintería negra, sillas de ratán en la plaza y un baño lleno de pintadas que acaba en todas las fotos. Servimos brunch desde que abrimos hasta que cerramos, así que aquí no se desayuna con prisa.</p>
+      <ul class="thumbs">
+        <li><figure class="ph"><img src="assets/img/fachada.webp" width="680" height="453" alt="Fachada rosa con el rótulo de Flamingo" loading="lazy" decoding="async"></figure><span>La fachada</span></li>
+        <li><figure class="ph"><img src="assets/img/graffiti.webp" width="680" height="510" alt="Baño con las paredes pintadas de grafitis rosas" loading="lazy" decoding="async"></figure><span>El baño</span></li>
+        <li><figure class="ph"><img src="assets/img/posters.jpg" width="1440" height="1800" alt="Carteles del local pintados con espray rosa" loading="lazy" decoding="async"></figure><span>Los carteles</span></li>
+      </ul>
     </div>
-    <figure class="cell cell--media local__a">
-      <img src="assets/img/exterior.jpg" width="1440" height="1800" alt="Terraza de Flamingo con sillas de ratán rosa y la fachada al fondo" loading="lazy" decoding="async">
+
+    <figure class="ph local__ph">
+      <video src="assets/video/reel3.mp4" poster="assets/img/reel3-poster.jpg" width="480" height="854" muted loop playsinline preload="none" aria-label="Café y macarons en una mesa de la terraza"></video>
     </figure>
-    <figure class="cell cell--media local__b">
-      <img src="assets/img/graffiti.webp" width="680" height="510" alt="Baño de Flamingo con las paredes pintadas de grafitis rosas" loading="lazy" decoding="async">
-    </figure>
-    <figure class="cell cell--media local__c">
-      <img src="assets/img/barra.webp" width="382" height="510" alt="Barra de mármol con estantería negra y lámparas de aro" loading="lazy" decoding="async">
-    </figure>
-    <figure class="cell cell--media local__d">
-      <img src="assets/img/fachada.webp" width="680" height="453" alt="Fachada de Flamingo con el rótulo y el arco de flores en la entrada" loading="lazy" decoding="async">
-    </figure>
+
+    <div class="box box--white local__claim">
+      <figure class="ph local__claimph">
+        <img src="assets/img/allday.jpg" width="1080" height="1080" alt="Rótulo de Flamingo: all day brunch" loading="lazy" decoding="async">
+      </figure>
+      <p class="mut">El brunch no se acaba a mediodía. Ni los benedict, ni los pancakes, ni la tarta.</p>
+      <a href="https://www.instagram.com/flamingo.bf/" target="_blank" rel="noopener" class="btn btn--sm">@flamingo.bf</a>
+    </div>
   </div>
 </section>
 
-<!-- ══ 3. LA CARTA ═══════════════════════════════════════════ -->
+<!-- ══ 3. ES TU SITIO SI ═════════════════════════════════════
+     Rejilla 3×2 con la pieza destacada en el centro, tal cual
+     la referencia. Sin iconos: numeración.                     -->
+<section class="why" aria-labelledby="h-why">
+  <div class="why__grid">
+    <div class="box box--white why__it"><b>01</b><h3>Café de especialidad</h3><p>Del espresso corto al matcha latte, con la leche que tú quieras.</p></div>
+    <div class="box box--white why__it"><b>02</b><h3>Brunch sin horario</h3><p>Los benedict siguen ahí a media tarde. Nadie te dirá que ya no es hora.</p></div>
+
+    <div class="box box--pink why__mid">
+      <p class="tag">Para ti</p>
+      <h2 class="dis" data-lines id="h-why">Flamingo es<br>tu sitio si…</h2>
+      <p>…te levantas tarde, te gusta el café bien hecho y celebras las cosas con tarta. Sin reserva también entras: si hay hueco en la plaza, es tuyo.</p>
+      <a href="#visitanos" class="btn btn--ink btn--sm">Reservar mesa</a>
+    </div>
+
+    <div class="box box--white why__it"><b>03</b><h3>Repostería casera</h3><p>Cheesecakes, brownies y la Matilda de chocolate. Se hacen aquí cada mañana.</p></div>
+    <div class="box box--white why__it"><b>04</b><h3>Terraza en la plaza</h3><p>Sillas de ratán rosa a pie de Plaza de España. El mejor sitio para no hacer nada.</p></div>
+  </div>
+</section>
+
+<!-- ══ 4. LA CARTA ═══════════════════════════════════════════
+     Bloque rosa ancho con un panel blanco que sobresale por
+     abajo y los puntos de sección debajo. -->
 <section class="carta" id="carta" aria-labelledby="h-carta">
-  <header class="carta__head">
-    <p class="label">La carta</p>
-    <h2 class="display" data-lines id="h-carta">Del primer café<br>al último dulce</h2>
-  </header>
-  <div class="tabs" id="menuTabs"></div>
-  <div class="list" id="menuList"></div>
+  <div class="box box--pink carta__box">
+    <header class="carta__head">
+      <p class="tag">La carta</p>
+      <h2 class="dis" data-lines id="h-carta">Del primer café<br>al último dulce</h2>
+    </header>
+    <div class="tabs" id="menuTabs"></div>
+    <div class="box box--white carta__panel">
+      <div class="list" id="menuList"></div>
+    </div>
+  </div>
   <div class="carta__foot">
-    <p class="carta__note">Carta orientativa. La completa y actualizada, en el local.</p>
-    <p class="carta__deliv">
-      <a href="https://www.ubereats.com/es/store/flamingo-brunch-%26-food/E3RRudG6U4SG1LSSIhD-Qg" target="_blank" rel="noopener">Uber Eats</a>
-      <a href="https://glovoapp.com/es/es/elche/stores/flamingo-brunch-and-food-elche" target="_blank" rel="noopener">Glovo</a>
-      <a href="https://www.just-eat.es/restaurants-flamingo-brunch-and-food-elche/menu" target="_blank" rel="noopener">Just Eat</a>
+    <div class="dots" id="menuDots" aria-hidden="true"></div>
+    <p class="mut">Carta orientativa. La completa y actualizada, en el local.</p>
+    <p class="btns btns--c">
+      <a href="https://www.ubereats.com/es/store/flamingo-brunch-%26-food/E3RRudG6U4SG1LSSIhD-Qg" target="_blank" rel="noopener" class="btn btn--sm">Uber Eats</a>
+      <a href="https://glovoapp.com/es/es/elche/stores/flamingo-brunch-and-food-elche" target="_blank" rel="noopener" class="btn btn--sm">Glovo</a>
+      <a href="https://www.just-eat.es/restaurants-flamingo-brunch-and-food-elche/menu" target="_blank" rel="noopener" class="btn btn--sm">Just Eat</a>
     </p>
   </div>
 </section>
 
-<!-- ══ 4. VISÍTANOS ══════════════════════════════════════════ -->
-<section class="visit" id="visitanos" aria-labelledby="h-visit">
-  <div class="visit__grid">
-    <div class="cell visit__txt">
-      <p class="label">Visítanos</p>
-      <h2 class="display" data-lines id="h-visit">Plaza de<br>España, 3</h2>
-      <dl class="visit__info">
-        <div><dt>Dirección</dt><dd><address>Pl. de España, 3<br>03201 Elx / Elche, Alicante</address></dd></div>
-        <div><dt>Horario</dt><dd>Todos los días<br>9:00 — 21:00</dd></div>
-        <div><dt>Teléfono</dt><dd><a href="tel:+34607020554">607 02 05 54</a></dd></div>
-        <div><dt>Instagram</dt><dd><a href="https://www.instagram.com/flamingo.bf/" target="_blank" rel="noopener">@flamingo.bf</a></dd></div>
-      </dl>
-      <p class="visit__cta">
-        <a href="https://www.google.com/maps/search/?api=1&amp;query=Flamingo+Brunch+%26+Food+Plaza+de+Espa%C3%B1a+3+Elche" target="_blank" rel="noopener" class="btn btn--fill">Cómo llegar</a>
-        <a href="tel:+34607020554" class="btn">Llamar</a>
-      </p>
+<!-- ══ 5. LO MÁS PEDIDO ══════════════════════════════════════
+     El bloque de oferta de la referencia: lista con precios a
+     la izquierda y foto grande a la derecha.                   -->
+<section class="deal" aria-labelledby="h-deal">
+  <div class="deal__grid">
+    <div class="box box--pink deal__box">
+      <p class="tag">Lo más pedido</p>
+      <h2 class="dis" data-lines id="h-deal">Si es tu<br>primera vez</h2>
+      <ul class="deal__list" id="dealList"></ul>
+      <a href="#carta" class="btn btn--ink btn--sm">Ver la carta entera</a>
     </div>
-    <div class="cell cell--media visit__map">
-      <iframe title="Mapa con la ubicación de Flamingo Brunch &amp; Food en la Plaza de España de Elche" src="https://www.google.com/maps?q=Plaza%20de%20Espa%C3%B1a%203%2C%2003201%20Elche%2C%20Alicante&amp;z=17&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <figure class="ph deal__ph">
+      <video src="assets/video/reel1.mp4" poster="assets/img/reel1-poster.jpg" width="480" height="854" muted loop playsinline preload="none" aria-label="Bowl de açaí con granola, kiwi y frutos rojos"></video>
+    </figure>
+  </div>
+</section>
+
+<!-- ══ 6. MOMENTOS ═══════════════════════════════════════════
+     La galería de tamaños mezclados de la referencia.          -->
+<section class="moments" id="momentos" aria-labelledby="h-momentos">
+  <header class="head">
+    <p class="tag">Momentos</p>
+    <h2 class="dis" data-lines id="h-momentos">Lo que pasa dentro</h2>
+  </header>
+  <div class="gal">
+    <figure class="ph g1"><img src="assets/img/exterior.jpg" width="1440" height="1800" alt="Mesas de mármol y sillas de ratán rosa en la terraza de Flamingo" loading="lazy" decoding="async"><figcaption>La plaza</figcaption></figure>
+    <figure class="ph g2"><img src="assets/img/graffiti.webp" width="680" height="510" alt="Paredes del baño llenas de pintadas rosas" loading="lazy" decoding="async"><figcaption>El baño</figcaption></figure>
+    <figure class="ph g3"><video src="assets/video/reel2.mp4" poster="assets/img/reel2-poster.jpg" width="360" height="640" muted loop playsinline preload="none" aria-label="Rincón del interior con un cartel de París"></video><figcaption>El rincón de París</figcaption></figure>
+    <figure class="ph g4"><img src="assets/img/barra.webp" width="382" height="510" alt="Barra de mármol con flores y estantería negra" loading="lazy" decoding="async"><figcaption>La barra</figcaption></figure>
+    <figure class="ph g5"><img src="assets/img/posters.jpg" width="1440" height="1800" alt="Carteles de Flamingo pintados con espray rosa" loading="lazy" decoding="async"><figcaption>Los carteles</figcaption></figure>
+    <figure class="ph g6"><img src="assets/img/terraza.webp" width="382" height="510" alt="Sombrilla de rayas rosas en la terraza" loading="lazy" decoding="async"><figcaption>La terraza</figcaption></figure>
+    <figure class="ph g7"><img src="assets/img/fachada.webp" width="680" height="453" alt="Entrada de Flamingo con el arco de flores" loading="lazy" decoding="async"><figcaption>La entrada</figcaption></figure>
+  </div>
+</section>
+
+<!-- ══ 7. SE DICE POR AQUÍ ═══════════════════════════════════
+     El bloque de testimonios de la referencia, con las piezas
+     desplazadas a un lado y a otro. No inventamos reseñas: las
+     citas son carteles del propio local, y la nota de Google es
+     la real, enlazada a su ficha.                              -->
+<section class="says" aria-labelledby="h-says">
+  <div class="says__grid">
+    <div class="box box--pink says__lead">
+      <p class="tag">Se dice por aquí</p>
+      <h2 class="dis" data-lines id="h-says">Las paredes<br>hablan</h2>
+      <p>Lo que hay escrito en los carteles del local, tal cual está escrito.</p>
     </div>
+
+    <blockquote class="box box--white say say--a">
+      <p>Please no dancing on tables</p>
+      <cite>Cartel de la pared del fondo</cite>
+    </blockquote>
+
+    <figure class="ph say__ph">
+      <img src="assets/img/planes.jpg" width="1054" height="1054" alt="Cartel de Flamingo: los mejores planes, ven a celebrarlos a Flamingo" loading="lazy" decoding="async">
+    </figure>
+
+    <blockquote class="box box--white say say--b">
+      <p><em>a.m.</em> coffee — <em>p.m.</em> wine</p>
+      <cite>Cartel de la entrada</cite>
+    </blockquote>
+
+    <a class="box box--white say say--rate" href="https://www.google.com/maps/search/?api=1&amp;query=Flamingo+Brunch+%26+Food+Plaza+de+Espa%C3%B1a+3+Elche" target="_blank" rel="noopener">
+      <span class="say__num">4,2</span>
+      <span>sobre 776 reseñas en Google</span>
+      <span class="lnk">Leerlas todas</span>
+    </a>
+  </div>
+</section>
+
+<!-- ══ 8. RESERVA ════════════════════════════════════════════
+     Formulario a la izquierda y rejilla de fichas a la derecha,
+     como en la referencia. No hay servidor: el formulario
+     compone el mensaje y lo abre en WhatsApp.                  -->
+<section class="book" id="visitanos" aria-labelledby="h-book">
+  <div class="book__grid">
+    <div class="box box--pink book__form">
+      <p class="tag">Reservar</p>
+      <h2 class="dis" data-lines id="h-book">Te guardamos<br>mesa</h2>
+      <form id="bookForm" novalidate>
+        <p class="fld"><label for="f-name">Tu nombre</label><input id="f-name" name="nombre" type="text" autocomplete="name" placeholder="María"></p>
+        <p class="fld fld--2">
+          <span><label for="f-day">Día y hora</label><input id="f-day" name="dia" type="text" placeholder="Sábado a las 11:30"></span>
+          <span><label for="f-pax">Personas</label><input id="f-pax" name="personas" type="number" min="1" max="30" step="1" placeholder="4" inputmode="numeric"></span>
+        </p>
+        <p class="fld"><label for="f-msg">Algo que debamos saber <i>(opcional)</i></label><input id="f-msg" name="mensaje" type="text" placeholder="Vamos con carrito y hay un cumpleaños"></p>
+        <p class="fld__err" id="formError" role="alert" hidden></p>
+        <button type="submit" class="btn btn--ink">Enviar por WhatsApp</button>
+        <p class="fld__help">Se abre WhatsApp con el mensaje escrito. Tú solo le das a enviar.</p>
+      </form>
+    </div>
+
+    <div class="book__tiles">
+      <a class="box box--white tile" href="https://www.google.com/maps/search/?api=1&amp;query=Flamingo+Brunch+%26+Food+Plaza+de+Espa%C3%B1a+3+Elche" target="_blank" rel="noopener">
+        <b>Dónde</b><address>Pl. de España, 3<br>03201 Elx / Elche</address><span class="lnk">Abrir en Maps</span>
+      </a>
+      <div class="box box--white tile">
+        <b>Cuándo</b><p>Todos los días<br><time datetime="09:00">9:00</time> — <time datetime="21:00">21:00</time></p>
+      </div>
+      <a class="box box--white tile" href="tel:+34607020554"><b>Teléfono</b><p>607 02 05 54</p><span class="lnk">Llamar</span></a>
+      <a class="box box--white tile" href="https://www.instagram.com/flamingo.bf/" target="_blank" rel="noopener"><b>Instagram</b><p>@flamingo.bf</p><span class="lnk">Seguir</span></a>
+      <div class="ph book__map">
+        <iframe title="Mapa con la ubicación de Flamingo Brunch &amp; Food en la Plaza de España de Elche" src="https://www.google.com/maps?q=Plaza%20de%20Espa%C3%B1a%203%2C%2003201%20Elche%2C%20Alicante&amp;z=17&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ 9. PREGUNTAS ══════════════════════════════════════════ -->
+<section class="faq" aria-labelledby="h-faq">
+  <div class="faq__grid">
+    <div class="faq__col">
+      <p class="tag">Preguntas</p>
+      <h2 class="dis" data-lines id="h-faq">Lo que más<br>nos preguntáis</h2>
+      <div class="acc" id="acc">
+        <div class="acc__it">
+          <h3><button type="button" class="acc__b" aria-expanded="false">¿Hace falta reservar?<span class="acc__s" aria-hidden="true"></span></button></h3>
+          <div class="acc__p"><p>No es obligatorio: si hay mesa libre, te sientas. Los findes a media mañana se llena, así que si venís en grupo mejor avisad por WhatsApp o por teléfono.</p></div>
+        </div>
+        <div class="acc__it">
+          <h3><button type="button" class="acc__b" aria-expanded="false">¿Servís brunch por la tarde?<span class="acc__s" aria-hidden="true"></span></button></h3>
+          <div class="acc__p"><p>Sí. La carta es la misma de 9:00 a 21:00: los benedict, las tostas y los pancakes están disponibles todo el día.</p></div>
+        </div>
+        <div class="acc__it">
+          <h3><button type="button" class="acc__b" aria-expanded="false">¿Tenéis opciones veganas o sin lactosa?<span class="acc__s" aria-hidden="true"></span></button></h3>
+          <div class="acc__p"><p>Tenemos pancakes veganos y puedes elegir la leche de los cafés y los lattes. Para alergias e intolerancias, dínoslo al pedir y te contamos qué lleva cada plato.</p></div>
+        </div>
+        <div class="acc__it">
+          <h3><button type="button" class="acc__b" aria-expanded="false">¿Se puede celebrar un cumpleaños?<span class="acc__s" aria-hidden="true"></span></button></h3>
+          <div class="acc__p"><p>Es medio deporte nacional aquí. Escríbenos con la fecha y cuántos sois y lo cuadramos; las tartas son caseras y se pueden encargar.</p></div>
+        </div>
+        <div class="acc__it">
+          <h3><button type="button" class="acc__b" aria-expanded="false">¿Hay terraza y es accesible?<span class="acc__s" aria-hidden="true"></span></button></h3>
+          <div class="acc__p"><p>Terraza a pie de Plaza de España y entrada accesible en silla de ruedas.</p></div>
+        </div>
+        <div class="acc__it">
+          <h3><button type="button" class="acc__b" aria-expanded="false">¿Lleváis a casa?<span class="acc__s" aria-hidden="true"></span></button></h3>
+          <div class="acc__p"><p>Sí: para llevar en el local y a domicilio por Uber&nbsp;Eats, Glovo y Just&nbsp;Eat. Los precios de las plataformas van algo por encima de los de sala.</p></div>
+        </div>
+      </div>
+    </div>
+    <figure class="ph faq__ph">
+      <img src="assets/img/exterior.jpg" width="1440" height="1800" alt="Fachada rosa y terraza de Flamingo en la Plaza de España de Elche" loading="lazy" decoding="async">
+    </figure>
   </div>
 </section>
 
 </main>
 
-<!-- El pie invierte la marca: rosa sobre negro, como el centro del logo -->
 <footer class="foot">
-  <p class="foot__claim" data-lines>a.m. coffee<br>p.m. wine</p>
-  <div class="foot__grid">
-    <div class="cell foot__brand">
-      <p class="foot__mark">Flamingo</p>
-      <p>Brunch todo el día en la Plaza de España de Elche.</p>
+  <div class="box box--pink foot__box">
+    <p class="foot__claim" data-lines><em>a.m.</em> coffee — <em>p.m.</em> wine</p>
+    <div class="foot__grid">
+      <div class="foot__brand">
+        <img src="assets/img/logo.jpg" width="1057" height="1057" alt="" loading="lazy" decoding="async">
+        <p>Brunch todo el día en la Plaza de España de Elche.</p>
+        <div class="foot__soc">
+          <a href="https://www.instagram.com/flamingo.bf/" target="_blank" rel="noopener" aria-label="Instagram de Flamingo Brunch &amp; Food">IG</a>
+          <a href="tel:+34607020554" aria-label="Llamar a Flamingo Brunch &amp; Food">TEL</a>
+          <a href="https://www.google.com/maps/search/?api=1&amp;query=Flamingo+Brunch+%26+Food+Plaza+de+Espa%C3%B1a+3+Elche" target="_blank" rel="noopener" aria-label="Cómo llegar a Flamingo Brunch &amp; Food">MAP</a>
+        </div>
+      </div>
+      <nav aria-label="Secciones">
+        <h2>La casa</h2>
+        <a href="#local">El local</a>
+        <a href="#carta">La carta</a>
+        <a href="#momentos">Momentos</a>
+        <a href="#visitanos">Visítanos</a>
+      </nav>
+      <nav aria-label="A domicilio">
+        <h2>A domicilio</h2>
+        <a href="https://www.ubereats.com/es/store/flamingo-brunch-%26-food/E3RRudG6U4SG1LSSIhD-Qg" target="_blank" rel="noopener">Uber Eats</a>
+        <a href="https://glovoapp.com/es/es/elche/stores/flamingo-brunch-and-food-elche" target="_blank" rel="noopener">Glovo</a>
+        <a href="https://www.just-eat.es/restaurants-flamingo-brunch-and-food-elche/menu" target="_blank" rel="noopener">Just Eat</a>
+      </nav>
+      <div>
+        <h2>Contacto</h2>
+        <a href="tel:+34607020554">607 02 05 54</a>
+        <a href="https://www.instagram.com/flamingo.bf/" target="_blank" rel="noopener">@flamingo.bf</a>
+        <address>Pl. de España, 3<br>03201 Elx / Elche</address>
+      </div>
     </div>
-    <nav class="cell" aria-label="Secciones">
-      <h2>La casa</h2>
-      <a href="#local">El local</a>
-      <a href="#carta">La carta</a>
-      <a href="#visitanos">Visítanos</a>
-    </nav>
-    <nav class="cell" aria-label="A domicilio">
-      <h2>A domicilio</h2>
-      <a href="https://www.ubereats.com/es/store/flamingo-brunch-%26-food/E3RRudG6U4SG1LSSIhD-Qg" target="_blank" rel="noopener">Uber Eats</a>
-      <a href="https://glovoapp.com/es/es/elche/stores/flamingo-brunch-and-food-elche" target="_blank" rel="noopener">Glovo</a>
-      <a href="https://www.just-eat.es/restaurants-flamingo-brunch-and-food-elche/menu" target="_blank" rel="noopener">Just Eat</a>
-    </nav>
-    <div class="cell">
-      <h2>Contacto</h2>
-      <a href="tel:+34607020554">607 02 05 54</a>
-      <a href="https://www.instagram.com/flamingo.bf/" target="_blank" rel="noopener">@flamingo.bf</a>
-      <address>Pl. de España, 3<br>03201 Elx / Elche</address>
-    </div>
+    <p class="foot__bar">
+      <span>© <span id="year">2026</span> Flamingo Brunch &amp; Food</span>
+      <a href="#top">Volver arriba</a>
+    </p>
   </div>
-  <p class="foot__bar">
-    <span>© <span id="year">2026</span> Flamingo Brunch &amp; Food</span>
-    <a href="#top">Volver arriba</a>
-  </p>
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>

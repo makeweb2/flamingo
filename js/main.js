@@ -3,14 +3,17 @@
    ------------------------------------------------------------
    Sin build y sin dependencias obligatorias: GSAP y Lenis solo
    mejoran la entrada y el scroll. Si el CDN no responde, la
-   carta se pinta igual y las pestañas siguen funcionando.
+   carta se pinta, las pestañas cambian, el acordeón abre y el
+   formulario envía igual.
 
    Índice
      1. Carta: datos, pestañas y JSON-LD
-     2. Franja de rótulo
-     3. Nav y menú móvil
-     4. Vídeos
-     5. Entradas
+     2. Lo más pedido
+     3. Acordeon de preguntas (+ FAQPage)
+     4. Reserva por WhatsApp
+     5. Nav, scroll y menú móvil
+     6. Vídeos
+     7. Entradas
    ============================================================ */
 (function () {
   'use strict';
@@ -23,9 +26,9 @@
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
 
 
-  /* ══ 1. LA CARTA ═════════════════════════════════════════════
-     Un único array alimenta la lista, las pestañas y el JSON-LD
-     del menú, así que nunca se desincronizan.                  */
+  /* == 1. LA CARTA ==========================================
+     Un único array alimenta la lista, las pestañas, el bloque de
+     "lo más pedido" y el JSON-LD del menú: nunca se desincronizan. */
   var MENU = [
     { label: 'Brunch', items: [
       { n: 'Huevos Benedict', d: 'Pan brioche, bacón, aguacate, huevo poché y salsa holandesa.', p: '15,00', tag: 'top' },
@@ -95,14 +98,15 @@
 
   var tabsEl = $('#menuTabs');
   var listEl = $('#menuList');
+  var dotsEl = $('#menuDots');
   var current = 0;
 
   function dishMarkup(it) {
-    var tag = it.tag ? '<span class="tag">' + it.tag + '</span>' : '';
+    var tag = it.tag ? '<span class="tag--dish">' + it.tag + '</span>' : '';
     return '<article class="dish">' +
-             '<h3 class="dish__name">' + it.n + tag + '</h3>' +
-             '<p class="dish__price">' + it.p + ' €</p>' +
-             '<p class="dish__desc">' + it.d + '</p>' +
+             '<h3 class="dish__n">' + it.n + tag + '</h3>' +
+             '<p class="dish__p">' + it.p + ' €</p>' +
+             '<p class="dish__d">' + it.d + '</p>' +
            '</article>';
   }
 
@@ -110,6 +114,8 @@
     current = i;
     listEl.innerHTML = MENU[i].items.map(dishMarkup).join('');
     listEl.setAttribute('aria-labelledby', 'tab-' + i);
+    listEl.scrollLeft = 0;
+    if (dotsEl) $$('i', dotsEl).forEach(function (d, k) { d.classList.toggle('is-on', k === i); });
     if (hasGSAP && !REDUCED) {
       gsap.from($$('.dish', listEl), {
         opacity: 0, y: 12, duration: .5, stagger: .03, ease: 'power2.out', overwrite: true
@@ -129,6 +135,7 @@
              ' role="tab" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? 0 : -1) + '"' +
              ' data-i="' + i + '">' + c.label + '</button>';
     }).join('');
+    if (dotsEl) dotsEl.innerHTML = MENU.map(function () { return '<i></i>'; }).join('');
 
     var tabs = $$('.tab', tabsEl);
 
@@ -198,20 +205,147 @@
   })();
 
 
-  /* ══ 2. FRANJA DE RÓTULO ═════════════════════════════════════
-     El contenido se duplica en JS: la animación desplaza la mitad
-     exacta, así que las dos copias tienen que existir para que el
-     bucle no dé un salto. Duplicar a mano invita a olvidarse. */
+  /* ══ 2. LO MÁS PEDIDO ════════════════════════════════════════
+     Se saca de MENU por nombre: si un plato desaparece de la
+     carta, desaparece también de aquí en vez de quedarse colgado. */
   (function () {
-    var row = $('#ticker');
-    if (!row) return;
-    var WORDS = ['Brunch todo el día', 'Café de especialidad', 'Repostería casera', 'Terraza en la plaza'];
-    var once = WORDS.map(function (w) { return '<span>' + w + '</span><i>✳</i>'; }).join('');
-    row.innerHTML = once + once;
+    var host = $('#dealList');
+    if (!host) return;
+    var PICK = ['Huevos Benedict', 'Puglia', 'Flamingo Burger', 'Bowl de Açaí', 'Matilda'];
+    var byName = {};
+    MENU.forEach(function (s) { s.items.forEach(function (it) { byName[it.n] = it; }); });
+
+    var rows = PICK.map(function (n) { return byName[n]; })
+      .filter(Boolean)
+      .map(function (it) {
+        return '<li><b>' + it.n + '</b><span class="d" aria-hidden="true"></span>' +
+               '<span class="p">' + it.p + ' €</span></li>';
+      });
+    host.innerHTML = rows.join('');
   })();
 
+  /* ══ 3. ACORDEÓN ═════════════════════════════════════════════
+     Altura animada en píxeles y devuelta a `auto` al terminar,
+     para que el texto siga fluyendo si cambia el ancho.          */
+  (function () {
+    var acc = $('#acc');
+    if (!acc) return;
+    var items = $$('.acc__it', acc).map(function (item, i) {
+      var btn = $('.acc__b', item);
+      var panel = $('.acc__p', item);
+      panel.id = 'acc-p-' + i;
+      btn.id = 'acc-b-' + i;
+      btn.setAttribute('aria-controls', panel.id);
+      panel.setAttribute('role', 'region');
+      panel.setAttribute('aria-labelledby', btn.id);
+      panel.hidden = true;
+      return { btn: btn, panel: panel };
+    });
 
-  /* ══ 3. NAV Y MENÚ MÓVIL ═════════════════════════════════════ */
+    function close(it) {
+      if (it.btn.getAttribute('aria-expanded') !== 'true') return;
+      it.btn.setAttribute('aria-expanded', 'false');
+      var h = it.panel.scrollHeight;
+      it.panel.style.height = h + 'px';
+      requestAnimationFrame(function () { it.panel.style.height = '0px'; });
+      var done = function () {
+        it.panel.hidden = true;
+        it.panel.style.height = '';
+        it.panel.removeEventListener('transitionend', done);
+      };
+      if (REDUCED) done();
+      else it.panel.addEventListener('transitionend', done);
+    }
+
+    function open(it) {
+      it.btn.setAttribute('aria-expanded', 'true');
+      it.panel.hidden = false;
+      it.panel.style.height = '0px';
+      var h = it.panel.scrollHeight;
+      requestAnimationFrame(function () { it.panel.style.height = h + 'px'; });
+      var done = function () {
+        it.panel.style.height = 'auto';
+        it.panel.removeEventListener('transitionend', done);
+        if (window.ScrollTrigger) ScrollTrigger.refresh();
+      };
+      if (REDUCED) done();
+      else it.panel.addEventListener('transitionend', done);
+    }
+
+    // La transición se pone aquí y no en el CSS: así, sin JS, los
+    // paneles quedan abiertos y legibles en vez de recortados a cero.
+    items.forEach(function (it) {
+      if (!REDUCED) it.panel.style.transition = 'height .42s cubic-bezier(.22,1,.36,1)';
+      it.btn.addEventListener('click', function () {
+        var wasOpen = it.btn.getAttribute('aria-expanded') === 'true';
+        items.forEach(close);
+        if (!wasOpen) open(it);
+      });
+    });
+
+    /* FAQPage: se lee del propio acordeón, igual que el menú se lee de
+       MENU. Si se edita una pregunta en el HTML, el schema va detrás. */
+    var faq = items.map(function (it) {
+      return {
+        '@type': 'Question',
+        'name': it.btn.textContent.replace(/\s+/g, ' ').trim(),
+        'acceptedAnswer': {
+          '@type': 'Answer',
+          'text': it.panel.textContent.replace(/\s+/g, ' ').trim()
+        }
+      };
+    });
+    if (faq.length) {
+      var tag = document.createElement('script');
+      tag.type = 'application/ld+json';
+      tag.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        'inLanguage': 'es-ES',
+        'mainEntity': faq
+      });
+      document.head.appendChild(tag);
+    }
+  })();
+
+  /* ══ 4. RESERVA POR WHATSAPP ═════════════════════════════════
+     Sin servidor y sin promesas falsas: el formulario compone el
+     mensaje y abre WhatsApp, que es por donde el local atiende.   */
+  (function () {
+    var form = $('#bookForm');
+    if (!form) return;
+    var TEL = '34607020554';
+    var err = $('#formError');
+
+    function fail(msg, field) {
+      if (err) { err.textContent = msg; err.hidden = false; }
+      if (field) { field.classList.add('is-bad'); field.focus(); }
+    }
+
+    form.addEventListener('input', function (e) {
+      e.target.classList.remove('is-bad');
+      if (err) err.hidden = true;
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var name = form.elements.nombre, day = form.elements.dia, pax = form.elements.personas, msg = form.elements.mensaje;
+
+      if (!name.value.trim())        return fail('Dinos tu nombre para saber a quién guardamos la mesa.', name);
+      if (!day.value.trim())         return fail('¿Qué día y a qué hora te esperamos?', day);
+      var n = parseInt(pax.value, 10);
+      if (!n || n < 1 || n > 30)     return fail('Pon cuántas personas sois (de 1 a 30).', pax);
+
+      var text = 'Hola Flamingo, soy ' + name.value.trim() + '.\n' +
+                 'Quería mesa para ' + n + (n === 1 ? ' persona' : ' personas') + ' el ' + day.value.trim() + '.' +
+                 (msg.value.trim() ? '\n' + msg.value.trim() : '') +
+                 '\n\n(Enviado desde la web)';
+
+      window.open('https://wa.me/' + TEL + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
+    });
+  })();
+
+  /* ══ 5. NAV, SCROLL Y MENÚ MÓVIL ═════════════════════════════════════ */
   var lenis = null;
   if (window.Lenis && !REDUCED) {
     lenis = new Lenis({ duration: 1.05, smoothWheel: true });
@@ -244,7 +378,7 @@
     if (!el) return;
     e.preventDefault();
     closeDrawer();
-    if (lenis) lenis.scrollTo(el, { duration: 1.1, offset: -66 });
+    if (lenis) lenis.scrollTo(el, { duration: 1.1, offset: -84 });
     else el.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
   });
 
@@ -270,6 +404,7 @@
     var lastY = window.scrollY, ticking = false;
     var onScroll = function () {
       var y = window.scrollY;
+      nav.classList.toggle('is-stuck', y > 30);
       if (!drawer || !drawer.classList.contains('is-open')) {
         nav.classList.toggle('is-hidden', y > lastY && y > 240);
       }
@@ -301,8 +436,7 @@
   var yEl = $('#year');
   if (yEl) yEl.textContent = new Date().getFullYear();
 
-
-  /* ══ 4. VÍDEOS ═══════════════════════════════════════════════
+  /* ══ 6. VÍDEOS ═══════════════════════════════════════════════
      Solo se descargan y se reproducen cuando entran en pantalla. */
   $$('video').forEach(function (v) {
     if (!('IntersectionObserver' in window)) { v.preload = 'auto'; return; }
@@ -319,10 +453,9 @@
     }, { threshold: .25 }).observe(v);
   });
 
-
-  /* ══ 5. ENTRADAS ═════════════════════════════════════════════
+  /* == 7. ENTRADAS ==========================================
      Un solo gesto en toda la página: los titulares suben línea a
-     línea, recortados por su propia caja. Nada más se anima.    */
+     línea y los bloques entran desde abajo. Nada más se anima.  */
   function splitLines(el) {
     var out = document.createDocumentFragment();
     el.innerHTML.split(/<br\s*\/?>/i).forEach(function (chunk) {
@@ -342,16 +475,23 @@
   if (hasGSAP && !REDUCED) {
     lined.forEach(function (h) {
       gsap.from($$('.ln > span', h), {
-        yPercent: 108, duration: 1, ease: 'power4.out', stagger: .07,
+        yPercent: 108, duration: .95, ease: 'power4.out', stagger: .06,
         scrollTrigger: { trigger: h, start: 'top 92%' }
       });
     });
 
-    gsap.utils.toArray('.cell--media').forEach(function (c) {
-      gsap.from(c, {
-        opacity: 0, duration: .9, ease: 'power2.out',
-        scrollTrigger: { trigger: c, start: 'top 94%' }
+    gsap.utils.toArray('.hero__row, .local__grid, .why__grid, .gal, .deal__grid, .says__grid, .book__grid, .foot__grid')
+      .forEach(function (grid) {
+        gsap.from(grid.children, {
+          opacity: 0, y: 22, duration: .8, stagger: .05, ease: 'power3.out',
+          scrollTrigger: { trigger: grid, start: 'top 90%' }
+        });
       });
+
+    gsap.from('.hero__box', { opacity: 0, y: 20, duration: .9, ease: 'power3.out' });
+    gsap.utils.toArray('.carta__box, .faq__ph').forEach(function (el) {
+      gsap.from(el, { opacity: 0, y: 22, duration: .85, ease: 'power3.out',
+        scrollTrigger: { trigger: el, start: 'top 90%' } });
     });
 
     // El enlace de la sección en la que estás se queda subrayado
