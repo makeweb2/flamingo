@@ -136,8 +136,11 @@ address{ font-style:normal; }
 .dis{
   font-family:var(--dis); font-weight:400;
   font-variation-settings:"opsz" 18, "SOFT" 100, "WONK" 1;
-  font-size:clamp(28px, 3.5vw, 52px); line-height:1.08;
-  letter-spacing:-.005em;
+  font-size:clamp(28px, 3.5vw, 52px);
+  /* El 1.08 y el tracking negativo venían de la Bodoni, que es estrecha
+     y de asta fina. Fraunces tiene más ojo y más cuerpo: con esos
+     valores las líneas se tocan y el titular se lee apretado. */
+  line-height:1.2; letter-spacing:0;
 }
 .dis em{ font-style:italic; }
 /* La voz de los carteles del local. La regla es que el texto TENGA que

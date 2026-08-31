@@ -100,6 +100,9 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   alto natural y las tres piezas dejan de medir lo mismo.
 - **El acordeón no lleva `height:0` en el CSS.** Si el JS no llega, los paneles se
   leen abiertos en vez de recortados a cero; es el JS quien los cierra.
+- **`.dis` va con interlineado 1.2 y sin tracking negativo.** El 1.08 y el `-.005em`
+  venían de la Bodoni, que es estrecha y de asta fina; Fraunces tiene más ojo y más
+  cuerpo, y con esos valores las líneas se tocan.
 - **`.dis` usa `opsz` BAJO aunque el cuerpo sea grande.** Fraunces es variable y su
   eje de tamaño óptico es el que manda: subido, la fuente se afina y vuelve a
   parecer una didona fría, que es justo lo que se quería quitar. Va a 18, con
