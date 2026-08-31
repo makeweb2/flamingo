@@ -227,6 +227,12 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
 .box--pink > p,.box--white > p{ color:var(--mut); }
 .box--ink > p{ color:var(--mut-ink); }
 
+/* Con `--fill` el medio se coloca en absoluto: así no impone su alto
+   natural a la rejilla. Un reel en vertical, si no, estira su columna
+   a 864px y descuadra toda la fila. */
+.ph--fill{ position:relative; }
+.ph--fill > img,.ph--fill > video,.ph--fill > iframe{ position:absolute; inset:0; }
+
 /* Foto o vídeo: la misma pieza, sin relleno */
 .ph{
   position:relative; overflow:hidden; border-radius:var(--r);
@@ -485,16 +491,22 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
   display:grid; gap:var(--gap);
   grid-template-columns:repeat(12,1fr);
 }
-.local__story{ grid-column:1 / 8; grid-row:1 / 3; display:flex; flex-direction:column; }
-.local__story{ position:relative; }
+/* El relato y el vídeo comparten fila, y el claim pasa a banda ancha
+   debajo. Antes el relato cruzaba dos filas y el vídeo, en vertical,
+   estiraba la columna derecha a 864px: quedaban 875px de rosa vacío
+   entre el párrafo y las miniaturas. */
+.local__story{ position:relative; grid-column:1 / 8; grid-row:1; display:flex; flex-direction:column; }
 .local__story > p{ margin-top:16px; max-width:46ch; }
 .local__doodle{ right:4%; top:6%; }
 .local__ph{ grid-column:8 / 13; grid-row:1; min-height:clamp(280px,30vw,420px); }
 .local__claim{
-  grid-column:8 / 13; grid-row:2;
-  display:flex; flex-direction:column; align-items:flex-start; gap:14px;
+  grid-column:1 / 13; grid-row:2;
+  display:grid; grid-template-columns:minmax(0,.62fr) minmax(0,1fr);
+  align-items:center; gap:clamp(20px,3vw,48px);
 }
 .local__claimph{ width:100%; aspect-ratio:16/9; box-shadow:none; }
+.local__claimtxt{ display:flex; flex-direction:column; align-items:flex-start; gap:clamp(16px,2vw,26px); }
+.local__claimtxt p{ font-size:clamp(15px,1.2vw,17.5px); color:var(--mut); max-width:44ch; }
 
 .thumbs{
   display:grid; grid-template-columns:repeat(3,1fr); gap:var(--gap);
@@ -533,15 +545,16 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
    El panel blanco sobresale por debajo del bloque rosa: es el
    gesto de la referencia.                                      */
 .carta{ max-width:var(--maxw); margin:0 auto; padding:0 var(--pad) var(--sec); }
-.carta__box{ padding-bottom:0; }
+/* El panel va suspendido dentro del bloque, no pegado a su canto */
+.carta__box{ padding-bottom:clamp(20px,2.2vw,34px); }
 .carta__head{ text-align:center; max-width:640px; margin:0 auto; }
 .carta__panel{
   padding:clamp(18px,2vw,30px) clamp(14px,1.6vw,26px);
-  margin:clamp(22px,2.6vw,36px) clamp(0px,2vw,34px) calc(var(--box) * -1);
+  margin:clamp(22px,2.6vw,36px) clamp(0px,2vw,34px) 0;
 }
 .carta__foot{
-  display:grid; justify-items:center; gap:16px;
-  padding-top:calc(var(--box) + clamp(26px,3vw,44px));
+  display:grid; justify-items:center; gap:18px;
+  padding-top:clamp(26px,3vw,44px);
 }
 
 .tabs{
@@ -579,6 +592,21 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
   text-transform:uppercase; color:var(--spray);
   vertical-align:2px;
 }
+
+
+/* Reparto: cada enlace lleva el color de su servicio. No son los logos
+   —esos son ficheros de marca que hay que pedir o descargar— pero el
+   color ya los distingue de un vistazo. Para poner los de verdad:
+   sustituir la `i` por un <img> de 18px de alto y quitar el `background`. */
+.deliv .btn{ gap:9px; }
+.deliv i{ width:11px; height:11px; border-radius:50%; flex:none; background:currentColor; }
+.deliv--uber{ --svc:#06864B; color:var(--svc); }
+.deliv--glovo{ --svc:#B07A00; color:var(--svc); }
+.deliv--justeat{ --svc:#D2401E; color:var(--svc); }
+/* Ojo: aquí no vale `background:currentColor` — en :hover se resolvería
+   contra el color ya cambiado a blanco y el fondo saldría blanco. */
+.deliv .btn:hover{ background:var(--svc); border-color:var(--svc); color:#fff; }
+.deliv .btn:hover i{ background:#fff; }
 
 
 /* ══ 10. LO MÁS PEDIDO ═══════════════════════════════════════ */
@@ -637,7 +665,10 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
 
 /* ══ 13. RESERVA ═════════════════════════════════════════════ */
 .book{ max-width:var(--maxw); margin:0 auto; padding:0 var(--pad) var(--sec); }
-.book__grid{ display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); align-items:start; }
+/* Sin `align-items:start`: el formulario se estira hasta donde acaba el
+   mapa, y el botón se va al fondo en vez de dejar un pie de rosa vacío. */
+.book__grid{ display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); }
+.book__form{ display:flex; flex-direction:column; }
 .book__tiles{ display:grid; grid-template-columns:1fr 1fr; gap:var(--gap); }
 .tile{ display:flex; flex-direction:column; gap:7px; transition:transform .4s var(--ease); }
 a.tile:hover{ transform:translateY(-3px); }
@@ -646,7 +677,11 @@ a.tile:hover{ transform:translateY(-3px); }
 .tile .lnk{ margin-top:auto; padding-top:14px; }
 .book__map{ grid-column:1 / 3; min-height:clamp(200px,22vw,280px); }
 
-.book__form form{ display:grid; gap:13px; margin-top:clamp(20px,2.2vw,30px); }
+.book__form form{
+  display:flex; flex-direction:column; gap:13px;
+  flex:1; margin-top:clamp(20px,2.2vw,30px);
+}
+.book__form .fld--last{ margin-bottom:auto; }
 .fld{ display:grid; gap:6px; }
 .fld--2{ grid-template-columns:1.6fr 1fr; gap:12px; }
 .fld--2 > span{ display:grid; gap:6px; }
@@ -664,8 +699,9 @@ a.tile:hover{ transform:translateY(-3px); }
 .fld input:focus{ outline:none; border-color:var(--ink); }
 .fld input.is-bad{ border-color:#B4304B; }
 .fld__err{ font-size:13px; color:#8E2237; }
-.fld__help{ font-size:12px; color:var(--mut); }
-.book__form .btn{ justify-self:start; }
+/* Los churretes del botón caen unos 45px: el pie tiene que despejarlos */
+.fld__help{ font-size:12px; color:var(--mut); margin-top:44px; }
+.book__form .btn{ align-self:flex-start; }
 
 
 /* ══ 14. PREGUNTAS ═══════════════════════════════════════════ */
@@ -750,8 +786,8 @@ a.tile:hover{ transform:translateY(-3px); }
   .hero__b{ grid-column:1 / 3; }
 
   .local__story{ grid-column:1 / 13; grid-row:1; }
-  .local__ph{ grid-column:1 / 8; grid-row:2; min-height:clamp(260px,40vw,340px); }
-  .local__claim{ grid-column:8 / 13; grid-row:2; }
+  .local__ph{ grid-column:1 / 13; grid-row:2; min-height:clamp(260px,44vw,380px); }
+  .local__claim{ grid-column:1 / 13; grid-row:3; }
 
   .deal__grid,.book__grid,.faq__grid{ grid-template-columns:1fr; }
   .faq__ph{ position:static; aspect-ratio:16/9; }
@@ -790,8 +826,7 @@ a.tile:hover{ transform:translateY(-3px); }
   .foot__doodle{ right:5%; top:3%; }
   .hero__row{ grid-template-columns:1fr; }
   .hero__b{ grid-column:auto; }
-  .local__ph{ grid-column:1 / 13; grid-row:2; }
-  .local__claim{ grid-column:1 / 13; grid-row:3; }
+  .local__claim{ grid-template-columns:1fr; }
   .thumbs{ grid-template-columns:1fr 1fr; }
   .thumbs li:last-child{ grid-column:1 / 3; }
   .thumbs li:last-child .ph{ aspect-ratio:16/10; }
