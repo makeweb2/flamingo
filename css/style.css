@@ -133,13 +133,15 @@ address{ font-style:normal; }
   letter-spacing:-.005em;
 }
 .dis em{ font-style:italic; }
-/* La voz de los carteles del local. Va en los ROTULOS y en las CIFRAS
-   que funcionan como señalética —nunca en texto corrido—: la marca del
-   nav, una palabra por titular, las dos frases de cartel, los números
-   grandes y las etiquetas de plato. Cooper pesa más que la Didone al
-   mismo cuerpo, así que baja un punto cuando comparten línea. */
+/* La voz de los carteles del local. La regla es que el texto TENGA que
+   ser un rótulo, no que se le ponga un acento a una palabra cualquiera:
+     · la marca del nav
+     · las dos frases que son carteles del local, enteras
+     · las cifras que hacen de señalética (horario, nota de Google) y
+       las etiquetas de plato
+   Nunca una palabra suelta dentro de una frase: eso es decoración, y
+   además obliga a elegir cuál, que es una decisión sin criterio. */
 .coop{ font-family:var(--coop); font-weight:400; letter-spacing:-.005em; }
-.dis .coop{ font-size:.93em; }
 /* Los titulares entran línea a línea. El respiro de arriba evita que el
    recorte se coma la tilde de "día" o el asta de la "b". */
 .ln{ display:block; overflow:hidden; padding:.12em 0 .06em; margin:-.12em 0 -.06em; }

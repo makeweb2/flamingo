@@ -22,7 +22,7 @@ servidor: `python -m http.server` y abrir `http://localhost:8000`.
   | Token | Fuente | Dónde se usa |
   |-------|--------|--------------|
   | `--dis`  | Bodoni Moda | Titulares. Es la Didone del rótulo de la puerta y del logo. |
-  | `--coop` | Cooper Black (`COOPBL`) | **Rótulos y cifras que hacen de señalética**, nunca texto corrido: la marca del nav, una palabra por titular, las dos frases de cartel ("Please no dancing on tables" y "a.m. coffee — p.m. wine"), los números grandes (el horario, la nota de Google, los 01–04) y las etiquetas de plato. |
+  | `--coop` | Cooper Black (`COOPBL`) | **Solo donde el texto ES un rótulo**: la marca del nav, las dos frases que son carteles del local ("Please no dancing on tables" y "a.m. coffee — p.m. wine"), las cifras que hacen de señalética (el horario, la nota de Google, los 01–04) y las etiquetas de plato. |
   | `--ui`   | Jost | Texto corriente, etiquetas, pestañas y botones. |
 
 - **El registro es el de la fachada, no el del baño.** La Cooper Black es la letra
@@ -85,9 +85,8 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   acordeón, así que no hay que tocarlo dos veces.
 - **Teléfono de reservas**: constante `TEL` del bloque 4 (formato internacional sin
   `+`), además de los `tel:` del HTML.
-- **Titulares**: se parten por líneas con los `<br>` del HTML y `data-lines`. Para
-  que una palabra vaya en Cooper Black, envuélvela en `<span class="coop">`. Una por
-  titular: en cuanto son dos, el titular deja de tener un acento y pasa a tener dos.
+- **Titulares**: se parten por líneas con los `<br>` del HTML y `data-lines`. Van
+  enteros en Didone: **no se le pone Cooper a una palabra suelta** (ver abajo).
 - **La franja de "la pared"**: la frase está en el HTML de la sección 7. Es el sitio
   donde meter un cartel del local sin montar una sección entera.
 - **Fotos y vídeos**: sustituir los archivos de `assets/` manteniendo el nombre.
@@ -104,8 +103,11 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   leen abiertos en vez de recortados a cero; es el JS quien los cierra.
 - **`button{ font:inherit }`.** Los botones no heredan la tipografía: sin esa línea
   el `burger` cae al Arial del navegador y aparece una cuarta fuente.
-- **`.dis .coop` baja a `.93em`.** Cooper pesa bastante más que la Didone al mismo
-  cuerpo; sin ese ajuste, la palabra en Cooper se come la línea.
+- **La Cooper no entra en los titulares.** Poner una palabra suelta en Cooper dentro
+  de una frase es decoración, no criterio: obliga a elegir cuál, y esa decisión no
+  tiene respuesta buena. La regla es que el texto TENGA que ser un rótulo — un
+  wordmark, un cartel del local, una cifra de señalética — no que se le ponga un
+  acento a lo que sea.
 - **Cooper Black va incrustada en base64.** Las fuentes se piden siempre en modo
   CORS y un `@font-face` con `url()` no cargaría al abrir el HTML con doble clic,
   que es como se revisa. Los ficheros sueltos están en `assets/fonts`.
