@@ -16,66 +16,23 @@ servidor: `python -m http.server` y abrir `http://localhost:8000`.
   filos, ese mismo rosa rebajado. El negro `#14100F` es el del logo, y se usa solo
   en el texto y en el botón principal — **no hay bloques negros**, igual que en la
   referencia.
-- **La tipografía** son **tres voces con una tarea cada una**, y las tres están en
-  el local. Si alguna se sale de su papel, la página vuelve a parecer hecha por
-  varias personas:
+- **La tipografía** son **dos voces con una tarea cada una**, y las dos están en la
+  fachada:
 
   | Token | Fuente | Dónde se usa |
   |-------|--------|--------------|
-  | `--dis`  | Bodoni Moda | Titulares de sección. Es la Didone del rótulo de la puerta y del logo. |
-  | `--coop` | Cooper Black (`COOPBL`) | La voz de sus carteles: la marca del nav, **una** palabra por titular, las citas de la pared, las etiquetas de plato, el claim del pie y el rótulo de los botones. |
-  | `--ui`   | Jost | Todo el texto corriente y las etiquetas. |
+  | `--dis` | Bodoni Moda | Titulares, la marca del nav y el claim del pie. Es la Didone del rótulo de la puerta y del logo. |
+  | `--ui`  | Jost | Todo lo demás: texto, etiquetas, pestañas y botones. |
 
-- **Lo urbano** sale de la pared del baño, y está hecho a código en el bloque 0 de
-  `js/main.js`: corazones, destellos y aureolas, el brochazo de espray bajo una
-  palabra, el subrayado de los enlaces del nav y, sobre todo, **la forma de los
-  botones**. Todos los trazos salen del mismo par de funciones con una ondulación
-  determinista: misma semilla, mismo gesto, así que ningún trazo repite a otro pero
-  todos son iguales entre recargas — y ninguno es una imagen que haya que descargar.
+- **El registro es el de la fachada, no el del baño.** Pared rosa lisa, carpintería
+  negra, rótulo en Didone y flores: sobrio. Nada de espray, ni goteos, ni pintadas,
+  ni tipografía de cartel. Las fotos del baño y de los carteles siguen en la galería
+  —son el local— pero como fotografía, no como lenguaje de la interfaz.
 
-### Los botones y la barra del nav
-
-Los botones no son un `border-radius`: su forma la traza el JS como un tag de la
-pared, en tres capas — relleno, contorno y una tercera copia desplazada en fucsia,
-que es el doble contorno del grafiti. Al señalarlos el tag se da la vuelta: fucsia
-dentro, negro fuera. En el principal la copia va **rellena** (el macizo de un
-throw-up); en el secundario va **solo a contorno**, porque un relleno desplazado
-inundaría la forma en vez de doblarle el filo.
-
-**Solo se tatúan los botones grandes** — los tres que de verdad piden acción. Un tag
-es un gesto; puesto en seis enlaces pequeños seguidos deja de ser un gesto y es
-ruido. `.btn--sm` es una pastilla limpia con el rótulo en Cooper y se acabó.
-
-**Y solo gotea el macizo** (`.btn--ink`). Uno de contorno está hueco: no tiene masa
-de pintura de la que caiga nada, y ponerle churretes es justo lo que lo hace parecer
-un dibujo en vez de un tag.
-
-**Los churretes** son lo que hace que la cosa se lea como pintura y no como adorno,
-y tienen cuatro reglas:
-
-1. **La silueta es un HUSO, no un palo con una bola.** `dripPath()` muestrea un
-   perfil de ancho: nace con el grosor de la masa de la que sale, **engorda a un
-   tercio del recorrido** porque la pintura se acumula, va afinando y acaba en una
-   gota más ancha que alta. Sin ese engorde queda un signo de exclamación.
-2. **Se desvían de la vertical.** Un reguero perfectamente recto delata que está
-   dibujado; el desvío crece con el cuadrado del recorrido.
-3. **Contrastan.** En una tanda, uno corre mucho y los demás poco. Si todos miden
-   parecido parecen rayas. El azar es determinista (`rnd()`, un hash del seno):
-   misma semilla, mismo churrete entre recargas.
-4. **Son del color de la masa que tienen encima** (`--drip`). Un botón negro corre
-   negro; cuando al señalarlo se vuelve fucsia, corre fucsia. Y el SVG monta sobre
-   la mancha, así que la unión no se ve.
-
-**La barra del nav** acaba en una línea de espray trazada a mano, sin churretes: la
-pintura que corre se reserva para los botones. Se traza en **píxeles reales** —el
-SVG se regenera al cambiar el ancho— y no en un viewBox estirado: con
-`preserveAspectRatio="none"` a lo ancho de la pantalla la ondulación se aplanaba
-hasta parecer un subrayador y el grosor se disparaba.
-
-Reglas que mantienen el conjunto de una pieza: **tres fuentes con su papel, un solo
-fucsia de espray (`--spray`), dos radios (`--r` y `--r-s`) más el círculo y la
-píldora, una sombra (`--sh`) y un filo (`--hair`)**. Sin degradados, sin iconos y
-sin emojis.
+Reglas que mantienen el conjunto de una pieza: **dos fuentes con su papel, dos
+radios (`--r` y `--r-s`) más el círculo y la píldora, una sombra (`--sh`) y un filo
+(`--hair`)**. Sin degradados, sin iconos y sin emojis. Comprobado en el render: la
+página entera usa exactamente dos familias tipográficas.
 
 ## Estructura
 
@@ -87,7 +44,7 @@ sin emojis.
 | 4 | La carta | El bloque ancho con el panel interior que sobresale y los puntos |
 | 5 | Lo más pedido | El bloque de precios: lista a la izquierda, foto a la derecha |
 | 6 | Momentos | La galería de tamaños mezclados |
-| 7 | La pared | Franja pintada con el cartel del local. Ocupa el sitio del bloque de testimonios de la referencia, pero dice lo mismo en una frase en vez de en cuatro tarjetas |
+| 7 | La pared | Franja con el cartel del local en cursiva. Ocupa el sitio del bloque de testimonios de la referencia, pero dice lo mismo en una frase en vez de en cuatro tarjetas |
 | 8 | Reserva | El formulario con la rejilla de fichas al lado |
 | 9 | Preguntas | El acordeón con la foto al lado |
 | — | Pie | La franja rosa con los círculos y las columnas de enlaces |
@@ -103,12 +60,12 @@ css/style.css       Tokens, piezas y secciones (índice numerado arriba)
 js/main.js          Carta, acordeón, formulario, nav y entradas
 assets/img          Fotos del local, carteles de la marca y pósters de los vídeos
 assets/video        Los cuatro reels (mp4, sin sonido, en bucle)
-assets/fonts        Cooper Black (woff2 + woff), por si se sirve por HTTP
 robots.txt          Reglas de rastreo + ruta del sitemap
 sitemap.xml         Sitemap con las imágenes principales
 _fuentes/           Material original que no se publica: fotos sin recortar,
-                    vídeos sin comprimir, la Cooper Black y la referencia de
-                    estructura. Excluido en robots.txt.
+                    vídeos sin comprimir, los logos de reparto en crudo, la
+                    Cooper Black (ya sin uso) y la referencia de estructura.
+                    Excluido en robots.txt.
 ```
 
 Librerías por CDN (GSAP 3.12 + ScrollTrigger, Lenis). **Son opcionales**: si el CDN
@@ -126,11 +83,7 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   acordeón, así que no hay que tocarlo dos veces.
 - **Teléfono de reservas**: constante `TEL` del bloque 4 (formato internacional sin
   `+`), además de los `tel:` del HTML.
-- **Titulares**: se parten por líneas con los `<br>` del HTML y `data-lines`. Para
-  que una palabra vaya en Cooper Black, envuélvela en `<span class="coop">`; para
-  que lleve el brochazo de espray, en `<span class="spray">`. Una por titular.
-- **Pintadas**: `<span class="doodle doodle--heart|--star|--halo">` vacío, más una
-  regla de posición en el CSS de esa sección. El SVG lo dibuja el JS.
+- **Titulares**: se parten por líneas con los `<br>` del HTML y `data-lines`.
 - **La franja de "la pared"**: la frase está en el HTML de la sección 7. Es el sitio
   donde meter un cartel del local sin montar una sección entera.
 - **Fotos y vídeos**: sustituir los archivos de `assets/` manteniendo el nombre.
@@ -139,37 +92,16 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
 
 - **`.ln` lleva `padding` arriba y margen negativo.** Sin ese respiro, el recorte
   del titular se come la tilde de "día" y el asta de la "b".
-- **`.ln` no está anidada dentro de `.dis`.** El JS la pone en cualquier titular con
-  `data-lines`, y el claim del pie no es `.dis`.
 - **`.why__it` se coloca con `nth-of-type` 1, 2, 4 y 5.** `nth-of-type` cuenta divs y
   el tercero es la pieza destacada del centro.
 - **`.hero__row` fija su altura con `grid-auto-rows`.** Sin ella cada foto impone su
   alto natural y las tres piezas dejan de medir lo mismo.
-- **`.local__story` ocupa las dos filas.** Si no, la mitad izquierda de la fila de
-  abajo se queda vacía.
 - **El acordeón no lleva `height:0` en el CSS.** Si el JS no llega, los paneles se
   leen abiertos en vez de recortados a cero; es el JS quien los cierra.
 - **`button{ font:inherit }`.** Los botones no heredan la tipografía: sin esa línea
-  el `burger` cae al Arial del navegador y aparece una cuarta fuente.
-- **El brochazo de `.spray` se pinta en el bloque 7, no en el 0.** `splitLines`
-  reconstruye el titular entero, así que decorarlo antes dejaría el SVG y su
-  observador colgando de un nodo ya reemplazado.
-- **El brochazo lleva tres pasadas.** Una ancha y casi transparente que hace de nube
-  de aerosol, el trazo, y una segunda más fina desplazada. Con una sola pasada
-  gruesa queda una barra plana, no una pintada.
-- **El destello es una astroide (`cos³/sen³`).** Con pétalos de rosa polar salía un
-  trébol de cuatro hojas en vez de un brillo.
-- **La copia desplazada del botón lleva el desplazamiento metido en el trazado**
-  (`ringPath(..., dx, dy)`), no un `transform`: el SVG va estirado con
-  `preserveAspectRatio="none"` y un `transform` se deformaría con él.
-- **`.btns` separa 30px en horizontal y 38px en vertical.** Las manchas se salen de
-  su caja por los cuatro lados y los churretes caen por debajo; con el hueco normal
-  los botones se pisaban.
-- **La barra del nav se traza en píxeles reales y se regenera al redimensionar.**
-  Un viewBox estirado aplana la ondulación y descuadra el grosor.
-- **El viewBox de los churretes del botón guarda la proporción de su caja CSS**
-  (80:90 y 62:70). Con `preserveAspectRatio` por defecto, si no coincidieran el SVG
-  se centraría y los churretes se saldrían de su sitio.
+  el `burger` cae al Arial del navegador y aparece una tercera fuente.
+- **`.ln` no está anidada dentro de `.dis`.** El JS la pone en cualquier titular con
+  `data-lines`, y el claim del pie no es `.dis`.
 - **`.local__ph` lleva `.ph--fill`.** Sus medios van en absoluto para que no
   impongan su alto natural: un reel vertical, si no, estira su columna a 864px y
   deja tres cuartos de bloque en rosa vacío.
@@ -185,23 +117,13 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   sacados del píxel del propio badge (`#31B466`, `#F1CC38`, `#FB8C00`), no a ojo.
   El rótulo va en negro y no en blanco: contra esos tres, el negro contrasta 7.1,
   12.1 y 8.0, y el blanco 2.7, 1.6 y 2.4.
-- **Los logos van a hueso, sin filo.** Los badges de Glovo y Just Eat comparten
-  color con su pastilla, así que se funden y dejan flotando solo su marca. El de
-  Uber Eats es un logotipo escrito y ahí se queda su propio texto en pequeño; si
-  molesta, se le quita el `<img>` a esa pastilla y se queda solo con el rótulo.
 - **El aviso de `scrollRestoration` va en un `<script>` en línea en el `<head>`.**
   El navegador programa la restauración del scroll muy temprano y desde un script
   con `defer` ya se le avisa tarde: la página abría a media altura al recargar.
   Además hay que subir también el contador propio de Lenis, que si no devuelve la
   página a donde estaba.
 - **El nav no lleva el logo en JPEG.** A 34px era un borrón con un cerco claro
-  alrededor y al lado del rótulo en Cooper cantaba. El rótulo ya es la marca.
-- **`stroke-dasharray` va a `100 101`, no a `100`.** Un solo valor significa "raya
-  100 / hueco 100": con el offset a 100 el trazo cae justo en la costura del patrón
-  y el remate redondo asoma como un puntito suelto.
-- **Cooper Black va incrustada en base64.** Las fuentes se piden siempre en modo
-  CORS y un `@font-face` con `url()` no cargaría al abrir el HTML con doble clic,
-  que es como se revisa. Los ficheros sueltos están en `assets/fonts`.
+  alrededor. El rótulo en Didone, que es el de la fachada, ya es la marca.
 
 ## SEO — lo primero al publicar
 
