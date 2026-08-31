@@ -95,6 +95,71 @@
     return d;
   }
 
+  /* Un churrete de pintura.
+     No es una línea con una bola al final: es una figura RELLENA que
+     nace ancha donde se despega de la masa, se estrecha al bajar y
+     acaba en una gota más gorda que el propio reguero. Esa silueta
+     —ancho, cuello, bulbo— es lo que lo hace leer como pintura que
+     cae y no como un alfiler.
+       x    posición horizontal
+       len  lo que ha corrido
+       w0   ancho arriba, donde sale de la masa
+       w1   ancho del cuello
+       r    radio de la gota del final                              */
+  function dripPath(x, len, w0, w1, r) {
+    var xl = (x - w0 / 2).toFixed(2), nl = (x - w1 / 2).toFixed(2);
+    var nr = (x + w1 / 2).toFixed(2), xr = (x + w0 / 2).toFixed(2);
+    var a = (len * 0.3).toFixed(2), b = (len * 0.66).toFixed(2), L = len.toFixed(2);
+    return 'M' + xl + ' 0' +
+           'C' + xl + ' ' + a + ',' + nl + ' ' + b + ',' + nl + ' ' + L +
+           // large-arc + sweep 0: el arco pasa por DEBAJO y cierra la gota
+           'A' + r + ' ' + r + ' 0 1 0 ' + nr + ' ' + L +
+           'C' + nr + ' ' + b + ',' + xr + ' ' + a + ',' + xr + ' 0Z';
+  }
+
+  // Ruido determinista 0..1. `wobble` no vale aquí: su recorrido es
+  // estrechísimo y todos los churretes salían casi iguales o disparados.
+  function rnd(seed, i) {
+    var v = Math.sin(seed * 12.9898 + i * 78.233) * 43758.5453;
+    return v - Math.floor(v);
+  }
+
+  /* Una tanda de churretes. La gracia está en el CONTRASTE: uno que ha
+     corrido mucho y un par cortos, a distinta altura y grosor. Si todos
+     miden parecido parecen rayas, no pintura. */
+  function dripsInto(svg, seed, n, spread, x0, scale, freeLen) {
+    scale = scale || 1;
+    for (var i = 0; i < n; i++) {
+      var a = rnd(seed, i), b = rnd(seed + 4.7, i), c = rnd(seed + 9.1, i);
+      // repartidos por el borde, sin quedar a intervalos regulares
+      var x = x0 + (i + 0.18 + a * 0.64) * (spread / n);
+      // En una tanda, el primero corre mucho y los demás poco: es el
+      // contraste lo que la hace creíble. Con `freeLen` cada churrete
+      // saca su propio largo, que es lo que hace falta cuando van
+      // sueltos y separados, como en la barra del nav.
+      var t = freeLen ? 0.08 + b * 0.92
+            : i === 0 ? 0.72 + b * 0.28
+            : 0.14 + b * 0.4;
+      var len = (14 + t * 44) * scale;
+      var w0 = (8.2 + c * 4.6) * scale;
+      var w1 = w0 * (0.44 + c * 0.1);
+      var r = w1 * 0.58 + 1.4 * scale;
+      var g = document.createElementNS(NS, 'g');
+      g.setAttribute('class', 'd');
+      g.style.setProperty('--i', i);
+      pathEl(g, dripPath(x, len, w0, w1, r));
+      // alguna gota ya desprendida, más abajo
+      if (c > 0.62) {
+        var dot = document.createElementNS(NS, 'circle');
+        dot.setAttribute('cx', (x + (a - 0.5) * 3).toFixed(2));
+        dot.setAttribute('cy', (len + (4 + a * 7) * scale).toFixed(2));
+        dot.setAttribute('r', (r * 0.5).toFixed(2));
+        g.appendChild(dot);
+      }
+      svg.appendChild(g);
+    }
+  }
+
   /* Los tres garabatos de la pared, con su ondulación propia */
   var DOODLE = {
     heart: function (seed) {
@@ -167,26 +232,48 @@
     pathEl(blob, ringPath(seed, 0.034, -0.4, TAU + 0.26, 104, 28, BOX), 'btn__line');
     btn.appendChild(blob);
 
-    var drips = svgEl('btn__drip', '0 0 74 34', false);
-    [0, 1, 2].forEach(function (i) {
-      var x = 11 + i * 21 + (wobble(i * 2.1, seed, 1) - 1) * 5;
-      var len = [7, 17, 11][i] * (0.8 + Math.abs(wobble(i * 1.4, seed, 1) - 1) * 0.5);
-      var r = 3.1 + i * 0.45;
-      var g = document.createElementNS(NS, 'g');
-      g.setAttribute('class', 'd');
-      g.style.setProperty('--i', i);
-      var line = document.createElementNS(NS, 'path');
-      line.setAttribute('d', 'M' + x.toFixed(1) + ' 0v' + len.toFixed(1));
-      g.appendChild(line);
-      var c = document.createElementNS(NS, 'circle');
-      c.setAttribute('cx', x.toFixed(1));
-      c.setAttribute('cy', (len + r * 0.7).toFixed(1));
-      c.setAttribute('r', r);
-      g.appendChild(c);
-      drips.appendChild(g);
-    });
+    // El SVG de los churretes monta sobre el blob: al compartir color, la
+    // unión no se ve y parece que la pintura cae de la propia mancha.
+    // El viewBox y la caja del CSS guardan la misma proporción (80:90 y
+    // 62:70): con `preserveAspectRatio` por defecto, si no coincidieran
+    // el SVG se centraría y los churretes se saldrían de su sitio.
+    var drips = svgEl('btn__drip', '0 0 80 90', false);
+    dripsInto(drips, seed, 3, 62, 9);
     btn.appendChild(drips);
   });
+
+  /* La barra del nav es una franja de pintura de lado a lado, con sus
+     churretes cayendo sobre la página. La línea va en un SVG estirado
+     (le da igual el ancho de pantalla) y los churretes en SVGs propios
+     sin estirar, colocados por porcentaje: metidos en el estirado
+     saldrían anchos y aplastados.                                    */
+  (function () {
+    var nav = $('#nav');
+    if (!nav) return;
+    var paint = document.createElement('div');
+    paint.className = 'nav__paint';
+    paint.setAttribute('aria-hidden', 'true');
+
+    // Primero los churretes y DESPUÉS la línea: así el trazo pasa por
+    // encima y les tapa el canto recto de arriba, que si no se ve y
+    // delata que son dos piezas y no una sola mancha de pintura.
+    // Repartidos sin simetría y cada uno con su largo, para que no
+    // parezcan seis marcas iguales puestas a compás.
+    [7, 23, 44, 62, 79, 93].forEach(function (pc, i) {
+      var d = svgEl('nav__drip', '0 0 34 70', false);
+      d.style.left = pc + '%';
+      dripsInto(d, 5.3 + i * 3.1, 1, 16, 9, 0.92, true);
+      paint.appendChild(d);
+    });
+
+    var line = svgEl('nav__line', '0 0 100 12', true);
+    // Amplitud alta: el SVG va estirado a lo ancho de la pantalla, así
+    // que una ondulación pequeña se aplana hasta parecer una regla.
+    pathEl(line, swipePath(6.2, 2.4, 0.4));
+    paint.appendChild(line);
+
+    nav.appendChild(paint);
+  })();
 
   /* Nav: cada enlace lleva su propio brochazo */
   $$('.nav__links a, .nav__tel').forEach(function (a, i) {

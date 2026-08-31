@@ -33,14 +33,32 @@ servidor: `python -m http.server` y abrir `http://localhost:8000`.
   determinista: misma semilla, mismo gesto, así que ningún trazo repite a otro pero
   todos son iguales entre recargas — y ninguno es una imagen que haya que descargar.
 
-### Los botones
+### Los botones y la barra del nav
 
-No son un `border-radius`: su forma la traza el JS como un tag de la pared, en tres
-capas — relleno, contorno y una tercera copia desplazada en fucsia, que es el doble
-contorno del grafiti. Cuelgan goterones y, al señalarlos, el tag se da la vuelta:
-fucsia dentro, negro fuera. En el principal la copia va **rellena** (el macizo de un
+Los botones no son un `border-radius`: su forma la traza el JS como un tag de la
+pared, en tres capas — relleno, contorno y una tercera copia desplazada en fucsia,
+que es el doble contorno del grafiti. Al señalarlos el tag se da la vuelta: fucsia
+dentro, negro fuera. En el principal la copia va **rellena** (el macizo de un
 throw-up); en el secundario va **solo a contorno**, porque un relleno desplazado
 inundaría la forma en vez de doblarle el filo.
+
+**Los churretes** son lo que hace que la cosa se lea como pintura y no como adorno,
+y tienen tres reglas:
+
+1. **Son masa rellena, no un palo con una bola.** `dripPath()` dibuja una figura que
+   nace ancha donde se despega de la mancha, se estrecha al bajar y acaba en una
+   gota más gorda que el propio reguero. Ancho, cuello y bulbo.
+2. **Contrastan.** En una tanda, uno corre mucho y los demás poco. Si todos miden
+   parecido parecen rayas. El azar es determinista (`rnd()`, un hash del seno):
+   misma semilla, mismo churrete entre recargas.
+3. **Son del color de la masa que tienen encima** (`--drip`). Un botón negro corre
+   negro; cuando al señalarlo se vuelve fucsia, corre fucsia. Y el SVG monta sobre
+   la mancha, así que la unión no se ve.
+
+**La barra del nav** acaba en la misma pintura: una línea trazada a mano de lado a
+lado con seis churretes cayendo sobre la página, que se estiran al despegarse del
+hero. La línea va en un SVG estirado (le da igual el ancho de pantalla) y los
+churretes en SVGs propios sin estirar, colocados por porcentaje.
 
 Reglas que mantienen el conjunto de una pieza: **tres fuentes con su papel, un solo
 fucsia de espray (`--spray`), dos radios (`--r` y `--r-s`) más el círculo y la
@@ -133,8 +151,19 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   (`ringPath(..., dx, dy)`), no un `transform`: el SVG va estirado con
   `preserveAspectRatio="none"` y un `transform` se deformaría con él.
 - **`.btns` separa 30px en horizontal y 38px en vertical.** Las manchas se salen de
-  su caja por los cuatro lados y los goterones caen por debajo; con el hueco normal
+  su caja por los cuatro lados y los churretes caen por debajo; con el hueco normal
   los botones se pisaban.
+- **En la barra del nav, los churretes se pintan ANTES que la línea.** El trazo pasa
+  por encima y les tapa el canto recto de arriba; al revés se ve que son dos piezas
+  y no una sola mancha. Por eso `.nav__drip` va con `top:11px`, justo dentro del
+  grosor del trazo.
+- **`.nav__line` usa un viewBox de 100 de ancho.** `swipePath` dibuja de x=1 a x=99;
+  con un viewBox de 1000 la franja solo cubría la décima parte de la barra.
+- **El viewBox de los churretes del botón guarda la proporción de su caja CSS**
+  (80:90 y 62:70). Con `preserveAspectRatio` por defecto, si no coincidieran el SVG
+  se centraría y los churretes se saldrían de su sitio.
+- **En móvil la barra deja tres churretes de seis.** A 390px los seis se amontonan y
+  uno cae justo encima del texto.
 - **`stroke-dasharray` va a `100 101`, no a `100`.** Un solo valor significa "raya
   100 / hueco 100": con el offset a 100 el trazo cae justo en la costura del patrón
   y el remate redondo asoma como un puntito suelto.

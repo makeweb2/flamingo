@@ -289,20 +289,27 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
   transition:stroke .3s var(--ease);
 }
 
-/* Goterones: cuelgan siempre y se estiran al señalar */
+/* Churretes. Cuelgan siempre, son masa rellena (no un palo con una bola)
+   y toman el color de la pintura que tienen encima: si el botón es negro
+   corre negro, y cuando al señalarlo se vuelve fucsia, corren fucsia.
+   El SVG monta 13px sobre el blob para que la unión no se vea. */
 .btn__drip{
-  position:absolute; left:22%; top:calc(100% + 1px); width:56px; height:30px;
+  position:absolute; left:20%; top:calc(100% - 15px); width:62px; height:70px;
   z-index:-1; overflow:visible; pointer-events:none;
 }
-.btn__drip path{ stroke:var(--spray); stroke-width:2.6; stroke-linecap:round; fill:none; }
-.btn__drip circle{ fill:var(--spray); }
-.btn__drip .d{
-  transform:translateY(0);
-  transition:transform .5s cubic-bezier(.34,1.4,.5,1);
-  transition-delay:calc(var(--i) * 70ms);
+.btn__drip path,.btn__drip circle{
+  fill:var(--drip); stroke:none;
+  transition:fill .3s var(--ease);
 }
-.btn:hover .btn__drip .d{ transform:translateY(7px); }
-.btn:active .btn__drip .d{ transform:translateY(10px); transition-duration:.12s; transition-delay:0s; }
+/* La pintura sigue corriendo mientras la señalas */
+.btn__drip .d{
+  transform-box:fill-box; transform-origin:top center;
+  transform:scaleY(1);
+  transition:transform .55s cubic-bezier(.22,1,.36,1);
+  transition-delay:calc(var(--i) * 80ms);
+}
+.btn:hover .btn__drip .d{ transform:scaleY(1.42); }
+.btn:active .btn__drip .d{ transform:scaleY(1.6); transition-duration:.14s; transition-delay:0s; }
 
 /* La nube de aerosol alrededor, como cuando el bote se pasa de cerca */
 .btn::before{
@@ -314,21 +321,22 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
 }
 .btn:hover::before,.btn:focus-visible::before{ opacity:.36; }
 
-/* Variantes: cambia el relleno, no la forma */
-.btn{ color:var(--on-pink); }
+/* Variantes: cambia el relleno y lo que gotea, nunca la forma.
+   `--drip` es siempre el color de la masa que tiene encima. */
+.btn{ color:var(--on-pink); --drip:var(--spray); }
 .btn:hover .btn__fill{ fill:var(--ink); }
-.btn:hover{ color:var(--pink); }
+.btn:hover{ color:var(--pink); --drip:var(--ink); }
 
-.btn--ink{ color:var(--pink); }
+.btn--ink{ color:var(--pink); --drip:var(--ink); }
 .btn--ink .btn__fill{ fill:var(--ink); }
 /* Al señalarlo se le da la vuelta al tag: fucsia dentro, negro fuera. */
 .btn--ink:hover .btn__fill{ fill:var(--spray); }
 .btn--ink:hover .btn__sh{ fill:var(--ink); opacity:1; }
-.btn--ink:hover{ color:#fff; }
+.btn--ink:hover{ color:#fff; --drip:var(--spray); }
 
 .btn--sm{ min-height:44px; padding:13px 26px; font-size:11.5px; }
 .btn--sm .btn__blob{ left:-11px; top:-9px; width:calc(100% + 22px); height:calc(100% + 18px); }
-.btn--sm .btn__drip{ left:24%; width:46px; transform:scale(.84); transform-origin:top left; }
+.btn--sm .btn__drip{ left:22%; width:52px; transform:scale(.86); transform-origin:top left; }
 /* Las manchas se salen de su caja por los cuatro lados: el hueco entre
    botones tiene que contarlo, y las filas además los goterones. */
 .btns{ display:flex; flex-wrap:wrap; gap:38px 30px; }
@@ -336,19 +344,50 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
 
 
 /* ══ 5. NAV ══════════════════════════════════════════════════ */
+/* La barra no acaba en un filo de 1px: acaba en una franja de pintura
+   que corre de lado a lado y gotea sobre la página. */
 .nav{
   position:fixed; top:0; left:0; right:0; z-index:100;
   display:flex; align-items:center; justify-content:space-between; gap:24px;
   height:68px; padding:0 var(--pad);
   background:var(--ground);
-  border-bottom:1px solid transparent;
-  transition:transform .45s var(--ease), border-color .4s var(--ease), background .4s var(--ease);
+  transition:transform .45s var(--ease), background .4s var(--ease);
 }
 .nav.is-stuck{
-  border-bottom-color:var(--sink);
-  background:rgba(251,238,239,.92);
+  background:rgba(251,238,239,.94);
   -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
 }
+.nav__paint{
+  position:absolute; left:0; right:0; bottom:-1px; height:12px;
+  pointer-events:none; color:var(--spray);
+}
+.nav__line{
+  position:absolute; left:0; bottom:0; width:100%; height:12px; overflow:visible;
+}
+.nav__line path{
+  fill:none; stroke:currentColor; stroke-width:3.4;
+  stroke-linecap:round;
+}
+/* `top`, no `bottom`: anclados abajo, la caja de 54px crecía hacia
+   arriba y los churretes salían por encima de la barra. */
+/* Arranca por encima de la línea a propósito: el trazo se pinta después
+   y le tapa el canto recto de arriba. */
+/* `top:11px` deja el canto de arriba justo dentro del grosor del trazo,
+   que se pinta después y lo tapa. Medido: la línea ocupa de 66.8 a 73 y
+   la franja empieza en 57. */
+.nav__drip{
+  position:absolute; top:11px; width:34px; height:70px;
+  overflow:visible; transform:translateX(-50%);
+}
+.nav__drip path,.nav__drip circle{ fill:currentColor; stroke:none; }
+/* Los churretes se estiran un poco al despegarse del hero, como si la
+   pintura siguiera corriendo con el scroll. */
+.nav__drip .d{
+  transform-box:fill-box; transform-origin:top center;
+  transform:scaleY(.55);
+  transition:transform .8s var(--ease);
+}
+.nav.is-stuck .nav__drip .d{ transform:scaleY(1); }
 .nav.is-hidden{ transform:translateY(-101%); }
 .nav__brand{ display:flex; align-items:center; gap:11px; }
 .nav__brand img{ width:34px; height:34px; border-radius:50%; object-fit:cover; }
@@ -755,6 +794,12 @@ a.tile:hover{ transform:translateY(-3px); }
 @media (max-width:620px){
   :root{ --r:14px; }
 
+  /* A ancho de móvil los seis churretes de la barra se amontonan y uno
+     acaba justo encima del texto: se quedan tres y corren menos. */
+  .nav__drip:nth-of-type(2n){ display:none; }
+  .nav__drip .d{ transform:scaleY(.62); }
+  .nav.is-stuck .nav__drip .d{ transform:scaleY(.8); }
+
   /* Las pintadas se meten dentro de su bloque: a ancho de móvil, los
      desplazamientos negativos las sacaban del rosa y quedaban sueltas. */
   .hero__doodle{ right:2%; top:auto; bottom:-2%; }
@@ -810,6 +855,8 @@ a.tile:hover{ transform:translateY(-3px); }
     animation-duration:.01ms!important; animation-iteration-count:1!important;
     transition-duration:.01ms!important;
   }
-  /* Los trazos que se dibujan al señalar se quedan puestos, no a medias */
-  .spray__ink path,.btn__spray path{ stroke-dashoffset:0; opacity:.55; }
+  /* Los trazos que se dibujan al señalar se quedan puestos, no a medias,
+     y la pintura del nav aparece ya corrida. */
+  .spray__ink path{ stroke-dashoffset:0; }
+  .nav__drip .d{ transform:scaleY(1); }
 }
