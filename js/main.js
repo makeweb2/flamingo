@@ -69,13 +69,16 @@
   }
 
   // Superelipse ondulado: es como se rodea algo con un espray.
-  function ringPath(seed, amp, from, to, rx, ry, box, sq) {
+  // `dx`/`dy` desplazan el trazo en unidades del viewBox — así se dibuja
+  // la copia de debajo del doble contorno sin recurrir a un `transform`,
+  // que en un SVG estirado se deformaría con él.
+  function ringPath(seed, amp, from, to, rx, ry, box, sq, dx, dy) {
     var steps = 74, d = '', e = 2 / (sq || 3.6);
     for (var i = 0; i <= steps; i++) {
       var a = from + (to - from) * (i / steps);
       var ca = Math.cos(a), sa = Math.sin(a), k = wobble(a, seed, amp);
-      var x = box.w / 2 + Math.sign(ca) * Math.pow(Math.abs(ca), e) * rx * k;
-      var y = box.h / 2 + Math.sign(sa) * Math.pow(Math.abs(sa), e) * ry * k;
+      var x = box.w / 2 + Math.sign(ca) * Math.pow(Math.abs(ca), e) * rx * k + (dx || 0);
+      var y = box.h / 2 + Math.sign(sa) * Math.pow(Math.abs(sa), e) * ry * k + (dy || 0);
       d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
     }
     return d;
@@ -141,15 +144,28 @@
      `splitLines` reconstruye el titular entero, así que decorarlo antes
      dejaría el SVG y su observador colgando de un nodo ya reemplazado. */
 
-  /* Botones: alguien los rodea a espray y les caen dos goterones */
+  /* Botones. Se trazan como un tag de la pared: una mancha ondulada de
+     relleno, su contorno, y una tercera copia desplazada en fucsia que
+     hace de doble contorno. Cada botón lleva su semilla, así que no hay
+     dos manchas iguales — pero siempre son las mismas entre recargas. */
   var BOX = { w: 220, h: 66 };
   $$('.btn').forEach(function (btn, n) {
-    if (btn.querySelector('.btn__spray')) return;
+    if (btn.querySelector('.btn__blob')) return;
     var seed = 1.4 + n * 2.11;
 
-    var ring = svgEl('btn__spray', '0 0 ' + BOX.w + ' ' + BOX.h, true);
-    pathEl(ring, ringPath(seed, 0.03, -0.45, TAU + 0.3, 104, 28, BOX));
-    btn.appendChild(ring);
+    // El texto va en su propio span: el SVG es hermano, no fondo, para
+    // que el contorno pueda salirse de la caja sin recortarse.
+    var label = document.createElement('span');
+    label.className = 'btn__t';
+    while (btn.firstChild) label.appendChild(btn.firstChild);
+    btn.appendChild(label);
+
+    var blob = svgEl('btn__blob', '0 0 ' + BOX.w + ' ' + BOX.h, true);
+    // la copia de debajo, desplazada abajo y a la derecha
+    pathEl(blob, ringPath(seed + 0.6, 0.030, 0, TAU, 104, 28, BOX, 3.6, 5, 3), 'btn__sh');
+    pathEl(blob, ringPath(seed, 0.028, 0, TAU, 104, 28, BOX), 'btn__fill');
+    pathEl(blob, ringPath(seed, 0.034, -0.4, TAU + 0.26, 104, 28, BOX), 'btn__line');
+    btn.appendChild(blob);
 
     var drips = svgEl('btn__drip', '0 0 74 34', false);
     [0, 1, 2].forEach(function (i) {
@@ -651,7 +667,7 @@
       });
     });
 
-    gsap.utils.toArray('.hero__row, .local__grid, .why__grid, .gal, .deal__grid, .says__grid, .book__grid, .foot__grid')
+    gsap.utils.toArray('.hero__row, .local__grid, .why__grid, .gal, .deal__grid, .book__grid, .foot__grid')
       .forEach(function (grid) {
         gsap.from(grid.children, {
           opacity: 0, y: 22, duration: .8, stagger: .05, ease: 'power3.out',

@@ -28,11 +28,19 @@ servidor: `python -m http.server` y abrir `http://localhost:8000`.
 
 - **Lo urbano** sale de la pared del baño, y está hecho a código en el bloque 0 de
   `js/main.js`: corazones, destellos y aureolas, el brochazo de espray bajo una
-  palabra, el subrayado de los enlaces del nav y la pintada que rodea un botón
-  cuando lo señalas, con sus goterones. Todos los trazos salen del mismo par de
-  funciones con una ondulación determinista: misma semilla, mismo gesto, así que
-  ningún trazo repite a otro pero todos son iguales entre recargas — y ninguno es
-  una imagen que haya que descargar.
+  palabra, el subrayado de los enlaces del nav y, sobre todo, **la forma de los
+  botones**. Todos los trazos salen del mismo par de funciones con una ondulación
+  determinista: misma semilla, mismo gesto, así que ningún trazo repite a otro pero
+  todos son iguales entre recargas — y ninguno es una imagen que haya que descargar.
+
+### Los botones
+
+No son un `border-radius`: su forma la traza el JS como un tag de la pared, en tres
+capas — relleno, contorno y una tercera copia desplazada en fucsia, que es el doble
+contorno del grafiti. Cuelgan goterones y, al señalarlos, el tag se da la vuelta:
+fucsia dentro, negro fuera. En el principal la copia va **rellena** (el macizo de un
+throw-up); en el secundario va **solo a contorno**, porque un relleno desplazado
+inundaría la forma en vez de doblarle el filo.
 
 Reglas que mantienen el conjunto de una pieza: **tres fuentes con su papel, un solo
 fucsia de espray (`--spray`), dos radios (`--r` y `--r-s`) más el círculo y la
@@ -49,7 +57,7 @@ sin emojis.
 | 4 | La carta | El bloque ancho con el panel interior que sobresale y los puntos |
 | 5 | Lo más pedido | El bloque de precios: lista a la izquierda, foto a la derecha |
 | 6 | Momentos | La galería de tamaños mezclados |
-| 7 | Se dice por aquí | Los testimonios desplazados a un lado y a otro |
+| 7 | La pared | Franja pintada con el cartel del local. Ocupa el sitio del bloque de testimonios de la referencia, pero dice lo mismo en una frase en vez de en cuatro tarjetas |
 | 8 | Reserva | El formulario con la rejilla de fichas al lado |
 | 9 | Preguntas | El acordeón con la foto al lado |
 | — | Pie | La franja rosa con los círculos y las columnas de enlaces |
@@ -93,6 +101,8 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   que lleve el brochazo de espray, en `<span class="spray">`. Una por titular.
 - **Pintadas**: `<span class="doodle doodle--heart|--star|--halo">` vacío, más una
   regla de posición en el CSS de esa sección. El SVG lo dibuja el JS.
+- **La franja de "la pared"**: la frase está en el HTML de la sección 7. Es el sitio
+  donde meter un cartel del local sin montar una sección entera.
 - **Fotos y vídeos**: sustituir los archivos de `assets/` manteniendo el nombre.
 
 ## Detalles que conviene no romper
@@ -119,6 +129,12 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   gruesa queda una barra plana, no una pintada.
 - **El destello es una astroide (`cos³/sen³`).** Con pétalos de rosa polar salía un
   trébol de cuatro hojas en vez de un brillo.
+- **La copia desplazada del botón lleva el desplazamiento metido en el trazado**
+  (`ringPath(..., dx, dy)`), no un `transform`: el SVG va estirado con
+  `preserveAspectRatio="none"` y un `transform` se deformaría con él.
+- **`.btns` separa 30px en horizontal y 38px en vertical.** Las manchas se salen de
+  su caja por los cuatro lados y los goterones caen por debajo; con el hueco normal
+  los botones se pisaban.
 - **`stroke-dasharray` va a `100 101`, no a `100`.** Un solo valor significa "raya
   100 / hueco 100": con el offset a 100 el trazo cae justo en la costura del patrón
   y el remate redondo asoma como un puntito suelto.
