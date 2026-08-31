@@ -16,12 +16,11 @@ servidor: `python -m http.server` y abrir `http://localhost:8000`.
   filos, ese mismo rosa rebajado. El negro `#14100F` es el del logo, y se usa solo
   en el texto y en el botón principal — **no hay bloques negros**, igual que en la
   referencia.
-- **La tipografía** son **tres voces con una tarea cada una**, y las tres están en
-  el local:
+- **La tipografía** son **tres voces con una tarea cada una**:
 
   | Token | Fuente | Dónde se usa |
   |-------|--------|--------------|
-  | `--dis`  | Bodoni Moda | Titulares. Es la Didone del rótulo de la puerta y del logo. |
+  | `--dis`  | Fraunces | Titulares. Una serif cálida de la familia de la Cooper: al lado no chirrían. |
   | `--coop` | Cooper Black (`COOPBL`) | **Solo donde el texto ES un rótulo**: la marca del nav, las dos frases que son carteles del local ("Please no dancing on tables" y "a.m. coffee — p.m. wine"), las cifras que hacen de señalética (el horario, la nota de Google, los 01–04) y las etiquetas de plato. |
   | `--ui`   | Jost | Texto corriente, etiquetas, pestañas y botones. |
 
@@ -101,6 +100,10 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   alto natural y las tres piezas dejan de medir lo mismo.
 - **El acordeón no lleva `height:0` en el CSS.** Si el JS no llega, los paneles se
   leen abiertos en vez de recortados a cero; es el JS quien los cierra.
+- **`.dis` usa `opsz` BAJO aunque el cuerpo sea grande.** Fraunces es variable y su
+  eje de tamaño óptico es el que manda: subido, la fuente se afina y vuelve a
+  parecer una didona fría, que es justo lo que se quería quitar. Va a 18, con
+  `SOFT` 100 (remates redondos) y `WONK` 1 (curvas inclinadas).
 - **`button{ font:inherit }`.** Los botones no heredan la tipografía: sin esa línea
   el `burger` cae al Arial del navegador y aparece una cuarta fuente.
 - **La Cooper no entra en los titulares.** Poner una palabra suelta en Cooper dentro
