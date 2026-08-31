@@ -62,12 +62,11 @@ y tienen cuatro reglas:
    negro; cuando al señalarlo se vuelve fucsia, corre fucsia. Y el SVG monta sobre
    la mancha, así que la unión no se ve.
 
-**La barra del nav** acaba en la misma pintura: una línea trazada a mano de lado a
-lado con tres churretes que se estiran al despegarse del hero. Se traza en
-**píxeles reales** —el SVG se regenera al cambiar el ancho— y no en un viewBox
-estirado: con `preserveAspectRatio="none"` a lo ancho de la pantalla la ondulación
-se aplanaba hasta parecer un subrayador y el grosor se disparaba. Al ir todo en el
-mismo SVG y a escala real, la línea tapa por sí sola el arranque de cada churrete.
+**La barra del nav** acaba en una línea de espray trazada a mano, sin churretes: la
+pintura que corre se reserva para los botones. Se traza en **píxeles reales** —el
+SVG se regenera al cambiar el ancho— y no en un viewBox estirado: con
+`preserveAspectRatio="none"` a lo ancho de la pantalla la ondulación se aplanaba
+hasta parecer un subrayador y el grosor se disparaba.
 
 Reglas que mantienen el conjunto de una pieza: **tres fuentes con su papel, un solo
 fucsia de espray (`--spray`), dos radios (`--r` y `--r-s`) más el círculo y la
@@ -162,9 +161,6 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
 - **`.btns` separa 30px en horizontal y 38px en vertical.** Las manchas se salen de
   su caja por los cuatro lados y los churretes caen por debajo; con el hueco normal
   los botones se pisaban.
-- **En la barra del nav, los churretes se pintan ANTES que la línea.** El trazo pasa
-  por encima y les tapa el arranque; al revés se ve que son dos piezas y no una sola
-  mancha.
 - **La barra del nav se traza en píxeles reales y se regenera al redimensionar.**
   Un viewBox estirado aplana la ondulación y descuadra el grosor.
 - **El viewBox de los churretes del botón guarda la proporción de su caja CSS**

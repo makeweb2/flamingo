@@ -366,7 +366,7 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
   -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
 }
 .nav__paint{
-  position:absolute; left:0; top:100%; width:100%; height:62px;
+  position:absolute; left:0; top:100%; width:100%; height:20px;
   margin-top:-9px;                 /* el trazo va a 9px del lienzo */
   overflow:visible; pointer-events:none;
   color:var(--spray);
@@ -375,15 +375,6 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
   fill:none; stroke:currentColor; stroke-width:2.2;
   stroke-linecap:round; stroke-linejoin:round;
 }
-.nav__paint .d path,.nav__paint .d ellipse{ fill:currentColor; stroke:none; }
-/* La pintura sigue corriendo al despegarse del hero */
-.nav__paint .d{
-  transform-box:fill-box; transform-origin:top center;
-  transform:scaleY(.6);
-  transition:transform .9s var(--ease);
-  transition-delay:calc(var(--i) * 90ms);
-}
-.nav.is-stuck .nav__paint .d{ transform:scaleY(1); }
 .nav.is-hidden{ transform:translateY(-101%); }
 /* Sin el logo en JPEG: a 34px es un borrón con un cerco claro alrededor,
    y al lado del rótulo en Cooper canta. El rótulo ya es la marca. */
@@ -791,12 +782,6 @@ a.tile:hover{ transform:translateY(-3px); }
 @media (max-width:620px){
   :root{ --r:14px; }
 
-  /* A ancho de móvil los seis churretes de la barra se amontonan y uno
-     acaba justo encima del texto: se quedan tres y corren menos. */
-  .nav__drip:nth-of-type(2n){ display:none; }
-  .nav__drip .d{ transform:scaleY(.62); }
-  .nav.is-stuck .nav__drip .d{ transform:scaleY(.8); }
-
   /* Las pintadas se meten dentro de su bloque: a ancho de móvil, los
      desplazamientos negativos las sacaban del rosa y quedaban sueltas. */
   .hero__doodle{ right:2%; top:auto; bottom:-2%; }
@@ -852,8 +837,6 @@ a.tile:hover{ transform:translateY(-3px); }
     animation-duration:.01ms!important; animation-iteration-count:1!important;
     transition-duration:.01ms!important;
   }
-  /* Los trazos que se dibujan al señalar se quedan puestos, no a medias,
-     y la pintura del nav aparece ya corrida. */
+  /* Los trazos que se dibujan al señalar se quedan puestos, no a medias */
   .spray__ink path{ stroke-dashoffset:0; }
-  .nav__drip .d{ transform:scaleY(1); }
 }

@@ -263,18 +263,17 @@
     btn.appendChild(drips);
   });
 
-  /* La barra del nav acaba en una línea de espray con sus churretes.
-     Se traza en PÍXELES REALES, no en un viewBox estirado: con
+  /* La barra del nav acaba en una línea de espray trazada a mano.
+     Va en PÍXELES REALES, no en un viewBox estirado: con
      `preserveAspectRatio="none"` a lo ancho de la pantalla la ondulación
      se aplanaba hasta parecer un subrayador y el grosor se disparaba.
-     Aquí una unidad es un píxel, así que el temblor y el trazo miden lo
-     que se les pide, y línea y churretes caben en un mismo SVG — con lo
-     que la línea tapa por sí sola el canto de arriba de cada churrete. */
+     Aquí una unidad es un píxel, así que el temblor y el trazo miden
+     exactamente lo que se les pide, en cualquier ancho de pantalla. */
   (function () {
     var nav = $('#nav');
     if (!nav) return;
 
-    var H = 62, Y = 9;                 // alto del lienzo y altura del trazo
+    var H = 20, Y = 9;                 // alto del lienzo y altura del trazo
     var svg = svgEl('nav__paint', '0 0 100 ' + H, false);
     svg.setAttribute('preserveAspectRatio', 'xMinYMin slice');
     nav.appendChild(svg);
@@ -296,27 +295,6 @@
       last = w;
       svg.setAttribute('viewBox', '0 0 ' + w + ' ' + H);
       while (svg.firstChild) svg.removeChild(svg.firstChild);
-
-      // Tres churretes, en sitios que no dependen del ancho, y bien
-      // distintos de largo: son pocos y contrastados a propósito.
-      [0.13, 0.46, 0.81].forEach(function (at, i) {
-        var g = document.createElementNS(NS, 'g');
-        g.setAttribute('class', 'd');
-        g.style.setProperty('--i', i);
-        var a = rnd(7.3 + i * 4.4, i), b = rnd(2.9 + i * 6.1, i);
-        var x = w * at + (a - 0.5) * 40;
-        var len = 13 + b * 34;
-        // Arranca con el grosor del trazo (2.2px) y engorda justo debajo:
-        // así sale de la línea en vez de estar clavado en ella.
-        var wMax = 4.6 + a * 2.2;
-        var wNeck = 1.9 + a * 0.7;
-        var rx = wNeck * 1.05 + 1, ry = rx * 0.78;
-        pathEl(g, dripPath(x, len, 2.4, wMax, wNeck, rx, ry, (b - 0.5) * 6));
-        // el trazo pasa por encima del arranque, así que el churrete
-        // se dibuja desde la propia línea
-        g.setAttribute('transform', 'translate(0,' + (Y - 1) + ')');
-        svg.appendChild(g);
-      });
 
       pathEl(svg, handLine(w, Y, 2.6, 6.2), 'nav__line');
     }
