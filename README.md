@@ -181,9 +181,12 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   transparente y el de Uber Eats con un marco blanco: el script de recorte quita
   primero lo transparente y después el blanco opaco, y cuadra sin deformar. Su
   radio de 7px es la esquina del propio icono, no un radio de interfaz.
-- **La pastilla de reparto se rellena de negro al señalarla, no del color del
-  servicio.** Pintada de su color, el logo de Glovo —amarillo— quedaba sobre fondo
-  amarillo.
+- **Cada pastilla de reparto va del color de su logo**, y los tres colores están
+  sacados del píxel del propio badge (`#31B466`, `#F1CC38`, `#FB8C00`), no a ojo.
+  El rótulo va en negro y no en blanco: contra esos tres, el negro contrasta 7.1,
+  12.1 y 8.0, y el blanco 2.7, 1.6 y 2.4.
+- **El logo lleva un filo blanco.** Sin él, el badge de Uber Eats se funde con la
+  pastilla y deja flotando su propio "Uber Eats" al lado del nuestro.
 - **El aviso de `scrollRestoration` va en un `<script>` en línea en el `<head>`.**
   El navegador programa la restauración del scroll muy temprano y desde un script
   con `defer` ya se le avisa tarde: la página abría a media altura al recargar.

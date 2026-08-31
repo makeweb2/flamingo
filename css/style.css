@@ -594,13 +594,27 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
 }
 
 
-/* Reparto: el color lo pone el logo y la pastilla se queda neutra —con
-   el texto y el filo también de color, tres seguidas eran un semáforo—.
-   Al señalar se rellena de negro como el resto de pastillas pequeñas:
-   pintarla del color del servicio dejaba el logo de Glovo, amarillo,
-   encima de un fondo amarillo. */
-.deliv .btn{ gap:10px; padding-left:12px; }
-.deliv__logo{ width:26px; height:26px; border-radius:7px; flex:none; }
+/* Reparto: cada pastilla va del color de su logo. Los tres colores están
+   sacados del píxel del propio badge, no a ojo.
+     #31B466  #F1CC38  #FB8C00
+   El rótulo va en negro y no en blanco porque contra esos tres el negro
+   contrasta 7.1, 12.1 y 8.0 — y el blanco, 2.7, 1.6 y 2.4.
+   El logo lleva un filo blanco: sin él, el badge de Uber Eats se funde
+   con la pastilla y deja flotando su propio "Uber Eats" al lado del
+   nuestro. */
+.deliv .btn{
+  gap:10px; padding-left:12px;
+  background:var(--svc); border-color:var(--svc); color:var(--ink);
+}
+.deliv__logo{
+  width:26px; height:26px; flex:none;
+  border-radius:8px; padding:2px; background:#fff;
+}
+.deliv--uber{ --svc:#31B466; }
+.deliv--glovo{ --svc:#F1CC38; }
+.deliv--justeat{ --svc:#FB8C00; }
+/* Al señalar, negro como el resto de pastillas pequeñas */
+.deliv .btn:hover{ background:var(--ink); border-color:var(--ink); color:#fff; }
 
 
 /* ══ 10. LO MÁS PEDIDO ═══════════════════════════════════════ */
