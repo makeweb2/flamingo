@@ -1,23 +1,16 @@
 /* ============================================================
    FLAMINGO BRUNCH & FOOD — interacción
    ------------------------------------------------------------
-   Un solo fichero, sin build, sin dependencias obligatorias:
-   GSAP y Lenis mejoran la página, pero si el CDN no responde
-   todo sigue funcionando (la carta se pinta, las pestañas
-   cambian, el acordeón abre y el formulario envía).
+   Sin build y sin dependencias obligatorias: GSAP y Lenis solo
+   mejoran la entrada y el scroll. Si el CDN no responde, la
+   carta se pinta igual y las pestañas siguen funcionando.
 
    Índice
-     1. Motor de tinta (trazos SVG)
-     2. Botones
-     3. Subrayados, tachones y nav
-     4. Carta: datos, pestañas y JSON-LD
-     5. Lo más pedido
-     6. Estado abierto / cerrado
-     7. Acordeón de preguntas (+ FAQPage)
-     8. Reserva por WhatsApp
-     9. Scroll, nav y menú móvil
-    10. Vídeos
-    11. Animaciones
+     1. Carta: datos, pestañas y JSON-LD
+     2. Franja de rótulo
+     3. Nav y menú móvil
+     4. Vídeos
+     5. Entradas
    ============================================================ */
 (function () {
   'use strict';
@@ -30,209 +23,9 @@
   var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
 
 
-  /* ══ 1. MOTOR DE TINTA ═══════════════════════════════════════
-     Cada trazo se genera a partir de un superelipse con una
-     ondulación determinista: misma semilla, mismo gesto. Así no
-     hay dos botones iguales, pero sí son iguales entre recargas. */
-  var NS  = 'http://www.w3.org/2000/svg';
-  var BOX = { w: 220, h: 66 };
-  var TAU = Math.PI * 2;
-
-  function wobble(a, seed, amp) {
-    return 1 + amp * (
-      Math.sin(a * 3 + seed) * 0.5 +
-      Math.sin(a * 5 + seed * 1.7) * 0.3 +
-      Math.sin(a * 7 + seed * 2.3) * 0.2
-    );
-  }
-
-  // Superelipse: un rectángulo redondeado, que es como se rodea una palabra.
-  function point(a, seed, amp, rx, ry, box, sq) {
-    var ca = Math.cos(a), sa = Math.sin(a), e = 2 / (sq || 3.6);
-    var k = wobble(a, seed, amp);
-    return [
-      box.w / 2 + Math.sign(ca) * Math.pow(Math.abs(ca), e) * rx * k,
-      box.h / 2 + Math.sign(sa) * Math.pow(Math.abs(sa), e) * ry * k
-    ];
-  }
-
-  function trace(seed, amp, from, to, close, rx, ry, box, sq) {
-    box = box || BOX;
-    var steps = 76, d = '';
-    for (var i = 0; i <= steps; i++) {
-      var p = point(from + (to - from) * (i / steps), seed, amp, rx, ry, box, sq);
-      d += (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1);
-    }
-    return d + (close ? 'Z' : '');
-  }
-
-  // Brochazo horizontal: cae y remonta un poco, como un gesto de verdad.
-  function swipe(seed, amp, rise) {
-    var steps = 26, d = '';
-    for (var i = 0; i <= steps; i++) {
-      var t = i / steps;
-      var x = 1 + t * 98;
-      var y = 13 - rise * t + Math.sin(t * 7 + seed) * amp + Math.sin(t * 13 + seed * 1.6) * amp * 0.45;
-      d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + y.toFixed(1);
-    }
-    return d;
-  }
-
-  // Aspa de tachón: cruza la palabra y se pasa un poco por los dos lados.
-  function slash(seed, dir) {
-    var steps = 18, d = '';
-    for (var i = 0; i <= steps; i++) {
-      var t = i / steps;
-      var x = -2 + t * 104;
-      var base = dir > 0 ? 21 - t * 12 : 9 + t * 12;
-      d += (i ? 'L' : 'M') + x.toFixed(1) + ' ' + (base + Math.sin(t * 6 + seed) * 1.5).toFixed(1);
-    }
-    return d;
-  }
-
-  function svgEl(cls, viewBox, stretch) {
-    var s = document.createElementNS(NS, 'svg');
-    s.setAttribute('class', cls);
-    s.setAttribute('viewBox', viewBox);
-    s.setAttribute('aria-hidden', 'true');
-    s.setAttribute('focusable', 'false');
-    if (stretch) s.setAttribute('preserveAspectRatio', 'none');
-    return s;
-  }
-
-  function pathEl(parent, d, cls) {
-    var p = document.createElementNS(NS, 'path');
-    p.setAttribute('d', d);
-    if (cls) p.setAttribute('class', cls);
-    p.setAttribute('pathLength', '100');
-    parent.appendChild(p);
-    return p;
-  }
-
-  // Anillo de rotulador reutilizable (pestañas, precios, etiquetas)
-  function ring(host, cls, seed, amp, rx, ry, passes) {
-    var el = svgEl(cls, '0 0 ' + BOX.w + ' ' + BOX.h, true);
-    for (var i = 0; i < (passes || 1); i++) {
-      pathEl(el, trace(seed + i * 0.9, amp + i * 0.014, -0.4 - i * 0.2, TAU + 0.2 + i * 0.3, false, rx - i * 3, ry - i * 2), 'ink-ring__p');
-    }
-    host.appendChild(el);
-    return el;
-  }
-
-
-  /* ══ 2. BOTONES ══════════════════════════════════════════════
-     Contorno trazado, etiqueta que rota, goterones y un imán que
-     acerca el botón al cursor. Todo por variables CSS para que
-     los estados no se pisen entre sí.                            */
-  function inkButton(btn, n) {
-    if (btn.querySelector('.btn__ink')) return;
-    var seed = 1.3 + n * 2.11;
-
-    // La etiqueta se duplica: una sale por arriba y la copia entra por abajo.
-    var text = btn.textContent.trim();
-    btn.textContent = '';
-    var label = document.createElement('span');
-    label.className = 'btn__label';
-    var t1 = document.createElement('span');
-    t1.className = 'btn__t';
-    t1.textContent = text;
-    var t2 = document.createElement('span');
-    t2.className = 'btn__t btn__t--alt';
-    t2.textContent = text;
-    t2.setAttribute('aria-hidden', 'true');
-    label.appendChild(t1);
-    label.appendChild(t2);
-    btn.appendChild(label);
-
-    // Relleno + primera pasada + segunda pasada (esta se dibuja al señalar)
-    var ink = svgEl('btn__ink', '0 0 ' + BOX.w + ' ' + BOX.h, true);
-    pathEl(ink, trace(seed, 0.022, 0, TAU, true, 104, 28), 'btn__fill');
-    pathEl(ink, trace(seed, 0.030, -0.5, TAU + 0.22, false, 104, 28), 'btn__stroke btn__stroke--1');
-    pathEl(ink, trace(seed + 0.9, 0.046, -0.18, TAU + 0.55, false, 101, 26), 'btn__stroke btn__stroke--2');
-    btn.appendChild(ink);
-
-    // Goterones: cada uno con su longitud y su retardo
-    var drips = svgEl('btn__drips', '0 0 74 34', false);
-    var g = document.createElementNS(NS, 'g');
-    var LENS = [8, 19, 12];
-    [0, 1, 2].forEach(function (i) {
-      var x = 9 + i * 22 + (wobble(i * 2.1, seed, 1) - 1) * 4;
-      var len = LENS[i] * (0.8 + Math.abs(wobble(i * 1.4, seed, 1) - 1) * 0.45);
-      var r = 3.4 + i * 0.5;
-      var d = document.createElementNS(NS, 'g');
-      d.setAttribute('class', 'drip');
-      d.style.setProperty('--i', i);
-      var line = document.createElementNS(NS, 'path');
-      line.setAttribute('d', 'M' + x.toFixed(1) + ' 0v' + len.toFixed(1));
-      d.appendChild(line);
-      var c = document.createElementNS(NS, 'circle');
-      c.setAttribute('cx', x.toFixed(1));
-      c.setAttribute('cy', (len + r * 0.72).toFixed(1));
-      c.setAttribute('r', r);
-      d.appendChild(c);
-      g.appendChild(d);
-    });
-    drips.appendChild(g);
-    btn.appendChild(drips);
-
-    // Imán: lerp propio para escribir las variables con unidades y parar
-    // el bucle en cuanto se asienta. Nada corriendo de fondo sin motivo.
-    if (window.matchMedia('(hover:hover) and (pointer:fine)').matches && !REDUCED) {
-      var cur = { x: 0, y: 0 }, aim = { x: 0, y: 0 }, raf = 0;
-      var tick = function () {
-        cur.x += (aim.x - cur.x) * 0.16;
-        cur.y += (aim.y - cur.y) * 0.16;
-        btn.style.setProperty('--mx', cur.x.toFixed(2) + 'px');
-        btn.style.setProperty('--my', cur.y.toFixed(2) + 'px');
-        if (Math.abs(aim.x - cur.x) + Math.abs(aim.y - cur.y) > 0.05) {
-          raf = requestAnimationFrame(tick);
-        } else {
-          raf = 0;
-          btn.style.setProperty('--mx', aim.x.toFixed(2) + 'px');
-          btn.style.setProperty('--my', aim.y.toFixed(2) + 'px');
-        }
-      };
-      var nudge = function () { if (!raf) raf = requestAnimationFrame(tick); };
-      btn.addEventListener('pointermove', function (e) {
-        var r = btn.getBoundingClientRect();
-        aim.x = ((e.clientX - r.left) / r.width - 0.5) * 14;
-        aim.y = ((e.clientY - r.top) / r.height - 0.5) * 9;
-        nudge();
-      });
-      btn.addEventListener('pointerleave', function () { aim.x = 0; aim.y = 0; nudge(); });
-    }
-  }
-  $$('.btn').forEach(inkButton);
-
-
-  /* ══ 3. SUBRAYADOS, TACHONES Y NAV ═══════════════════════════
-     Cada uno se traza aparte: ningún gesto se repite.            */
-  $$('.paint').forEach(function (el, i) {
-    var seed = 0.7 + i * 2.9;
-    var sv = svgEl('ink-ul ink-ul--big', '0 0 100 20', true);
-    pathEl(sv, swipe(seed, 1.4, 3), 'ink-ul__p ink-ul__p--1');
-    pathEl(sv, swipe(seed + 1.1, 1.9, 1.4), 'ink-ul__p ink-ul__p--2');
-    el.appendChild(sv);
-  });
-
-  $$('.strike').forEach(function (el, i) {
-    var seed = 1.9 + i * 3.4;
-    var sv = svgEl('ink-x', '0 0 100 30', true);
-    pathEl(sv, slash(seed, 1), 'ink-x__p ink-x__p--1');
-    pathEl(sv, slash(seed + 2.2, -1), 'ink-x__p ink-x__p--2');
-    el.appendChild(sv);
-  });
-
-  $$('.nav__links a').forEach(function (a, i) {
-    var sq = svgEl('squig', '0 0 100 12', true);
-    pathEl(sq, swipe(4.3 + i * 2.6, 1.6, 1.8), 'squig__p');
-    a.appendChild(sq);
-  });
-
-
-  /* ══ 4. LA CARTA ═════════════════════════════════════════════
-     Un único array alimenta la lista, las pestañas, el bloque de
-     "lo más pedido" y el JSON-LD del menú: nunca se desincronizan. */
+  /* ══ 1. LA CARTA ═════════════════════════════════════════════
+     Un único array alimenta la lista, las pestañas y el JSON-LD
+     del menú, así que nunca se desincronizan.                  */
   var MENU = [
     { label: 'Brunch', items: [
       { n: 'Huevos Benedict', d: 'Pan brioche, bacón, aguacate, huevo poché y salsa holandesa.', p: '15,00', tag: 'top' },
@@ -302,44 +95,25 @@
 
   var tabsEl = $('#menuTabs');
   var listEl = $('#menuList');
-  var dotsEl = $('#menuDots');
   var current = 0;
 
-  function dishMarkup(it, i) {
-    var flag = it.tag ? '<span class="flag"><em>' + it.tag + '</em></span>' : '';
-    return '<article class="dish" style="--d:' + i + '">' +
-             '<h3 class="dish__name"><span class="dish__n">' + it.n + '</span>' + flag + '</h3>' +
-             '<p class="dish__price"><span>' + it.p + ' €</span></p>' +
+  function dishMarkup(it) {
+    var tag = it.tag ? '<span class="tag">' + it.tag + '</span>' : '';
+    return '<article class="dish">' +
+             '<h3 class="dish__name">' + it.n + tag + '</h3>' +
+             '<p class="dish__price">' + it.p + ' €</p>' +
              '<p class="dish__desc">' + it.d + '</p>' +
            '</article>';
-  }
-
-  function inkDish(dish, n) {
-    var seed = 2.4 + n * 1.77;
-    var price = $('.dish__price', dish);
-    if (price) ring(price, 'ink-ring ink-ring--price', seed, 0.05, 96, 24, 1);
-    var name = $('.dish__n', dish);
-    if (name) {
-      var u = svgEl('ink-ul', '0 0 100 20', true);
-      pathEl(u, swipe(seed, 1.1, 2.2), 'ink-ul__p');
-      name.appendChild(u);
-    }
-    var flag = $('.flag', dish);
-    if (flag) ring(flag, 'ink-ring ink-ring--flag', seed + 3, 0.07, 92, 22, 1);
   }
 
   function renderMenu(i) {
     current = i;
     listEl.innerHTML = MENU[i].items.map(dishMarkup).join('');
     listEl.setAttribute('aria-labelledby', 'tab-' + i);
-    listEl.scrollLeft = 0;
-    var dishes = $$('.dish', listEl);
-    dishes.forEach(inkDish);
-    if (dotsEl) $$('i', dotsEl).forEach(function (d, k) { d.classList.toggle('is-on', k === i); });
     if (hasGSAP && !REDUCED) {
-      gsap.fromTo(dishes,
-        { opacity: 0, y: 14, clipPath: 'inset(0 0 100% 0)' },
-        { opacity: 1, y: 0, clipPath: 'inset(0 0 0% 0)', duration: .6, stagger: .04, ease: 'power3.out', overwrite: true });
+      gsap.from($$('.dish', listEl), {
+        opacity: 0, y: 12, duration: .5, stagger: .03, ease: 'power2.out', overwrite: true
+      });
     }
     if (window.ScrollTrigger) ScrollTrigger.refresh();
   }
@@ -353,12 +127,10 @@
     tabsEl.innerHTML = MENU.map(function (c, i) {
       return '<button class="tab' + (i === 0 ? ' is-active' : '') + '" id="tab-' + i + '"' +
              ' role="tab" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? 0 : -1) + '"' +
-             ' data-i="' + i + '"><span>' + c.label + '</span></button>';
+             ' data-i="' + i + '">' + c.label + '</button>';
     }).join('');
-    if (dotsEl) dotsEl.innerHTML = MENU.map(function () { return '<i></i>'; }).join('');
 
     var tabs = $$('.tab', tabsEl);
-    tabs.forEach(function (t, i) { ring(t, 'ink-ring ink-ring--tab', 5.1 + i * 1.4, 0.055, 100, 26, 2); });
 
     var select = function (i, focus) {
       if (i === current) { if (focus) tabs[i].focus(); return; }
@@ -399,7 +171,9 @@
   (function () {
     var canon = $('link[rel="canonical"]');
     var base = canon ? canon.href.replace(/\/$/, '') : '';
-    var data = {
+    var tag = document.createElement('script');
+    tag.type = 'application/ld+json';
+    tag.textContent = JSON.stringify({
       '@context': 'https://schema.org',
       '@type': 'Menu',
       '@id': base + '/#menu',
@@ -419,187 +193,28 @@
           })
         };
       })
-    };
-    var tag = document.createElement('script');
-    tag.type = 'application/ld+json';
-    tag.textContent = JSON.stringify(data);
+    });
     document.head.appendChild(tag);
   })();
 
 
-  /* ══ 5. LO MÁS PEDIDO ════════════════════════════════════════
-     Se saca de MENU por nombre: si un plato desaparece de la
-     carta, desaparece también de aquí en vez de quedarse colgado. */
+  /* ══ 2. FRANJA DE RÓTULO ═════════════════════════════════════
+     El contenido se duplica en JS: la animación desplaza la mitad
+     exacta, así que las dos copias tienen que existir para que el
+     bucle no dé un salto. Duplicar a mano invita a olvidarse. */
   (function () {
-    var host = $('#dealList');
-    if (!host) return;
-    var PICK = ['Huevos Benedict', 'Puglia', 'Flamingo Burger', 'Bowl de Açaí', 'Matilda'];
-    var byName = {};
-    MENU.forEach(function (s) { s.items.forEach(function (it) { byName[it.n] = it; }); });
-
-    var rows = PICK.map(function (n) { return byName[n]; })
-      .filter(Boolean)
-      .map(function (it) {
-        return '<li><b>' + it.n + '</b><span class="dot" aria-hidden="true"></span>' +
-               '<span class="p">' + it.p + ' €</span></li>';
-      });
-    host.innerHTML = rows.join('');
+    var row = $('#ticker');
+    if (!row) return;
+    var WORDS = ['Brunch todo el día', 'Café de especialidad', 'Repostería casera', 'Terraza en la plaza'];
+    var once = WORDS.map(function (w) { return '<span>' + w + '</span><i>✳</i>'; }).join('');
+    row.innerHTML = once + once;
   })();
 
 
-  /* ══ 6. ABIERTO / CERRADO ════════════════════════════════════
-     El horario vive en los data- del propio elemento, que son los
-     mismos que el JSON-LD del <head>. */
-  (function () {
-    var el = $('#status');
-    if (!el) return;
-    var word = $('.status__word', el);
-    var mins = function (hhmm) {
-      var p = String(hhmm).split(':');
-      return (+p[0]) * 60 + (+p[1] || 0);
-    };
-    function paint() {
-      var now = new Date();
-      var t = now.getHours() * 60 + now.getMinutes();
-      var open = mins(el.dataset.open), close = mins(el.dataset.close);
-      var isOpen = t >= open && t < close;
-      el.classList.toggle('is-closed', !isOpen);
-      if (!word) return;
-      if (isOpen) word.textContent = t >= close - 60 ? 'Cerramos pronto' : 'Abierto ahora';
-      else word.textContent = t < open ? 'Abrimos a las 9:00' : 'Cerrado por hoy';
-    }
-    paint();
-    setInterval(paint, 60000);
-  })();
-
-
-  /* ══ 7. ACORDEÓN ═════════════════════════════════════════════
-     Altura animada en píxeles y devuelta a `auto` al terminar,
-     para que el texto siga fluyendo si cambia el ancho.          */
-  (function () {
-    var acc = $('#acc');
-    if (!acc) return;
-    var items = $$('.acc__item', acc).map(function (item, i) {
-      var btn = $('.acc__btn', item);
-      var panel = $('.acc__panel', item);
-      panel.id = 'acc-p-' + i;
-      btn.id = 'acc-b-' + i;
-      btn.setAttribute('aria-controls', panel.id);
-      panel.setAttribute('role', 'region');
-      panel.setAttribute('aria-labelledby', btn.id);
-      panel.hidden = true;
-      return { btn: btn, panel: panel };
-    });
-
-    function close(it) {
-      if (it.btn.getAttribute('aria-expanded') !== 'true') return;
-      it.btn.setAttribute('aria-expanded', 'false');
-      var h = it.panel.scrollHeight;
-      it.panel.style.height = h + 'px';
-      requestAnimationFrame(function () { it.panel.style.height = '0px'; });
-      var done = function () {
-        it.panel.hidden = true;
-        it.panel.style.height = '';
-        it.panel.removeEventListener('transitionend', done);
-      };
-      if (REDUCED) done();
-      else it.panel.addEventListener('transitionend', done);
-    }
-
-    function open(it) {
-      it.btn.setAttribute('aria-expanded', 'true');
-      it.panel.hidden = false;
-      it.panel.style.height = '0px';
-      var h = it.panel.scrollHeight;
-      requestAnimationFrame(function () { it.panel.style.height = h + 'px'; });
-      var done = function () {
-        it.panel.style.height = 'auto';
-        it.panel.removeEventListener('transitionend', done);
-        if (window.ScrollTrigger) ScrollTrigger.refresh();
-      };
-      if (REDUCED) done();
-      else it.panel.addEventListener('transitionend', done);
-    }
-
-    // La transición se pone aquí y no en el CSS: así, sin JS, los
-    // paneles quedan abiertos y legibles en vez de recortados a cero.
-    items.forEach(function (it) {
-      if (!REDUCED) it.panel.style.transition = 'height .42s cubic-bezier(.22,1,.36,1)';
-      it.btn.addEventListener('click', function () {
-        var wasOpen = it.btn.getAttribute('aria-expanded') === 'true';
-        items.forEach(close);
-        if (!wasOpen) open(it);
-      });
-    });
-
-    /* FAQPage: se lee del propio acordeón, igual que el menú se lee de
-       MENU. Si se edita una pregunta en el HTML, el schema va detrás. */
-    var faq = items.map(function (it) {
-      return {
-        '@type': 'Question',
-        'name': it.btn.textContent.replace(/\s+/g, ' ').trim(),
-        'acceptedAnswer': {
-          '@type': 'Answer',
-          'text': it.panel.textContent.replace(/\s+/g, ' ').trim()
-        }
-      };
-    });
-    if (faq.length) {
-      var tag = document.createElement('script');
-      tag.type = 'application/ld+json';
-      tag.textContent = JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'FAQPage',
-        'inLanguage': 'es-ES',
-        'mainEntity': faq
-      });
-      document.head.appendChild(tag);
-    }
-  })();
-
-
-  /* ══ 8. RESERVA POR WHATSAPP ═════════════════════════════════
-     Sin servidor y sin promesas falsas: el formulario compone el
-     mensaje y abre WhatsApp, que es por donde el local atiende.   */
-  (function () {
-    var form = $('#bookForm');
-    if (!form) return;
-    var TEL = '34607020554';
-    var err = $('#formError');
-
-    function fail(msg, field) {
-      if (err) { err.textContent = msg; err.hidden = false; }
-      if (field) { field.classList.add('is-bad'); field.focus(); }
-    }
-
-    form.addEventListener('input', function (e) {
-      e.target.classList.remove('is-bad');
-      if (err) err.hidden = true;
-    });
-
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var name = form.elements.nombre, day = form.elements.dia, pax = form.elements.personas, msg = form.elements.mensaje;
-
-      if (!name.value.trim())        return fail('Dinos tu nombre para saber a quién guardamos la mesa.', name);
-      if (!day.value.trim())         return fail('¿Qué día y a qué hora te esperamos?', day);
-      var n = parseInt(pax.value, 10);
-      if (!n || n < 1 || n > 30)     return fail('Pon cuántas personas sois (de 1 a 30).', pax);
-
-      var text = 'Hola Flamingo, soy ' + name.value.trim() + '.\n' +
-                 'Quería mesa para ' + n + (n === 1 ? ' persona' : ' personas') + ' el ' + day.value.trim() + '.' +
-                 (msg.value.trim() ? '\n' + msg.value.trim() : '') +
-                 '\n\n(Enviado desde la web)';
-
-      window.open('https://wa.me/' + TEL + '?text=' + encodeURIComponent(text), '_blank', 'noopener');
-    });
-  })();
-
-
-  /* ══ 9. SCROLL, NAV Y MENÚ MÓVIL ═════════════════════════════ */
+  /* ══ 3. NAV Y MENÚ MÓVIL ═════════════════════════════════════ */
   var lenis = null;
   if (window.Lenis && !REDUCED) {
-    lenis = new Lenis({ duration: 1.1, smoothWheel: true });
+    lenis = new Lenis({ duration: 1.05, smoothWheel: true });
     if (hasGSAP) {
       lenis.on('scroll', ScrollTrigger.update);
       gsap.ticker.add(function (t) { lenis.raf(t * 1000); });
@@ -629,7 +244,7 @@
     if (!el) return;
     e.preventDefault();
     closeDrawer();
-    if (lenis) lenis.scrollTo(el, { duration: 1.2, offset: -70 });
+    if (lenis) lenis.scrollTo(el, { duration: 1.1, offset: -66 });
     else el.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
   });
 
@@ -645,7 +260,7 @@
       if (open) {
         nav.classList.remove('is-hidden');
         var first = $('a', drawer);
-        if (first) setTimeout(function () { first.focus(); }, 260);
+        if (first) setTimeout(function () { first.focus(); }, 240);
       }
     });
   }
@@ -655,7 +270,6 @@
     var lastY = window.scrollY, ticking = false;
     var onScroll = function () {
       var y = window.scrollY;
-      nav.classList.toggle('is-stuck', y > 40);
       if (!drawer || !drawer.classList.contains('is-open')) {
         nav.classList.toggle('is-hidden', y > lastY && y > 240);
       }
@@ -684,41 +298,11 @@
     }
   });
 
-  /* Titulares por palabras: envuelve palabra a palabra sin destruir
-     los <span> internos, así los brochazos y tachones sobreviven. */
-  function wrapWords(el) {
-    var out = document.createDocumentFragment();
-    Array.prototype.slice.call(el.childNodes).forEach(function (node) {
-      if (node.nodeType === 3) {
-        node.nodeValue.split(/(\s+)/).forEach(function (chunk) {
-          if (!chunk) return;
-          if (/^\s+$/.test(chunk)) { out.appendChild(document.createTextNode(' ')); return; }
-          var w = document.createElement('span');
-          w.className = 'w';
-          var i = document.createElement('i');
-          i.textContent = chunk;
-          w.appendChild(i);
-          out.appendChild(w);
-        });
-      } else {
-        var w = document.createElement('span');
-        w.className = 'w';
-        var i = document.createElement('i');
-        i.appendChild(node.cloneNode(true));
-        w.appendChild(i);
-        out.appendChild(w);
-      }
-    });
-    el.innerHTML = '';
-    el.appendChild(out);
-  }
-  $$('[data-split]').forEach(wrapWords);
-
   var yEl = $('#year');
   if (yEl) yEl.textContent = new Date().getFullYear();
 
 
-  /* ══ 10. VÍDEOS ══════════════════════════════════════════════
+  /* ══ 4. VÍDEOS ═══════════════════════════════════════════════
      Solo se descargan y se reproducen cuando entran en pantalla. */
   $$('video').forEach(function (v) {
     if (!('IntersectionObserver' in window)) { v.preload = 'auto'; return; }
@@ -736,45 +320,38 @@
   });
 
 
-  /* ══ 11. ANIMACIONES ═════════════════════════════════════════ */
+  /* ══ 5. ENTRADAS ═════════════════════════════════════════════
+     Un solo gesto en toda la página: los titulares suben línea a
+     línea, recortados por su propia caja. Nada más se anima.    */
+  function splitLines(el) {
+    var out = document.createDocumentFragment();
+    el.innerHTML.split(/<br\s*\/?>/i).forEach(function (chunk) {
+      var ln = document.createElement('span');
+      ln.className = 'ln';
+      var inner = document.createElement('span');
+      inner.innerHTML = chunk.trim();
+      ln.appendChild(inner);
+      out.appendChild(ln);
+    });
+    el.innerHTML = '';
+    el.appendChild(out);
+  }
+  var lined = $$('[data-lines]');
+  lined.forEach(splitLines);
+
   if (hasGSAP && !REDUCED) {
-    // Entrada del hero
-    gsap.from('.hero__lead > *', { opacity: 0, y: 22, duration: .9, stagger: .07, ease: 'power3.out', delay: .1 });
-    gsap.from('.hero__media, .hero__ph1, .hero__status, .hero__ph2', {
-      opacity: 0, y: 26, scale: .985, duration: 1, stagger: .07, ease: 'power3.out', delay: .25
-    });
-
-    // Titulares, palabra a palabra
-    $$('[data-split]').forEach(function (h) {
-      gsap.from($$('.w i', h), {
-        yPercent: 110, duration: .95, ease: 'power4.out', stagger: .05,
-        scrollTrigger: { trigger: h, start: 'top 90%' }
+    lined.forEach(function (h) {
+      gsap.from($$('.ln > span', h), {
+        yPercent: 108, duration: 1, ease: 'power4.out', stagger: .07,
+        scrollTrigger: { trigger: h, start: 'top 92%' }
       });
     });
 
-    // Tarjetas: entran desde abajo, escalonadas dentro de su rejilla
-    gsap.utils.toArray('.local__grid, .reasons__grid, .gallery, .deal__grid, .visit__grid, .faq__grid, .bubbles').forEach(function (grid) {
-      gsap.from(grid.children, {
-        opacity: 0, y: 26, duration: .85, stagger: .06, ease: 'power3.out',
-        scrollTrigger: { trigger: grid, start: 'top 88%' }
+    gsap.utils.toArray('.cell--media').forEach(function (c) {
+      gsap.from(c, {
+        opacity: 0, duration: .9, ease: 'power2.out',
+        scrollTrigger: { trigger: c, start: 'top 94%' }
       });
-    });
-
-    gsap.utils.toArray('.carta__shell, .head > *, .carta__foot > *').forEach(function (el) {
-      gsap.from(el, { opacity: 0, y: 20, duration: .85, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 92%' } });
-    });
-
-    // Los trazos se dibujan, no aparecen recortados
-    gsap.utils.toArray('.paint, .strike').forEach(function (el) {
-      gsap.fromTo($$('path', el),
-        { strokeDashoffset: 100 },
-        { strokeDashoffset: 0, duration: .5, stagger: .1, ease: 'power2.out',
-          scrollTrigger: { trigger: el, start: 'top 92%' } });
-    });
-
-    // Las fotos se asientan: entran con un pelín de zoom de más
-    gsap.utils.toArray('.card--media > img').forEach(function (img) {
-      gsap.from(img, { scale: 1.1, duration: 1.4, ease: 'power3.out', scrollTrigger: { trigger: img, start: 'top 95%' } });
     });
 
     // El enlace de la sección en la que estás se queda subrayado
