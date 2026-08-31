@@ -96,25 +96,40 @@
   }
 
   /* Un churrete de pintura.
-     No es una línea con una bola al final: es una figura RELLENA que
-     nace ancha donde se despega de la masa, se estrecha al bajar y
-     acaba en una gota más gorda que el propio reguero. Esa silueta
-     —ancho, cuello, bulbo— es lo que lo hace leer como pintura que
-     cae y no como un alfiler.
-       x    posición horizontal
-       len  lo que ha corrido
-       w0   ancho arriba, donde sale de la masa
-       w1   ancho del cuello
-       r    radio de la gota del final                              */
-  function dripPath(x, len, w0, w1, r) {
-    var xl = (x - w0 / 2).toFixed(2), nl = (x - w1 / 2).toFixed(2);
-    var nr = (x + w1 / 2).toFixed(2), xr = (x + w0 / 2).toFixed(2);
-    var a = (len * 0.3).toFixed(2), b = (len * 0.66).toFixed(2), L = len.toFixed(2);
-    return 'M' + xl + ' 0' +
-           'C' + xl + ' ' + a + ',' + nl + ' ' + b + ',' + nl + ' ' + L +
+     La silueta no es un palo con una bola: es un HUSO. Nace estrecho
+     —lo que mida la masa de la que sale—, engorda enseguida porque la
+     pintura se acumula, va afinando mientras corre y acaba en una gota
+     más ancha que alta, que es como se apoza antes de caer. Además se
+     desvía un poco de la vertical: un reguero perfectamente recto
+     delata que está dibujado.
+       wTop   ancho donde arranca (el de la línea o el del borde)
+       wMax   ancho del engorde, justo debajo
+       wNeck  ancho del cuello, antes de la gota
+       rx,ry  radios de la gota
+       drift  desvío horizontal al llegar abajo                      */
+  function dripPath(x, len, wTop, wMax, wNeck, rx, ry, drift) {
+    // El engorde a un tercio del recorrido y muestreado fino: más arriba
+    // sale un pico en punta en vez de un ensanchamiento.
+    var SWELL = 0.32, N = 16;
+    function smooth(t) { return t * t * (3 - 2 * t); }
+    function w(t) {
+      return t < SWELL
+        ? wTop + (wMax - wTop) * smooth(t / SWELL)
+        : wMax + (wNeck - wMax) * smooth((t - SWELL) / (1 - SWELL));
+    }
+    function cx(t) { return x + (drift || 0) * t * t; }
+
+    var down = [], up = [], i, t;
+    for (i = 0; i <= N; i++) {
+      t = i / N;
+      down.push((cx(t) - w(t) / 2).toFixed(2) + ' ' + (t * len).toFixed(2));
+      up.push((cx(t) + w(t) / 2).toFixed(2) + ' ' + (t * len).toFixed(2));
+    }
+    up.reverse();
+    return 'M' + down.join('L') +
            // large-arc + sweep 0: el arco pasa por DEBAJO y cierra la gota
-           'A' + r + ' ' + r + ' 0 1 0 ' + nr + ' ' + L +
-           'C' + nr + ' ' + b + ',' + xr + ' ' + a + ',' + xr + ' 0Z';
+           'A' + rx.toFixed(2) + ' ' + ry.toFixed(2) + ' 0 1 0 ' + up[0] +
+           'L' + up.slice(1).join('L') + 'Z';
   }
 
   // Ruido determinista 0..1. `wobble` no vale aquí: su recorrido es
@@ -141,19 +156,21 @@
             : i === 0 ? 0.72 + b * 0.28
             : 0.14 + b * 0.4;
       var len = (14 + t * 44) * scale;
-      var w0 = (8.2 + c * 4.6) * scale;
-      var w1 = w0 * (0.44 + c * 0.1);
-      var r = w1 * 0.58 + 1.4 * scale;
+      var wMax = (8 + c * 4.4) * scale;
+      var wTop = wMax * 0.78;               // el borde ya es ancho
+      var wNeck = wMax * (0.32 + c * 0.08);
+      var rx = wNeck * 0.95 + 1.2 * scale, ry = rx * 0.82;
       var g = document.createElementNS(NS, 'g');
       g.setAttribute('class', 'd');
       g.style.setProperty('--i', i);
-      pathEl(g, dripPath(x, len, w0, w1, r));
+      pathEl(g, dripPath(x, len, wTop, wMax, wNeck, rx, ry, (a - 0.5) * 5 * scale));
       // alguna gota ya desprendida, más abajo
       if (c > 0.62) {
-        var dot = document.createElementNS(NS, 'circle');
-        dot.setAttribute('cx', (x + (a - 0.5) * 3).toFixed(2));
-        dot.setAttribute('cy', (len + (4 + a * 7) * scale).toFixed(2));
-        dot.setAttribute('r', (r * 0.5).toFixed(2));
+        var dot = document.createElementNS(NS, 'ellipse');
+        dot.setAttribute('cx', (x + (a - 0.2) * 5).toFixed(2));
+        dot.setAttribute('cy', (len + (5 + a * 8) * scale).toFixed(2));
+        dot.setAttribute('rx', (rx * 0.55).toFixed(2));
+        dot.setAttribute('ry', (rx * 0.46).toFixed(2));
         g.appendChild(dot);
       }
       svg.appendChild(g);
@@ -216,6 +233,10 @@
   var BOX = { w: 220, h: 66 };
   $$('.btn').forEach(function (btn, n) {
     if (btn.querySelector('.btn__blob')) return;
+    // Los pequeños se quedan limpios. Un tag es un gesto: puesto en tres
+    // enlaces seguidos de 40px deja de ser un gesto y es ruido — se ven
+    // tres manchas iguales con sus rayitas y no se lee ninguna.
+    if (btn.classList.contains('btn--sm')) return;
     var seed = 1.4 + n * 2.11;
 
     // El texto va en su propio span: el SVG es hermano, no fondo, para
@@ -242,37 +263,70 @@
     btn.appendChild(drips);
   });
 
-  /* La barra del nav es una franja de pintura de lado a lado, con sus
-     churretes cayendo sobre la página. La línea va en un SVG estirado
-     (le da igual el ancho de pantalla) y los churretes en SVGs propios
-     sin estirar, colocados por porcentaje: metidos en el estirado
-     saldrían anchos y aplastados.                                    */
+  /* La barra del nav acaba en una línea de espray con sus churretes.
+     Se traza en PÍXELES REALES, no en un viewBox estirado: con
+     `preserveAspectRatio="none"` a lo ancho de la pantalla la ondulación
+     se aplanaba hasta parecer un subrayador y el grosor se disparaba.
+     Aquí una unidad es un píxel, así que el temblor y el trazo miden lo
+     que se les pide, y línea y churretes caben en un mismo SVG — con lo
+     que la línea tapa por sí sola el canto de arriba de cada churrete. */
   (function () {
     var nav = $('#nav');
     if (!nav) return;
-    var paint = document.createElement('div');
-    paint.className = 'nav__paint';
-    paint.setAttribute('aria-hidden', 'true');
 
-    // Primero los churretes y DESPUÉS la línea: así el trazo pasa por
-    // encima y les tapa el canto recto de arriba, que si no se ve y
-    // delata que son dos piezas y no una sola mancha de pintura.
-    // Repartidos sin simetría y cada uno con su largo, para que no
-    // parezcan seis marcas iguales puestas a compás.
-    [7, 23, 44, 62, 79, 93].forEach(function (pc, i) {
-      var d = svgEl('nav__drip', '0 0 34 70', false);
-      d.style.left = pc + '%';
-      dripsInto(d, 5.3 + i * 3.1, 1, 16, 9, 0.92, true);
-      paint.appendChild(d);
+    var H = 62, Y = 9;                 // alto del lienzo y altura del trazo
+    var svg = svgEl('nav__paint', '0 0 100 ' + H, false);
+    svg.setAttribute('preserveAspectRatio', 'xMinYMin slice');
+    nav.appendChild(svg);
+
+    function handLine(w, y, amp, seed) {
+      var step = 15, d = '';
+      for (var x = 0, i = 0; x <= w + step; x += step, i++) {
+        var n = Math.sin(i * 0.9 + seed) * 0.55 + Math.sin(i * 2.3 + seed * 1.7) * 0.32
+              + Math.sin(i * 5.1 + seed * 2.9) * 0.13;
+        d += (i ? 'L' : 'M') + Math.min(x, w).toFixed(1) + ' ' + (y + n * amp).toFixed(1);
+      }
+      return d;
+    }
+
+    var last = 0;
+    function paint() {
+      var w = nav.offsetWidth;
+      if (!w || w === last) return;
+      last = w;
+      svg.setAttribute('viewBox', '0 0 ' + w + ' ' + H);
+      while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+      // Tres churretes, en sitios que no dependen del ancho, y bien
+      // distintos de largo: son pocos y contrastados a propósito.
+      [0.13, 0.46, 0.81].forEach(function (at, i) {
+        var g = document.createElementNS(NS, 'g');
+        g.setAttribute('class', 'd');
+        g.style.setProperty('--i', i);
+        var a = rnd(7.3 + i * 4.4, i), b = rnd(2.9 + i * 6.1, i);
+        var x = w * at + (a - 0.5) * 40;
+        var len = 13 + b * 34;
+        // Arranca con el grosor del trazo (2.2px) y engorda justo debajo:
+        // así sale de la línea en vez de estar clavado en ella.
+        var wMax = 4.6 + a * 2.2;
+        var wNeck = 1.9 + a * 0.7;
+        var rx = wNeck * 1.05 + 1, ry = rx * 0.78;
+        pathEl(g, dripPath(x, len, 2.4, wMax, wNeck, rx, ry, (b - 0.5) * 6));
+        // el trazo pasa por encima del arranque, así que el churrete
+        // se dibuja desde la propia línea
+        g.setAttribute('transform', 'translate(0,' + (Y - 1) + ')');
+        svg.appendChild(g);
+      });
+
+      pathEl(svg, handLine(w, Y, 2.6, 6.2), 'nav__line');
+    }
+
+    paint();
+    var t = 0;
+    window.addEventListener('resize', function () {
+      clearTimeout(t);
+      t = setTimeout(paint, 140);
     });
-
-    var line = svgEl('nav__line', '0 0 100 12', true);
-    // Amplitud alta: el SVG va estirado a lo ancho de la pantalla, así
-    // que una ondulación pequeña se aplana hasta parecer una regla.
-    pathEl(line, swipePath(6.2, 2.4, 0.4));
-    paint.appendChild(line);
-
-    nav.appendChild(paint);
   })();
 
   /* Nav: cada enlace lleva su propio brochazo */

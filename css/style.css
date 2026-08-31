@@ -297,7 +297,7 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
   position:absolute; left:20%; top:calc(100% - 15px); width:62px; height:70px;
   z-index:-1; overflow:visible; pointer-events:none;
 }
-.btn__drip path,.btn__drip circle{
+.btn__drip path,.btn__drip ellipse{
   fill:var(--drip); stroke:none;
   transition:fill .3s var(--ease);
 }
@@ -334,9 +334,17 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
 .btn--ink:hover .btn__sh{ fill:var(--ink); opacity:1; }
 .btn--ink:hover{ color:#fff; --drip:var(--spray); }
 
-.btn--sm{ min-height:44px; padding:13px 26px; font-size:11.5px; }
-.btn--sm .btn__blob{ left:-11px; top:-9px; width:calc(100% + 22px); height:calc(100% + 18px); }
-.btn--sm .btn__drip{ left:22%; width:52px; transform:scale(.86); transform-origin:top left; }
+/* El pequeño no lleva mancha ni churretes: es una pastilla limpia con
+   el rótulo de cartel. La pintada se reserva para los dos botones que
+   de verdad piden acción. */
+.btn--sm{
+  min-height:42px; padding:12px 24px; font-size:11px;
+  border:1.5px solid currentColor; border-radius:999px;
+  transform:none;
+}
+.btn--sm:hover{ background:var(--ink); border-color:var(--ink); color:var(--pink); transform:none; }
+.btn--sm:active{ transform:scale(.97); }
+.btn--sm::before{ display:none; }
 /* Las manchas se salen de su caja por los cuatro lados: el hueco entre
    botones tiene que contarlo, y las filas además los goterones. */
 .btns{ display:flex; flex-wrap:wrap; gap:38px 30px; }
@@ -358,39 +366,28 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
   -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
 }
 .nav__paint{
-  position:absolute; left:0; right:0; bottom:-1px; height:12px;
-  pointer-events:none; color:var(--spray);
+  position:absolute; left:0; top:100%; width:100%; height:62px;
+  margin-top:-9px;                 /* el trazo va a 9px del lienzo */
+  overflow:visible; pointer-events:none;
+  color:var(--spray);
 }
 .nav__line{
-  position:absolute; left:0; bottom:0; width:100%; height:12px; overflow:visible;
+  fill:none; stroke:currentColor; stroke-width:2.2;
+  stroke-linecap:round; stroke-linejoin:round;
 }
-.nav__line path{
-  fill:none; stroke:currentColor; stroke-width:3.4;
-  stroke-linecap:round;
-}
-/* `top`, no `bottom`: anclados abajo, la caja de 54px crecía hacia
-   arriba y los churretes salían por encima de la barra. */
-/* Arranca por encima de la línea a propósito: el trazo se pinta después
-   y le tapa el canto recto de arriba. */
-/* `top:11px` deja el canto de arriba justo dentro del grosor del trazo,
-   que se pinta después y lo tapa. Medido: la línea ocupa de 66.8 a 73 y
-   la franja empieza en 57. */
-.nav__drip{
-  position:absolute; top:11px; width:34px; height:70px;
-  overflow:visible; transform:translateX(-50%);
-}
-.nav__drip path,.nav__drip circle{ fill:currentColor; stroke:none; }
-/* Los churretes se estiran un poco al despegarse del hero, como si la
-   pintura siguiera corriendo con el scroll. */
-.nav__drip .d{
+.nav__paint .d path,.nav__paint .d ellipse{ fill:currentColor; stroke:none; }
+/* La pintura sigue corriendo al despegarse del hero */
+.nav__paint .d{
   transform-box:fill-box; transform-origin:top center;
-  transform:scaleY(.55);
-  transition:transform .8s var(--ease);
+  transform:scaleY(.6);
+  transition:transform .9s var(--ease);
+  transition-delay:calc(var(--i) * 90ms);
 }
-.nav.is-stuck .nav__drip .d{ transform:scaleY(1); }
+.nav.is-stuck .nav__paint .d{ transform:scaleY(1); }
 .nav.is-hidden{ transform:translateY(-101%); }
-.nav__brand{ display:flex; align-items:center; gap:11px; }
-.nav__brand img{ width:34px; height:34px; border-radius:50%; object-fit:cover; }
+/* Sin el logo en JPEG: a 34px es un borrón con un cerco claro alrededor,
+   y al lado del rótulo en Cooper canta. El rótulo ya es la marca. */
+.nav__brand{ display:flex; align-items:center; }
 .nav__brand span{
   font-family:var(--coop); font-size:16px;
   letter-spacing:.1em; text-transform:uppercase;

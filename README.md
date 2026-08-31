@@ -42,23 +42,32 @@ dentro, negro fuera. En el principal la copia va **rellena** (el macizo de un
 throw-up); en el secundario va **solo a contorno**, porque un relleno desplazado
 inundaría la forma en vez de doblarle el filo.
 
-**Los churretes** son lo que hace que la cosa se lea como pintura y no como adorno,
-y tienen tres reglas:
+**Solo se tatúan los botones grandes** — los tres que de verdad piden acción. Un tag
+es un gesto; puesto en seis enlaces pequeños seguidos deja de ser un gesto y es
+ruido. `.btn--sm` es una pastilla limpia con el rótulo en Cooper y se acabó.
 
-1. **Son masa rellena, no un palo con una bola.** `dripPath()` dibuja una figura que
-   nace ancha donde se despega de la mancha, se estrecha al bajar y acaba en una
-   gota más gorda que el propio reguero. Ancho, cuello y bulbo.
-2. **Contrastan.** En una tanda, uno corre mucho y los demás poco. Si todos miden
+**Los churretes** son lo que hace que la cosa se lea como pintura y no como adorno,
+y tienen cuatro reglas:
+
+1. **La silueta es un HUSO, no un palo con una bola.** `dripPath()` muestrea un
+   perfil de ancho: nace con el grosor de la masa de la que sale, **engorda a un
+   tercio del recorrido** porque la pintura se acumula, va afinando y acaba en una
+   gota más ancha que alta. Sin ese engorde queda un signo de exclamación.
+2. **Se desvían de la vertical.** Un reguero perfectamente recto delata que está
+   dibujado; el desvío crece con el cuadrado del recorrido.
+3. **Contrastan.** En una tanda, uno corre mucho y los demás poco. Si todos miden
    parecido parecen rayas. El azar es determinista (`rnd()`, un hash del seno):
    misma semilla, mismo churrete entre recargas.
-3. **Son del color de la masa que tienen encima** (`--drip`). Un botón negro corre
+4. **Son del color de la masa que tienen encima** (`--drip`). Un botón negro corre
    negro; cuando al señalarlo se vuelve fucsia, corre fucsia. Y el SVG monta sobre
    la mancha, así que la unión no se ve.
 
 **La barra del nav** acaba en la misma pintura: una línea trazada a mano de lado a
-lado con seis churretes cayendo sobre la página, que se estiran al despegarse del
-hero. La línea va en un SVG estirado (le da igual el ancho de pantalla) y los
-churretes en SVGs propios sin estirar, colocados por porcentaje.
+lado con tres churretes que se estiran al despegarse del hero. Se traza en
+**píxeles reales** —el SVG se regenera al cambiar el ancho— y no en un viewBox
+estirado: con `preserveAspectRatio="none"` a lo ancho de la pantalla la ondulación
+se aplanaba hasta parecer un subrayador y el grosor se disparaba. Al ir todo en el
+mismo SVG y a escala real, la línea tapa por sí sola el arranque de cada churrete.
 
 Reglas que mantienen el conjunto de una pieza: **tres fuentes con su papel, un solo
 fucsia de espray (`--spray`), dos radios (`--r` y `--r-s`) más el círculo y la
@@ -154,16 +163,15 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   su caja por los cuatro lados y los churretes caen por debajo; con el hueco normal
   los botones se pisaban.
 - **En la barra del nav, los churretes se pintan ANTES que la línea.** El trazo pasa
-  por encima y les tapa el canto recto de arriba; al revés se ve que son dos piezas
-  y no una sola mancha. Por eso `.nav__drip` va con `top:11px`, justo dentro del
-  grosor del trazo.
-- **`.nav__line` usa un viewBox de 100 de ancho.** `swipePath` dibuja de x=1 a x=99;
-  con un viewBox de 1000 la franja solo cubría la décima parte de la barra.
+  por encima y les tapa el arranque; al revés se ve que son dos piezas y no una sola
+  mancha.
+- **La barra del nav se traza en píxeles reales y se regenera al redimensionar.**
+  Un viewBox estirado aplana la ondulación y descuadra el grosor.
 - **El viewBox de los churretes del botón guarda la proporción de su caja CSS**
   (80:90 y 62:70). Con `preserveAspectRatio` por defecto, si no coincidieran el SVG
   se centraría y los churretes se saldrían de su sitio.
-- **En móvil la barra deja tres churretes de seis.** A 390px los seis se amontonan y
-  uno cae justo encima del texto.
+- **El nav no lleva el logo en JPEG.** A 34px era un borrón con un cerco claro
+  alrededor y al lado del rótulo en Cooper cantaba. El rótulo ya es la marca.
 - **`stroke-dasharray` va a `100 101`, no a `100`.** Un solo valor significa "raya
   100 / hueco 100": con el offset a 100 el trazo cae justo en la costura del patrón
   y el remate redondo asoma como un puntito suelto.
