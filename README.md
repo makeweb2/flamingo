@@ -16,23 +16,24 @@ servidor: `python -m http.server` y abrir `http://localhost:8000`.
   filos, ese mismo rosa rebajado. El negro `#14100F` es el del logo, y se usa solo
   en el texto y en el botón principal — **no hay bloques negros**, igual que en la
   referencia.
-- **La tipografía** son **dos voces con una tarea cada una**, y las dos están en la
-  fachada:
+- **La tipografía** son **tres voces con una tarea cada una**, y las tres están en
+  el local:
 
   | Token | Fuente | Dónde se usa |
   |-------|--------|--------------|
-  | `--dis` | Bodoni Moda | Titulares, la marca del nav y el claim del pie. Es la Didone del rótulo de la puerta y del logo. |
-  | `--ui`  | Jost | Todo lo demás: texto, etiquetas, pestañas y botones. |
+  | `--dis`  | Bodoni Moda | Titulares. Es la Didone del rótulo de la puerta y del logo. |
+  | `--coop` | Cooper Black (`COOPBL`) | **Rótulos y cifras que hacen de señalética**, nunca texto corrido: la marca del nav, una palabra por titular, las dos frases de cartel ("Please no dancing on tables" y "a.m. coffee — p.m. wine"), los números grandes (el horario, la nota de Google, los 01–04) y las etiquetas de plato. |
+  | `--ui`   | Jost | Texto corriente, etiquetas, pestañas y botones. |
 
-- **El registro es el de la fachada, no el del baño.** Pared rosa lisa, carpintería
-  negra, rótulo en Didone y flores: sobrio. Nada de espray, ni goteos, ni pintadas,
-  ni tipografía de cartel. Las fotos del baño y de los carteles siguen en la galería
-  —son el local— pero como fotografía, no como lenguaje de la interfaz.
+- **El registro es el de la fachada, no el del baño.** La Cooper Black es la letra
+  de sus carteles y se queda; lo que no está es el envoltorio callejero: nada de
+  espray, ni goteos, ni pintadas, ni manchas trazadas en los botones. Las fotos del
+  baño y de los carteles siguen en la galería —son el local— pero como fotografía,
+  no como lenguaje de la interfaz.
 
-Reglas que mantienen el conjunto de una pieza: **dos fuentes con su papel, dos
+Reglas que mantienen el conjunto de una pieza: **tres fuentes con su papel, dos
 radios (`--r` y `--r-s`) más el círculo y la píldora, una sombra (`--sh`) y un filo
-(`--hair`)**. Sin degradados, sin iconos y sin emojis. Comprobado en el render: la
-página entera usa exactamente dos familias tipográficas.
+(`--hair`)**. Sin degradados, sin iconos y sin emojis.
 
 ## Estructura
 
@@ -60,6 +61,7 @@ css/style.css       Tokens, piezas y secciones (índice numerado arriba)
 js/main.js          Carta, acordeón, formulario, nav y entradas
 assets/img          Fotos del local, carteles de la marca y pósters de los vídeos
 assets/video        Los cuatro reels (mp4, sin sonido, en bucle)
+assets/fonts        Cooper Black (woff2 + woff), por si se sirve por HTTP
 robots.txt          Reglas de rastreo + ruta del sitemap
 sitemap.xml         Sitemap con las imágenes principales
 _fuentes/           Material original que no se publica: fotos sin recortar,
@@ -83,7 +85,9 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
   acordeón, así que no hay que tocarlo dos veces.
 - **Teléfono de reservas**: constante `TEL` del bloque 4 (formato internacional sin
   `+`), además de los `tel:` del HTML.
-- **Titulares**: se parten por líneas con los `<br>` del HTML y `data-lines`.
+- **Titulares**: se parten por líneas con los `<br>` del HTML y `data-lines`. Para
+  que una palabra vaya en Cooper Black, envuélvela en `<span class="coop">`. Una por
+  titular: en cuanto son dos, el titular deja de tener un acento y pasa a tener dos.
 - **La franja de "la pared"**: la frase está en el HTML de la sección 7. Es el sitio
   donde meter un cartel del local sin montar una sección entera.
 - **Fotos y vídeos**: sustituir los archivos de `assets/` manteniendo el nombre.
@@ -99,7 +103,12 @@ formulario envía igual. Solo se pierden la entrada y el scroll suave.
 - **El acordeón no lleva `height:0` en el CSS.** Si el JS no llega, los paneles se
   leen abiertos en vez de recortados a cero; es el JS quien los cierra.
 - **`button{ font:inherit }`.** Los botones no heredan la tipografía: sin esa línea
-  el `burger` cae al Arial del navegador y aparece una tercera fuente.
+  el `burger` cae al Arial del navegador y aparece una cuarta fuente.
+- **`.dis .coop` baja a `.93em`.** Cooper pesa bastante más que la Didone al mismo
+  cuerpo; sin ese ajuste, la palabra en Cooper se come la línea.
+- **Cooper Black va incrustada en base64.** Las fuentes se piden siempre en modo
+  CORS y un `@font-face` con `url()` no cargaría al abrir el HTML con doble clic,
+  que es como se revisa. Los ficheros sueltos están en `assets/fonts`.
 - **`.ln` no está anidada dentro de `.dis`.** El JS la pone en cualquier titular con
   `data-lines`, y el claim del pie no es `.dis`.
 - **`.local__ph` lleva `.ph--fill`.** Sus medios van en absoluto para que no
