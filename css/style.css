@@ -16,7 +16,9 @@
    Reglas que no se rompen:
      · dos fuentes: Bodoni Moda (titulares) y Jost (lo demás)
      · un solo radio (--r) y una sola sombra (--sh)
-     · sin degradados, sin iconos, sin emojis
+     · sin degradados y sin emojis. Los logos a color son solo los de
+       reparto, que son marcas ajenas; los signos del pie se dibujan a
+       trazo, en una tinta, como una pieza más de la página
      · lo urbano lo ponen las fotos (el baño, los carteles), no
        una tipografía de grafiti
 
@@ -109,6 +111,9 @@ ul{ padding:0; list-style:none; }
 address{ font-style:normal; }
 ::selection{ background:var(--ink); color:var(--pink); }
 
+/* El molde del flamenco: no se ve, sólo se llama con <use>. */
+.sprite{ position:absolute; width:0; height:0; overflow:hidden; }
+
 .skip{
   position:absolute; left:16px; top:-70px; z-index:200;
   padding:14px 22px; border-radius:var(--r); background:var(--ink); color:var(--pink);
@@ -136,11 +141,13 @@ address{ font-style:normal; }
 .dis{
   font-family:var(--dis); font-weight:400;
   font-variation-settings:"opsz" 18, "SOFT" 100, "WONK" 1;
-  font-size:clamp(28px, 3.5vw, 52px);
+  font-size:clamp(27px, 3.3vw, 48px);
   /* El 1.08 y el tracking negativo venían de la Bodoni, que es estrecha
-     y de asta fina. Fraunces tiene más ojo y más cuerpo: con esos
-     valores las líneas se tocan y el titular se lee apretado. */
-  line-height:1.2; letter-spacing:0;
+     y de asta fina. Fraunces tiene más ojo, más cuerpo y con SOFT al
+     máximo remates gordos: a 1.2 las líneas se rozan y el titular se
+     lee como un bloque. Se le da el aire de una serif de cuerpo grande:
+     interlineado ancho y una pizca de tracking para separar los astiles. */
+  line-height:1.34; letter-spacing:.006em; word-spacing:.03em;
 }
 .dis em{ font-style:italic; }
 /* La voz de los carteles del local. La regla es que el texto TENGA que
@@ -154,7 +161,7 @@ address{ font-style:normal; }
 .coop{ font-family:var(--coop); font-weight:400; letter-spacing:-.005em; }
 /* Los titulares entran línea a línea. El respiro de arriba evita que el
    recorte se coma la tilde de "día" o el asta de la "b". */
-.ln{ display:block; overflow:hidden; padding:.12em 0 .06em; margin:-.12em 0 -.06em; }
+.ln{ display:block; overflow:hidden; padding:.14em 0 .1em; margin:-.14em 0 -.1em; }
 .ln > span{ display:block; }
 
 .tag{
@@ -253,82 +260,180 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
 
 
 /* ══ 5. NAV ══════════════════════════════════════════════════ */
-/* La barra no acaba en un filo de 1px: acaba en una franja de pintura
-   que corre de lado a lado y gotea sobre la página. */
+/* Antes era una barra de lado a lado pegada al filo de la ventana: la
+   página son bloques redondeados flotando sobre el rosa, y la barra era
+   lo único con esquinas rectas. Ahora es una cápsula más, con el mismo
+   aire lateral que los bloques y el radio de los botones. */
 .nav{
-  position:fixed; top:0; left:0; right:0; z-index:100;
-  display:flex; align-items:center; justify-content:space-between; gap:24px;
-  height:68px; padding:0 var(--pad);
-  background:var(--ground);
-  border-bottom:1px solid transparent;
-  transition:transform .45s var(--ease), background .4s var(--ease), border-color .4s var(--ease);
+  position:fixed; top:12px; left:var(--pad); right:var(--pad); z-index:100;
+  display:flex; align-items:center; justify-content:space-between; gap:20px;
+  height:58px; padding:0 8px 0 20px;
+  border-radius:999px;
+  background:rgba(251,238,239,.78);
+  border:1px solid transparent;
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px);
+  transition:transform .45s var(--ease), background .4s var(--ease),
+             border-color .4s var(--ease), box-shadow .4s var(--ease);
 }
+/* Al despegarse del principio la cápsula se cierra: se opaca, se le
+   marca el filo y se le pone la única sombra que hay, muy abierta. */
 .nav.is-stuck{
-  background:rgba(251,238,239,.94);
-  border-bottom-color:var(--sink);
-  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+  background:rgba(251,238,239,.95);
+  border-color:var(--sink);
+  box-shadow:0 8px 26px rgba(42,26,29,.08);
 }
+/* El JS ya marcaba `is-hidden` al bajar, pero no había regla que la
+   escondiera. Con la cápsula suelta se puede ir del todo, sin dejar
+   media barra cortada arriba. */
+.nav.is-hidden{ transform:translateY(calc(-100% - 20px)); }
+/* Con el cajón abierto la barra se queda sin fondo ni filo: si los
+   conserva se ve una tira pegada encima del panel en vez de una pieza
+   sola de la que cuelga el menú. */
+.nav.is-open{
+  background:transparent; border-color:transparent; box-shadow:none;
+  -webkit-backdrop-filter:none; backdrop-filter:none;
+}
+
 /* Sin el logo en JPEG: a 34px es un borrón con un cerco claro alrededor.
    El rótulo en Didone, que es el de la fachada, ya es la marca. */
 .nav__brand{ display:flex; align-items:center; }
 .nav__brand span{
-  font-family:var(--coop); font-size:15px;
+  font-family:var(--coop); font-size:14.5px;
   letter-spacing:.12em; text-transform:uppercase;
 }
-.nav__links{ display:flex; gap:32px; }
-.nav__links a,.nav__tel{
-  position:relative; padding-bottom:4px;
-  font-size:10.5px; letter-spacing:.2em; text-transform:uppercase;
-}
-/* Subrayado fino, como el de los enlaces de la carta */
-.nav__links a::after,.nav__tel::after{
-  content:""; position:absolute; left:0; bottom:0; width:100%; height:1px;
-  background:currentColor; transform:scaleX(0); transform-origin:left;
-  transition:transform .4s var(--ease);
-}
-.nav__links a:hover::after,.nav__links a:focus-visible::after,
-.nav__links a.is-current::after,.nav__tel:hover::after{ transform:scaleX(1); }
 
+/* Los enlaces ya no llevan subrayado: se encienden en una pastilla del
+   rosa, que es el mismo lenguaje de los botones. */
+.nav__links{ display:flex; gap:2px; }
+.nav__links a{
+  display:inline-flex; align-items:center; height:38px; padding:0 15px;
+  border-radius:999px;
+  font-size:10.5px; letter-spacing:.18em; text-transform:uppercase;
+  transition:background .3s var(--ease);
+}
+.nav__links a:hover,.nav__links a:focus-visible{ background:rgba(231,179,185,.45); }
+.nav__links a.is-current{ background:var(--pink); }
+.nav__links a:focus-visible,.nav__tel:focus-visible,.burger:focus-visible{ border-radius:999px; }
+
+/* El teléfono es lo único que se pulsa de verdad en la barra, así que
+   se pinta como botón pequeño en vez de quedarse como un enlace más. */
+.nav__tel{
+  display:inline-flex; align-items:center;
+  height:42px; padding:0 20px; border-radius:999px;
+  background:var(--ink); color:var(--pink);
+  font-size:10px; letter-spacing:.18em; text-transform:uppercase;
+  white-space:nowrap;
+  transition:background .3s var(--ease), color .3s var(--ease);
+}
+.nav__tel:hover{ background:var(--pink); color:var(--on-pink); }
+
+/* Dos rayas sueltas en el aire quedaban de plantilla. Metidas en un
+   botón redondo del rosa hacen juego con los del pie, y al abrirse el
+   botón se invierte a negro con la equis en rosa.
+   La equis no aparece girando las dos rayas a la vez, que es el gesto
+   que trae cualquier plantilla: es el botón entero el que da un cuarto
+   de vuelta mientras las rayas se juntan, y la de abajo llega un pelo
+   después que la de arriba. Se ve como una sola pieza que gira, no como
+   dos palos cruzándose. */
 .burger{
-  display:none; width:34px; height:34px; padding:0; border:0; background:none;
-  cursor:pointer; position:relative;
+  display:none; width:42px; height:42px; flex:none;
+  padding:0; border:0; border-radius:50%;
+  background:var(--pink); cursor:pointer; position:relative;
+  transition:background .3s var(--ease), transform .5s var(--ease);
 }
 .burger span{
-  position:absolute; left:4px; width:26px; height:1.5px; background:var(--ink);
-  transition:transform .35s var(--ease);
+  position:absolute; left:13px; width:16px; height:2px; border-radius:2px;
+  background:var(--ink);
+  transition:transform .4s var(--ease), background .3s var(--ease), width .4s var(--ease);
 }
-.burger span:nth-child(1){ top:13px; }
-.burger span:nth-child(2){ top:20px; }
-.nav.is-open .burger span:nth-child(1){ transform:translateY(3.5px) rotate(45deg); }
-.nav.is-open .burger span:nth-child(2){ transform:translateY(-3.5px) rotate(-45deg); }
+.burger span:nth-child(1){ top:17px; }
+.burger span:nth-child(2){ top:23px; }
+.nav.is-open .burger{ background:var(--ink); transform:rotate(90deg); }
+.nav.is-open .burger span{ background:var(--pink); width:15px; left:13.5px; }
+.nav.is-open .burger span:nth-child(1){ transform:translateY(3px) rotate(45deg); }
+.nav.is-open .burger span:nth-child(2){ transform:translateY(-3px) rotate(-45deg); transition-delay:.05s; }
 
+/* El cajón era una cortina rosa de pantalla completa que bajaba de golpe:
+   el menú de cualquier plantilla. Ahora es un bloque más del sistema —el
+   mismo radio, el mismo aire lateral, el mismo rosa— que cuelga de la
+   cápsula y sólo mide lo que mide su contenido. La barra le queda por
+   encima, así que parece que se desenrolla de ella como el toldo. */
 .drawer{
-  position:fixed; inset:68px 0 0; z-index:99; background:var(--pink);
-  display:flex; flex-direction:column; justify-content:center; gap:4px;
-  padding:0 var(--pad);
-  clip-path:inset(0 0 100% 0); visibility:hidden;
-  transition:clip-path .5s var(--ease), visibility .5s;
+  position:fixed; top:12px; left:var(--pad); right:var(--pad); z-index:99;
+  padding:74px var(--box) var(--box);
+  background:var(--pink); border-radius:var(--r);
+  box-shadow:0 20px 50px rgba(42,26,29,.16);
+  /* En un móvil pequeño y de lado el panel no cabe: antes de desbordarse
+     por debajo de la pantalla, se hace scrollable él solo. */
+  max-height:calc(100dvh - 24px); overflow-y:auto; overscroll-behavior:contain;
+  clip-path:inset(0 0 100% 0 round var(--r)); visibility:hidden;
+  transition:clip-path .58s var(--ease), visibility .58s;
 }
-.drawer.is-open{ clip-path:inset(0 0 0 0); visibility:visible; }
-.drawer a{
+.drawer.is-open{ clip-path:inset(0 0 0 0 round var(--r)); visibility:visible; }
+/* El mismo bicho de la pared, ahora dentro del panel: el menú deja de ser
+   un rectángulo de color y pasa a tener el fondo pintado como el local.
+   Va a la derecha, que es donde no llega ninguna línea de texto. */
+.drawer__bird{
+  position:absolute; z-index:0; pointer-events:none;
+  right:calc(var(--box) * .5); bottom:calc(var(--box) * .8);
+  width:auto; height:clamp(150px,36vw,240px);
+  fill:var(--sink); opacity:.34;
+}
+.drawer > a,.drawer__foot{ position:relative; z-index:1; }
+
+/* Las filas están montadas como las de la carta: el nombre, la línea que
+   lo explica debajo y un filo de pelo por encima. */
+.drawer > a{ display:block; padding:13px 0 15px; }
+.drawer > a + a{ box-shadow:var(--hair); }
+.drawer__t{
+  display:block; overflow:hidden;
+  padding:.12em 0 .08em; margin:-.12em 0 -.08em;
   font-family:var(--dis); font-variation-settings:"opsz" 18, "SOFT" 100, "WONK" 1;
-  font-size:clamp(30px,8.5vw,52px); line-height:1.3;
-  opacity:0; transform:translateY(14px);
+  font-size:clamp(28px,7.6vw,40px); line-height:1.2; letter-spacing:.006em;
+}
+/* El nombre no se desvanece: sube desde detrás de su propio filo, que es
+   exactamente cómo entra cualquier titular de la página. */
+.drawer__t > span{
+  display:block; transform:translateY(112%);
+  transition:transform .72s var(--ease);
+}
+.drawer.is-open .drawer__t > span{ transform:none; }
+/* La misma letra pequeña con la que se describe un plato en la carta. */
+.drawer__d{
+  display:block; margin-top:3px;
+  font-size:13px; line-height:1.5; color:var(--mut);
+  opacity:0; transform:translateY(6px);
   transition:opacity .4s var(--ease), transform .4s var(--ease);
 }
-.drawer.is-open a{ opacity:1; transform:none; }
-.drawer.is-open a:nth-child(1){ transition-delay:.12s; }
-.drawer.is-open a:nth-child(2){ transition-delay:.17s; }
-.drawer.is-open a:nth-child(3){ transition-delay:.22s; }
-.drawer.is-open a:nth-child(4){ transition-delay:.27s; }
-.drawer.is-open a:nth-child(5){ transition-delay:.32s; }
-.drawer a:last-child{ font-family:var(--ui); font-size:13px; letter-spacing:.2em; margin-top:22px; }
+.drawer.is-open .drawer__d{ opacity:1; transform:none; }
+
+/* El menú se cierra con lo que de verdad hace falta a esa hora: el
+   teléfono y dónde está, no un enlace más. */
+.drawer__foot{
+  display:flex; flex-wrap:wrap; align-items:center; gap:14px 18px;
+  margin-top:26px; padding-top:22px; box-shadow:var(--hair);
+  opacity:0; transform:translateY(10px);
+  transition:opacity .45s var(--ease), transform .45s var(--ease);
+}
+.drawer.is-open .drawer__foot{ opacity:1; transform:none; }
+.drawer__foot p{ font-size:13px; line-height:1.5; color:var(--mut); }
+
+/* La escalera: cada fila entra detrás de la anterior. */
+.drawer.is-open > a:nth-of-type(1) .drawer__t > span{ transition-delay:.13s; }
+.drawer.is-open > a:nth-of-type(2) .drawer__t > span{ transition-delay:.19s; }
+.drawer.is-open > a:nth-of-type(3) .drawer__t > span{ transition-delay:.25s; }
+.drawer.is-open > a:nth-of-type(4) .drawer__t > span{ transition-delay:.31s; }
+.drawer.is-open > a:nth-of-type(1) .drawer__d{ transition-delay:.25s; }
+.drawer.is-open > a:nth-of-type(2) .drawer__d{ transition-delay:.31s; }
+.drawer.is-open > a:nth-of-type(3) .drawer__d{ transition-delay:.37s; }
+.drawer.is-open > a:nth-of-type(4) .drawer__d{ transition-delay:.43s; }
+.drawer.is-open .drawer__foot{ transition-delay:.42s; }
 
 
 /* ══ 6. PORTADA ══════════════════════════════════════════════ */
 .hero{
   max-width:var(--maxw); margin:0 auto;
-  padding:calc(68px + clamp(14px,1.6vw,26px)) var(--pad) var(--sec);
+  padding:calc(70px + clamp(14px,1.6vw,26px)) var(--pad) var(--sec);
   display:grid; gap:var(--gap);
 }
 .hero__box{
@@ -336,20 +441,35 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
   align-items:center; padding:clamp(30px,3.4vw,58px);
 }
 .hero__txt{ position:relative; display:flex; flex-direction:column; align-items:flex-start; }
-.hero .dis{ font-size:clamp(34px,4.6vw,68px); }
+.hero .dis{ font-size:clamp(33px,4.3vw,62px); line-height:1.28; }
 .hero__sub{ max-width:38ch; margin:clamp(16px,1.8vw,26px) 0 clamp(22px,2.4vw,32px); color:var(--mut); }
 .rate{
   display:inline-flex; align-items:baseline; gap:9px;
   margin-top:clamp(22px,2.4vw,30px); font-size:13px; color:var(--mut);
 }
 .rate b{ font-family:var(--coop); font-size:20px; font-weight:400; color:var(--on-pink); }
-.rate span{ position:relative; padding-bottom:2px; }
-.rate span::after{
+/* Cinco flamencos y, encima, los mismos cinco macizos recortados al 84%
+   —4,2 de 5—. Es el truco de las estrellas de toda la vida, pero con el
+   bicho de la casa: se entiende de un vistazo y no hace falta explicarlo.
+   Va con aria-hidden porque el dato ya está escrito ahí al lado. */
+.rate__b{ position:relative; display:inline-block; align-self:center; line-height:0; }
+.rate__b svg{ display:inline-block; width:auto; height:20px; vertical-align:top; }
+.rate__b svg + svg{ margin-left:4px; }
+.rate__off{ display:block; fill:var(--sink); }
+.rate__on{
+  position:absolute; left:0; top:0; height:100%; width:84%;
+  display:block; overflow:hidden; white-space:nowrap;
+  fill:var(--on-pink);
+}
+/* Ojo: esta regla iba a `span` a secas y desde que la nota lleva
+   flamencos hay tres spans más aquí dentro; se le subraya sólo al texto. */
+.rate__t{ position:relative; padding-bottom:2px; }
+.rate__t::after{
   content:""; position:absolute; left:0; bottom:0; width:100%; height:1px;
   background:currentColor; opacity:.35;
   transition:opacity .3s var(--ease);
 }
-.rate:hover span::after{ opacity:1; }
+.rate:hover .rate__t::after{ opacity:1; }
 .hero__ph{ aspect-ratio:4/5; box-shadow:none; }
 
 .hero__row{
@@ -383,13 +503,48 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
 .local__claimtxt{ display:flex; flex-direction:column; align-items:flex-start; gap:clamp(16px,2vw,26px); }
 .local__claimtxt p{ font-size:clamp(15px,1.2vw,17.5px); color:var(--mut); max-width:44ch; }
 
+/* Eran tres fotos en fila con su letrero debajo. Ahora van montadas en
+   cartulina blanca y, sobre todo, van EN BARAJA: montadas unas encima de
+   otras y con distinta inclinación, como las deja cualquiera en la mesa.
+   La que señalas (o la que tocas, que en un móvil no hay ratón) se
+   endereza, se sale del montón y sube. */
 .thumbs{
-  display:grid; grid-template-columns:repeat(3,1fr); gap:var(--gap);
-  margin-top:auto; padding-top:clamp(24px,2.8vw,40px);
+  display:flex; align-items:flex-end; justify-content:center;
+  margin-top:auto; padding-top:clamp(34px,3.6vw,52px);
+  /* Sitio para que la que sale hacia arriba no se coma el texto */
+  padding-bottom:6px;
 }
-.thumbs li{ display:flex; flex-direction:column; gap:8px; }
-.thumbs .ph{ aspect-ratio:3/4; box-shadow:none; }
-.thumbs span{ font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--mut); }
+.thumbs li{
+  position:relative; width:38%; flex:none;
+  padding:7px 7px 11px; border-radius:var(--r-s);
+  background:var(--white);
+  box-shadow:0 5px 16px -8px rgba(42,26,29,.45);
+  /* El giro sale del canto de abajo, que es por donde se apoyan */
+  transform-origin:50% 100%;
+  transition:transform .4s var(--ease), box-shadow .4s var(--ease);
+  cursor:pointer;
+}
+.thumbs li + li{ margin-left:-12%; }
+/* Tres ángulos distintos y ninguno redondo: si son -5, 0 y 5 se ve la
+   progresión y parece un abanico de catálogo, no un montón. */
+.thumbs li:nth-child(1){ transform:rotate(-6.5deg); z-index:1; }
+.thumbs li:nth-child(2){ transform:rotate(1.5deg)  translateY(-4px); z-index:2; }
+.thumbs li:nth-child(3){ transform:rotate(7deg); z-index:3; }
+.thumbs li:hover,.thumbs li.is-out{
+  transform:rotate(0deg) translateY(-16px) scale(1.05);
+  box-shadow:0 18px 34px -14px rgba(42,26,29,.55);
+  z-index:4;
+}
+/* La foto lleva el radio de dentro de la cartulina, no el de la página:
+   si comparten radio, la cartulina parece un filo y no un marco. */
+.thumbs .ph{ aspect-ratio:3/4; border-radius:8px; box-shadow:none; }
+.thumbs span{
+  display:block; margin-top:9px;
+  font-size:9.5px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--mut); text-align:center;
+  transition:color .3s var(--ease);
+}
+.thumbs li:hover span,.thumbs li.is-out span{ color:var(--on-pink); }
 
 
 /* ══ 8. ES TU SITIO SI ═══════════════════════════════════════
@@ -408,9 +563,14 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
 .why__it:nth-of-type(4){ grid-column:1; grid-row:2; }
 .why__it:nth-of-type(5){ grid-column:3; grid-row:2; }
 .why__it{ display:flex; flex-direction:column; gap:8px; }
+.why__ph{ aspect-ratio:16/11; border-radius:var(--r-s); margin-bottom:4px; }
+/* La cifra ya no flota suelta encima del texto: va sobre la foto, en la
+   misma pastilla rosa con la que se rotulan todas las fotos de la web. */
 .why__it b{
-  font-family:var(--coop); font-weight:400; font-size:24px; line-height:1;
-  color:var(--sink); margin-bottom:6px;
+  position:absolute; left:10px; bottom:10px; z-index:1;
+  padding:5px 12px 4px; border-radius:999px;
+  background:var(--pink); color:var(--on-pink);
+  font-family:var(--coop); font-weight:400; font-size:12px; line-height:1;
 }
 .why__it h3{ font-size:16.5px; font-weight:400; }
 .why__it p{ font-size:14px; color:var(--mut); }
@@ -445,6 +605,10 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
 .tab:hover{ color:var(--on-pink); border-color:var(--on-pink); }
 .tab.is-active{ background:var(--ink); border-color:var(--ink); color:var(--pink); }
 
+/* Los puntos eran el indicador del carrusel de móvil. Sin carrusel no
+   señalan nada que las propias pestañas no señalen ya, así que se
+   quedan fuera de la página; el JS los sigue generando y marcando, por
+   si alguna vez vuelve a hacer falta un indicador de sección. */
 .dots{ display:none; gap:6px; }
 .dots i{ width:6px; height:6px; border-radius:50%; background:var(--sink); transition:background .3s, transform .3s; }
 .dots i.is-on{ background:var(--ink); transform:scale(1.3); }
@@ -479,16 +643,35 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
    es justo lo que se busca. El de Uber Eats es un logotipo escrito, así
    que ahí se queda su propio texto en pequeño: si molesta, se le quita
    el <img> a esa pastilla y se queda con el rótulo. */
+.deliv{ gap:12px; }
 .deliv .btn{
-  gap:10px; padding-left:12px;
+  gap:12px; padding:14px 26px 14px 12px; min-height:56px;
+  font-size:11px; letter-spacing:.2em;
   background:var(--svc); border-color:var(--svc); color:var(--ink);
+  /* La sombra es del color de la propia pastilla, muy abierta y muy
+     rebajada: contra el rosa pálido del fondo hace que el color flote en
+     vez de quedarse plano, sin meter un gris que no existe en la web. */
+  box-shadow:0 8px 22px -6px var(--svc-sh);
+  transition:background .3s var(--ease), border-color .3s var(--ease),
+             color .3s var(--ease), transform .3s var(--ease),
+             box-shadow .3s var(--ease);
 }
-.deliv__logo{ width:26px; height:26px; flex:none; border-radius:7px; }
-.deliv--uber{ --svc:#31B466; }
-.deliv--glovo{ --svc:#F1CC38; }
-.deliv--justeat{ --svc:#FB8C00; }
+/* Van ligeramente torcidas y desiguales, como las pegatinas de las apps
+   en el cristal de la puerta. Al señalar una, se endereza y sube. */
+.deliv .btn:nth-child(1){ transform:rotate(-1.6deg); }
+.deliv .btn:nth-child(2){ transform:rotate(1.1deg); }
+.deliv .btn:nth-child(3){ transform:rotate(-.7deg); }
+.deliv__logo{ width:32px; height:32px; flex:none; border-radius:9px; }
+.deliv--uber{ --svc:#31B466; --svc-sh:rgba(49,180,102,.55); }
+.deliv--glovo{ --svc:#F1CC38; --svc-sh:rgba(241,204,56,.6); }
+.deliv--justeat{ --svc:#FB8C00; --svc-sh:rgba(251,140,0,.5); }
 /* Al señalar, negro como el resto de pastillas pequeñas */
-.deliv .btn:hover{ background:var(--ink); border-color:var(--ink); color:#fff; }
+.deliv .btn:hover,.deliv .btn:focus-visible{
+  background:var(--ink); border-color:var(--ink); color:#fff;
+  transform:rotate(0deg) translateY(-3px);
+  box-shadow:0 12px 26px -8px rgba(42,26,29,.4);
+}
+.deliv .btn:active{ transform:rotate(0deg) translateY(-1px) scale(.985); }
 
 
 /* ══ 10. LO MÁS PEDIDO ═══════════════════════════════════════ */
@@ -506,21 +689,49 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
 .deal__list .p{ color:var(--on-pink); font-variant-numeric:tabular-nums; }
 
 
-/* ══ 11. MOMENTOS ════════════════════════════════════════════ */
-.moments{ padding:0 0 var(--sec); }
-.gal{
-  max-width:var(--maxw); margin:0 auto; padding-inline:var(--pad);
-  display:grid; grid-template-columns:repeat(12,1fr);
-  grid-auto-rows:clamp(140px,15vw,210px); gap:var(--gap);
+/* ══ 11. MOMENTOS ════════════════════════════════════════════
+   El perfil, no un álbum. La ficha de arriba es la de la app —foto
+   redonda, arroba, la línea de debajo y el botón de seguir— pero
+   escrita con las letras de la casa: el arroba en la serif de los
+   titulares y el botón, el mismo negro que el resto.             */
+.moments{ max-width:var(--maxw); margin:0 auto; padding:0 var(--pad) var(--sec); }
+.ig__head{
+  display:grid; grid-template-columns:auto 1fr auto;
+  align-items:center; gap:clamp(16px,2vw,26px);
+  padding-bottom:clamp(22px,2.6vw,34px);
 }
-.g1{ grid-column:1 / 5;  grid-row:1 / 3; }
-.g2{ grid-column:5 / 9;  grid-row:1; }
-.g3{ grid-column:9 / 13; grid-row:1 / 3; }
-.g4{ grid-column:5 / 7;  grid-row:2; }
-.g5{ grid-column:7 / 9;  grid-row:2; }
-.g6{ grid-column:1 / 5;  grid-row:3; }
-.g7{ grid-column:5 / 10; grid-row:3; }
-.g8{ grid-column:10 / 13; grid-row:3; }
+/* La misma foto redonda que firma el pie. Ahí va a 52px; aquí es la
+   cara del perfil, así que pesa más. */
+.ig__av{
+  width:clamp(62px,7vw,92px); height:clamp(62px,7vw,92px);
+  border-radius:50%; object-fit:cover; flex:none;
+}
+.ig__id .dis{ margin-top:2px; }
+.ig__id .tag{ margin-bottom:10px; }
+.ig__bio{ margin-top:8px; font-size:14.5px; color:var(--mut); max-width:52ch; }
+/* El arroba vuelve a llevar el cuerpo grande, pero como párrafo: el
+   encabezado de la sección es la línea de arriba. Lleva al perfil, que
+   es lo que se espera al pulsar un arroba, con el mismo subrayado que
+   se despliega en el resto de enlaces de la página. */
+.ig__at a{ position:relative; display:inline-block; padding-bottom:.04em; }
+.ig__at a::after{
+  content:""; position:absolute; left:0; bottom:0; width:100%; height:2px;
+  background:currentColor; transform:scaleX(0); transform-origin:left;
+  transition:transform .45s var(--ease);
+}
+.ig__at a:hover::after,.ig__at a:focus-visible::after{ transform:scaleX(1); }
+.ig__go{ align-self:center; }
+
+/* Los cuatro de pie, en 9:16, que es el formato en el que están
+   grabados: puestos en horizontal habría que recortarlos y se perdería
+   justo lo que enseñan. */
+.ig__grid{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:var(--gap);
+}
+.ig__r{ aspect-ratio:9/16; }
+/* En la fila de reels el rótulo no espera al puntero: son cuatro trozos
+   distintos del local y conviene saber cuál es cuál de un vistazo. */
+.ig__r figcaption{ opacity:1; transform:none; }
 
 
 /* ══ 12b. LA PARED ═══════════════════════════════════════════
@@ -540,6 +751,18 @@ a:hover .lnk::after,.lnk:hover::after,.lnk:focus-visible::after{ transform:scale
   margin-top:clamp(18px,2vw,28px);
   font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:var(--mut);
 }
+/* El flamenco del logo, pintado en la pared detrás del cartel. Va en el
+   rosa rebajado de los filos y no en el fuerte: tiene que notarse cuando
+   se mira, no leerse antes que la frase. Se apoya en el suelo de la
+   sección, como el del logo, y queda a la derecha para no meterse por
+   debajo de un texto que está centrado. */
+.wall__bird{
+  position:absolute; z-index:0; pointer-events:none;
+  right:var(--pad); bottom:calc(var(--sec) * .42);
+  width:auto; height:clamp(150px,21vw,290px);
+  fill:var(--sink); opacity:.5;
+}
+.wall__txt,.wall__src{ position:relative; z-index:1; }
 /* Las dos pintadas enmarcan la frase; pegadas a ella, no a los bordes */
 
 
@@ -627,7 +850,7 @@ a.tile:hover{ transform:translateY(-3px); }
   padding-bottom:clamp(28px,3vw,44px);
 }
 .foot__grid > div,.foot__grid > nav{ display:flex; flex-direction:column; gap:8px; align-items:flex-start; }
-.foot__grid h2{
+.foot__grid h3{
   font-size:10px; font-weight:400; letter-spacing:.22em; text-transform:uppercase;
   color:var(--mut); margin-bottom:4px;
 }
@@ -640,14 +863,24 @@ a.tile:hover{ transform:translateY(-3px); }
 .foot__grid a:hover::after{ transform:scaleX(1); }
 .foot__brand img{ width:52px; height:52px; border-radius:50%; object-fit:cover; }
 .foot__brand p{ font-size:14.5px; color:var(--mut); max-width:28ch; }
-.foot__soc{ display:flex; gap:8px; margin-top:4px; }
+.foot__soc{ display:flex; align-items:center; gap:10px; margin-top:8px; }
 .foot__soc a{
-  display:grid; place-items:center; width:44px; height:44px; border-radius:50%;
-  border:1px solid var(--on-pink); font-size:9.5px; letter-spacing:.12em;
-  transition:background .3s var(--ease), color .3s var(--ease);
+  display:grid; place-items:center; width:44px; height:44px; flex:none;
+  border-radius:50%; border:1px solid var(--on-pink);
+  transition:background .3s var(--ease), color .3s var(--ease), border-color .3s var(--ease);
 }
 .foot__soc a::after{ display:none; }
 .foot__soc a:hover{ background:var(--ink); color:var(--pink); border-color:var(--ink); }
+/* Lucide viene a grosor 2, que es lo suyo cuando el icono se dibuja a
+   24px. Aquí van a 19 y dentro de un círculo de filo de un píxel, así
+   que se bajan a 1,5: el dibujo y el círculo pesan lo mismo. El punto
+   de Instagram es una línea de largo cero, y sale redondo por el
+   `stroke-linecap`, así que los remates no se tocan. */
+.foot__soc svg{
+  width:19px; height:19px;
+  fill:none; stroke:currentColor; stroke-width:1.5;
+  stroke-linecap:round; stroke-linejoin:round;
+}
 .foot__bar{
   display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap;
   padding-top:20px; border-top:1px solid rgba(42,26,29,.16);
@@ -676,6 +909,13 @@ a.tile:hover{ transform:translateY(-3px); }
 }
 
 @media (max-width:820px){
+  /* Cuatro reels de pie en una columna de móvil salen a tres dedos de
+     ancho. Se ponen de dos en dos, que sigue siendo la retícula de la
+     app, y la ficha se apila con el botón debajo del arroba. */
+  .ig__grid{ grid-template-columns:1fr 1fr; }
+  .ig__head{ grid-template-columns:auto 1fr; row-gap:18px; }
+  .ig__go{ grid-column:1 / -1; justify-self:start; }
+
   .why__grid{ grid-template-columns:1fr 1fr; }
   .why__mid{ grid-column:1 / 3; grid-row:1; }
   .why__it:nth-of-type(1){ grid-column:1; grid-row:2; }
@@ -683,15 +923,6 @@ a.tile:hover{ transform:translateY(-3px); }
   .why__it:nth-of-type(4){ grid-column:1; grid-row:3; }
   .why__it:nth-of-type(5){ grid-column:2; grid-row:3; }
 
-  .gal{ grid-auto-rows:clamp(120px,22vw,180px); }
-  .g1{ grid-column:1 / 7;  grid-row:1 / 3; }
-  .g2{ grid-column:7 / 13; grid-row:1; }
-  .g3{ grid-column:7 / 13; grid-row:2; }
-  .g4{ grid-column:1 / 5;  grid-row:3; }
-  .g5{ grid-column:5 / 9;  grid-row:3; }
-  .g6{ grid-column:9 / 13; grid-row:3; }
-  .g7{ grid-column:1 / 8;  grid-row:4; }
-  .g8{ grid-column:8 / 13; grid-row:4; }
 
   .foot__grid{ grid-template-columns:1fr 1fr; }
 }
@@ -704,9 +935,14 @@ a.tile:hover{ transform:translateY(-3px); }
   .hero__row{ grid-template-columns:1fr; }
   .hero__b{ grid-column:auto; }
   .local__claim{ grid-template-columns:1fr; }
-  .thumbs{ grid-template-columns:1fr 1fr; }
-  .thumbs li:last-child{ grid-column:1 / 3; }
-  .thumbs li:last-child .ph{ aspect-ratio:16/10; }
+  /* A ancho de móvil la frase ocupa todo y va centrada: el flamenco se
+     baja al pie de la sección y se rebaja más, para que se cruce con el
+     aire de debajo del cartel y no con el cartel. */
+  .wall__bird{ right:0; bottom:42px; height:clamp(120px,30vw,180px); opacity:.34; }
+  /* En móvil la baraja se abre un poco más: con la columna estrecha, tres
+     cartulinas al 38% se quedan en sellos. */
+  .thumbs li{ width:42%; }
+  .thumbs li + li{ margin-left:-14%; }
 
   .why__grid{ grid-template-columns:1fr; }
   .why__mid{ grid-column:1; grid-row:1; }
@@ -715,29 +951,17 @@ a.tile:hover{ transform:translateY(-3px); }
   .why__it:nth-of-type(4){ grid-column:1; grid-row:4; }
   .why__it:nth-of-type(5){ grid-column:1; grid-row:5; }
 
-  /* En móvil la carta va en carrusel, con un plato por pantalla y
-     26px del siguiente asomando. */
-  .carta__panel{ margin-inline:0; }
-  .list{
-    grid-auto-flow:column; grid-auto-columns:calc(100% - 26px);
-    grid-template-columns:none;
-    overflow-x:auto; scroll-snap-type:x mandatory;
-    scrollbar-width:none; margin:0 -6px; padding:0 6px;
-  }
-  .list::-webkit-scrollbar{ display:none; }
-  .dish{ scroll-snap-align:start; }
-  .dish + .dish{ box-shadow:none; }
-  .dots{ display:flex; }
+  /* La carta iba en carrusel, con un plato por pantalla. Para elegir qué
+     pedir hay que poder comparar, y así había que arrastrar ocho veces
+     para ver una sección entera: se leía peor que la carta de papel.
+     Vuelve a ser una lista de arriba abajo, que es como se lee una carta,
+     con su filo entre platos. Los puntos siguen marcando en qué sección
+     se está, que es lo que marcaban de verdad. */
+  .carta__panel{ margin-inline:0; padding-inline:clamp(10px,3vw,18px); }
+  .list{ grid-template-columns:1fr; }
+  .dish{ padding:14px 10px; }
 
-  .gal{ grid-auto-rows:clamp(110px,32vw,170px); }
-  .g1{ grid-column:1 / 13; grid-row:1; }
-  .g2{ grid-column:1 / 7;  grid-row:2; }
-  .g3{ grid-column:7 / 13; grid-row:2; }
-  .g4{ grid-column:1 / 7;  grid-row:3; }
-  .g5{ grid-column:7 / 13; grid-row:3; }
-  .g6{ grid-column:1 / 13; grid-row:4; }
-  .g7{ grid-column:1 / 7;  grid-row:5; }
-  .g8{ grid-column:7 / 13; grid-row:5; }
+
 
   .book__tiles{ grid-template-columns:1fr 1fr; }
   .fld--2{ grid-template-columns:1fr; }

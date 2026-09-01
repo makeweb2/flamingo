@@ -84,8 +84,10 @@
       { n: 'Tarta de Zanahoria', d: 'Carrot cake casera.', p: '6,00' },
       { n: 'Brownie de Pistacho', d: 'Brownie casero con crema de pistacho y pistacho en polvo.', p: '6,00' },
       { n: 'Brownie Nutella', d: 'Brownie casero con Nutella y crocanti de almendra.', p: '5,00' },
-      { n: 'Cookie Pistacho', d: 'Rellena de pistacho con chispas de chocolate blanco.', p: '4,50' },
-      { n: 'Cookies Lotus · Oreo · Kinder', d: 'Rellenas y con chispas de chocolate.', p: '3,80' }
+      { n: 'Cookie Pistacho', d: 'Rellena de pistacho, con chispas de chocolate blanco.', p: '4,50' },
+      { n: 'Cookie Lotus', d: 'Rellena de Lotus, con chispas de chocolate negro.', p: '3,80' },
+      { n: 'Cookie Oreo', d: 'Galleta de chocolate rellena de Oreo, con chispas de chocolate blanco.', p: '3,80' },
+      { n: 'Cookie Kinder', d: 'Rellena de Kinder, con chispas de chocolate blanco.', p: '3,80' }
     ]},
     { label: 'Bebidas', items: [
       { n: 'Cafés clásicos', d: 'Espresso, cortado, americano, con leche.', p: '1,50' },
@@ -209,11 +211,15 @@
 
   /* ══ 2. LO MÁS PEDIDO ════════════════════════════════════════
      Se saca de MENU por nombre: si un plato desaparece de la
-     carta, desaparece también de aquí en vez de quedarse colgado. */
+     carta, desaparece también de aquí en vez de quedarse colgado.
+     Los tres primeros no son una elección nuestra: son los que el
+     reparto publica como más vendidos (Club Sándwich, Crepe con pollo
+     y el bowl de açaí, por ese orden). Detrás van la burger y la
+     Matilda, que son las dos que la casa quiere enseñar. */
   (function () {
     var host = $('#dealList');
     if (!host) return;
-    var PICK = ['Huevos Benedict', 'Puglia', 'Flamingo Burger', 'Bowl de Açaí', 'Matilda'];
+    var PICK = ['Club Sándwich', 'Crepe con pollo', 'Bowl de Açaí', 'Flamingo Burger', 'Matilda'];
     var byName = {};
     MENU.forEach(function (s) { s.items.forEach(function (it) { byName[it.n] = it; }); });
 
@@ -408,6 +414,7 @@
   // Se esconde al bajar y vuelve al subir; arriba del todo siempre está.
   if (nav) {
     var lastY = window.scrollY, ticking = false;
+
     var onScroll = function () {
       var y = window.scrollY;
       nav.classList.toggle('is-stuck', y > 30);
@@ -441,6 +448,22 @@
 
   var yEl = $('#year');
   if (yEl) yEl.textContent = new Date().getFullYear();
+
+  /* Las tres fichas de "el local" están en baraja: la de encima tapa a
+     las otras dos. Con ratón basta el :hover del CSS, pero en un móvil
+     no hay ratón, así que al tocar una se saca del montón y se guardan
+     las demás. Se toca otra vez y vuelve a su sitio. */
+  (function () {
+    var cards = $$('.thumbs li');
+    if (!cards.length) return;
+    cards.forEach(function (li) {
+      li.addEventListener('click', function () {
+        var was = li.classList.contains('is-out');
+        cards.forEach(function (o) { o.classList.remove('is-out'); });
+        if (!was) li.classList.add('is-out');
+      });
+    });
+  })();
 
   /* ══ 6. VÍDEOS ═══════════════════════════════════════════════
      Solo se descargan y se reproducen cuando entran en pantalla. */
@@ -499,6 +522,47 @@
       gsap.from(el, { opacity: 0, y: 22, duration: .85, ease: 'power3.out',
         scrollTrigger: { trigger: el, start: 'top 90%' } });
     });
+
+    /* Los reels no aparecen ni se desvanecen: suben desde detrás de su
+       propio marco, que es exactamente el gesto con el que entra cada
+       titular de la página —la línea sube desde detrás de su caja—.
+       Aplicado a un vídeo: el marco ya está ahí, del rosa de los filos,
+       y la imagen trepa dentro. Van uno detrás de otro, y el letrero de
+       cada uno entra cuando su reel ya ha llegado.
+       Se anima recortando (`clip-path`) y no moviendo la imagen, para no
+       pisarle el transform al zoom que hacen las fotos al señalarlas. */
+    (function () {
+      var st = $$('.ig__r');
+      if (!st.length) return;
+      var r = getComputedStyle(document.documentElement)
+                .getPropertyValue('--r').trim() || '18px';
+      var trig = { trigger: '.ig__grid', start: 'top 88%' };
+      gsap.from(st, {
+        clipPath: 'inset(100% 0% 0% 0% round ' + r + ')',
+        y: 26, duration: .9, ease: 'power3.out', stagger: .09,
+        scrollTrigger: trig
+      });
+      /* `from` toma el valor final del estilo calculado, y el rótulo nace
+         con opacidad 0 en `.ph`: se le dan los dos extremos a mano para
+         que no acabe animando de 0 a 0. */
+      gsap.fromTo($$('.ig__r figcaption'),
+        { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: .5, ease: 'power2.out',
+          stagger: .09, delay: .4, scrollTrigger: trig });
+    })();
+
+    /* El flamenco de la pared va un poco más lento que la página, como
+       una figura pintada al fondo y no pegada encima: cuarenta píxeles
+       en todo el recorrido, lo justo para que tenga profundidad sin que
+       se note el truco. */
+    (function () {
+      var bird = $('.wall__bird');
+      if (!bird) return;
+      gsap.fromTo(bird, { y: 26 }, {
+        y: -26, ease: 'none',
+        scrollTrigger: { trigger: '.wall', start: 'top bottom', end: 'bottom top', scrub: .8 }
+      });
+    })();
 
     // El enlace de la sección en la que estás se queda subrayado
     var links = $$('.nav__links a');

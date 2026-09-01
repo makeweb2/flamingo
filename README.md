@@ -40,7 +40,7 @@ radios (`--r` y `--r-s`) más el círculo y la píldora, una sombra (`--sh`) y u
 |---|---------|-------------------------|
 | 1 | Portada | El titular con la foto dentro, y debajo la fila de tres piezas |
 | 2 | El local | El bloque con tres miniaturas y el vídeo al lado, y el claim en banda ancha debajo |
-| 3 | Es tu sitio si… | La rejilla 3×2 con la pieza destacada en el centro |
+| 3 | Café, brunch y repostería | La rejilla 3×2 con la pieza destacada en el centro |
 | 4 | La carta | El bloque ancho con el panel interior que sobresale y los puntos |
 | 5 | Lo más pedido | El bloque de precios: lista a la izquierda, foto a la derecha |
 | 6 | Momentos | La galería de tamaños mezclados |
