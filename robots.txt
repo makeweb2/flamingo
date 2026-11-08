@@ -5,4 +5,4 @@ User-agent: *
 Allow: /
 Disallow: /_fuentes/
 
-Sitemap: https://www.flamingobrunchfood.es/sitemap.xml
+Sitemap: https://makeweb2.github.io/flamingo/sitemap.xml

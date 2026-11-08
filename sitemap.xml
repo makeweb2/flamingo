@@ -3,20 +3,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
-    <loc>https://www.flamingobrunchfood.es/</loc>
-    <lastmod>2026-08-31</lastmod>
+    <loc>https://makeweb2.github.io/flamingo/</loc>
+    <lastmod>2026-11-08</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://www.flamingobrunchfood.es/assets/img/exterior.jpg</image:loc>
+      <image:loc>https://makeweb2.github.io/flamingo/assets/img/exterior.jpg</image:loc>
       <image:title>Fachada de Flamingo Brunch &amp; Food en Elche</image:title>
     </image:image>
     <image:image>
-      <image:loc>https://www.flamingobrunchfood.es/assets/img/fachada.webp</image:loc>
+      <image:loc>https://makeweb2.github.io/flamingo/assets/img/fachada.webp</image:loc>
       <image:title>Terraza de Flamingo Brunch &amp; Food</image:title>
     </image:image>
     <image:image>
-      <image:loc>https://www.flamingobrunchfood.es/assets/img/graffiti.webp</image:loc>
+      <image:loc>https://makeweb2.github.io/flamingo/assets/img/graffiti.webp</image:loc>
       <image:title>El baño de Flamingo, lleno de pintadas</image:title>
     </image:image>
   </url>
