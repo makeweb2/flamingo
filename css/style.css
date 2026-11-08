@@ -65,7 +65,7 @@
 /* ══ 2. BASE ═══════════════════════════════════════════════ */
 *,*::before,*::after{ box-sizing:border-box; }
 [hidden]{ display:none !important; }
-html{ -webkit-text-size-adjust:100%; }
+html{ -webkit-text-size-adjust:100%; scroll-padding-top:calc(var(--nav-h) + 8px); }
 body{ margin:0; background:var(--wall); color:var(--txt); font:400 clamp(16px,1.15vw,18px)/1.6 var(--ui); overflow-x:hidden; }
 img,video,svg{ display:block; max-width:100%; }
 img,video{ height:auto; }
@@ -76,6 +76,9 @@ a{ color:inherit; }
 button,input,select,textarea{ font:inherit; color:inherit; }
 address{ font-style:normal; }
 main:focus{ outline:0; }
+/* Los lienzos de las flores sobresalen de su caja. `clip` y no `hidden`:
+   no crea un contenedor de scroll, así que los `sticky` siguen funcionando. */
+main,.foot{ overflow-x:clip; }
 :focus-visible{ outline:3px solid var(--fuc); outline-offset:3px; }
 .sprite{ position:absolute; width:0; height:0; overflow:hidden; }
 .sr{ position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); white-space:nowrap; }
@@ -134,10 +137,10 @@ main:focus{ outline:0; }
 .acera{ height:clamp(52px,6vw,80px); background:var(--acera) #D4A63F; border-top:var(--bar) solid var(--steel); position:relative; }
 
 /* Flores del JS */
-.flores{ overflow:visible; }
-.ramo{ width:clamp(160px,18vw,230px); height:auto; margin-bottom:6px; }
+.flores canvas{ position:absolute; display:block; max-width:none; pointer-events:none; }
+.ramo{ position:relative; width:clamp(160px,18vw,230px); aspect-ratio:3/2; margin-bottom:6px; }
 .flores.guirnalda{ position:absolute; left:0; top:0; width:100%; height:clamp(60px,7.5vw,120px); pointer-events:none; overflow:hidden; }
-.esq{ position:absolute; z-index:4; width:clamp(110px,13vw,190px); height:auto; pointer-events:none; }
+.esq{ position:absolute; z-index:4; width:clamp(110px,13vw,190px); aspect-ratio:1; pointer-events:none; }
 .esq--tl{ top:-24px; left:-24px; }
 .esq--tr{ top:-24px; right:-24px; transform:scaleX(-1); }
 .esq--bl{ bottom:-24px; left:-24px; transform:scaleY(-1); }
@@ -436,14 +439,12 @@ a.tile:hover{ background:var(--wall-l); }
 @keyframes bump{ 40%{ transform:scale(1.35); } }
 
 @media (prefers-reduced-motion:no-preference){
-  .js .flores .f{ transform:scale(0); transform-box:fill-box; transform-origin:center; }
-  .js .flores.is-in .f{ animation:bloom .72s var(--ease) var(--d,0ms) both; }
 
   .js [data-lines] .ln > span{ transform:translateY(112%); transition:transform .95s var(--ease) calc(var(--l,0)*70ms); }
   .js [data-lines].is-in .ln > span{ transform:none; }
 
   /* El cristal: la foto baja como una persiana y un reflejo cruza una vez. */
-  .js .pane--foto[data-r] > img,.js .pane--foto[data-r] > video,.js .reel[data-r] > video,.js .deal__ph[data-r] > video,.js .faq__ph[data-r] > img{ clip-path:inset(0 0 100% 0); transition:clip-path 1s var(--ease) var(--d,0ms); }
+  .js .pane--foto[data-r] > img,.js .pane--foto[data-r] > video,.js .reel[data-r] > video,.js .deal__ph[data-r] > video,.js .faq__ph[data-r] > img{ clip-path:inset(0 0 100% 0); transition:clip-path .7s var(--ease) var(--d,0ms); }
   .js .pane--foto.is-in > img,.js .pane--foto.is-in > video,.js .reel.is-in > video,.js .deal__ph.is-in > video,.js .faq__ph.is-in > img{ clip-path:inset(0); }
   .js .pane--foto[data-r]::after{ content:''; position:absolute; z-index:1; top:-10%; bottom:-10%; left:-40%; width:30%; background:rgba(255,255,255,.28); transform:skewX(-18deg); pointer-events:none; }
   .js .pane--foto.is-in::after{ animation:brilla 1.5s ease-out calc(var(--d,0ms) + .35s) both; }

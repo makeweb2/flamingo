@@ -1,8 +1,7 @@
 /* ============================================================
    FLAMINGO BRUNCH & FOOD — interacción
    ------------------------------------------------------------
-   Sin build. Lenis es opcional: si el CDN no responde, solo se
-   pierde el scroll suave.
+   Sin build y sin dependencias: el scroll es el nativo del navegador.
 
    Índice
      1. Carta: datos, pestañas y JSON-LD
@@ -337,7 +336,6 @@
   var viewFull = $('#cestaLlena'), viewEmpty = $('#cestaVacia'), viewOk = $('#cestaOk');
   var errEl = $('#pedidoError');
   var lastFocus = null;
-  var lenis = null;
   var sent = false;
 
   function hhmm(m) { return Math.floor(m / 60) + ':' + String(m % 60).padStart(2, '0'); }
@@ -426,12 +424,10 @@
     fillDays();
     showView(count() ? viewFull : viewEmpty);
     cesta.showModal();
-    if (lenis) lenis.stop();
     paint();
   }
 
   function onClosed() {
-    if (lenis) lenis.start();
     paint();
     if (lastFocus && lastFocus.focus && !lastFocus.hidden) lastFocus.focus();
   }
@@ -458,6 +454,14 @@
   if (cesta && form) {
     $$('[data-abrir-pedido]').forEach(function (b) { b.addEventListener('click', openCesta); });
     $('#cestaCerrar').addEventListener('click', function () { cesta.close(); });
+
+    /* Sin el scroll simulado hay que evitar a mano que la página de
+       detrás se mueva con la cesta abierta. */
+    var quieta = function (e) {
+      if (e.target === cesta || cesta.scrollHeight <= cesta.clientHeight) e.preventDefault();
+    };
+    cesta.addEventListener('wheel', quieta, { passive: false });
+    cesta.addEventListener('touchmove', quieta, { passive: false });
     cesta.addEventListener('close', onClosed);
     cesta.addEventListener('click', function (e) { if (e.target === cesta) cesta.close(); });
 
@@ -502,9 +506,11 @@
       $('#okRef').textContent = ref;
       showView(viewOk);
       var ramo = $('#okRamo');
-      ramo.classList.remove('is-in');
-      ramo.innerHTML = ramoMarkup(300, 200, 12, Date.now() % 1000);
-      requestAnimationFrame(function () { ramo.classList.add('is-in'); });
+      var flores = ramoItems(300, 200, 12, Date.now() % 1000);
+      var planta = ramo._planta || plantar(ramo, function () { return { w: 300, h: 200, items: flores }; });
+      planta.build = function () { return { w: 300, h: 200, items: flores }; };
+      medir(planta);
+      florecer(planta);
       cesta.scrollTop = 0;
     });
 
@@ -661,24 +667,117 @@
   ];
   var VERDES = [['#5C7A50', '#47633E', '#35502F'], ['#7E9A68', '#5C7A50', '#47633E'], ['#D98BA6', '#C56D8C', '#A9516F']];
 
-  function flor(kind, x, y, s, rot, pal, d) {
-    return '<g class="f" style="--d:' + Math.round(d) + 'ms"><g transform="translate(' + x.toFixed(1) + ' ' + y.toFixed(1) +
-      ') rotate(' + Math.round(rot) + ') scale(' + s.toFixed(2) + ')">' +
-      '<use href="#f-' + kind + '" x="-50" y="-50" width="100" height="100" style="--a:' + pal[0] + ';--b:' + pal[1] + ';--c:' + pal[2] + '"/></g></g>';
+  /* Cada flor se dibuja una sola vez en un sprite y las composiciones
+     se estampan en un <canvas>. En SVG eran 1.752 flores con decenas de
+     trazos cada una que el navegador repintaba al hacer scroll (27 fps).
+     Terminada la floración, un canvas es una imagen quieta.            */
+  var DEG = Math.PI / 180;
+  var U = 2.2, R = 55; // píxeles de sprite por unidad y radio dibujado
+  var PETALO = new Path2D('M0 6C-20 -4 -27 -34 0 -46C27 -34 20 -4 0 6Z');
+  var ESPIRAL = new Path2D('M-3 0a3 3 0 1 1 3 3');
+  var CAPULLO = new Path2D('M0 -34C16 -22 18 -4 0 8C-18 -4 -16 -22 0 -34Z');
+  var CAP_LIN = new Path2D('M0 -30C8 -18 8 -4 0 8');
+  var SEPALO = new Path2D('M0 22C-12 18 -15 6 -11 -6C-6 2 -3 6 0 8C3 6 6 2 11 -6C15 6 12 18 0 22Z');
+  var HOJA = new Path2D('M0 44C-24 18 -24 -18 0 -46C24 -18 24 18 0 44Z');
+  var VENAS = new Path2D('M0 40V-38M0 16L-11 4M0 16L11 4M0 -6L-10 -18M0 -6L10 -18');
+  var GIPSO = [[0, 0, 7], [-17, -8, 5], [15, -14, 5.5], [-6, -24, 4.5], [20, 8, 4.5], [-20, 13, 5], [3, 20, 5], [-30, -20, 3.2], [30, -28, 3.2], [-32, 24, 3], [24, 28, 3]];
+
+  function festón(rad, rIn, n) {
+    var pts = [], i;
+    for (i = 0; i < n * 2; i++) {
+      var a = Math.PI * i / n, r0 = i % 2 ? rIn : rad;
+      pts.push([r0 * Math.cos(a), r0 * Math.sin(a)]);
+    }
+    var path = new Path2D();
+    path.moveTo(pts[0][0], pts[0][1]);
+    for (i = 1; i < pts.length; i += 2) {
+      var e = pts[(i + 1) % pts.length];
+      path.quadraticCurveTo(pts[i][0] * 1.22, pts[i][1] * 1.22, e[0], e[1]);
+    }
+    path.closePath();
+    return path;
   }
+  var CLAVEL = [festón(42, 38, 13), festón(30, 26, 11), festón(18, 15, 9)];
+
+  function trazo(c, path, fill, stroke, w) {
+    if (fill) { c.fillStyle = fill; c.fill(path); }
+    if (stroke) { c.strokeStyle = stroke; c.lineWidth = w; c.stroke(path); }
+  }
+  function corona(c, n, sc, rot, fill, stroke) {
+    for (var i = 0; i < n; i++) {
+      c.save();
+      c.rotate((rot + i * 360 / n) * DEG);
+      c.scale(sc, sc);
+      trazo(c, PETALO, fill, stroke, 1.5);
+      c.restore();
+    }
+  }
+  function disco(c, x, y, r, fill, stroke, w) {
+    c.beginPath();
+    c.arc(x, y, r, 0, Math.PI * 2);
+    c.fillStyle = fill;
+    c.fill();
+    if (stroke) { c.strokeStyle = stroke; c.lineWidth = w; c.stroke(); }
+  }
+  function girado(c, deg, fn) { c.save(); c.rotate(deg * DEG); fn(); c.restore(); }
+
+  var DIBUJO = {
+    rosa: function (c, a, b, d) {
+      corona(c, 6, 1, 0, a, d); corona(c, 5, .7, 30, b, d); corona(c, 4, .42, 10, a, d);
+      disco(c, 0, 0, 7, d);
+      trazo(c, ESPIRAL, null, a, 1.4);
+    },
+    peonia: function (c, a, b, d) {
+      corona(c, 9, 1.06, 0, a, d); corona(c, 8, .8, 20, b, d); corona(c, 7, .56, 8, a, d); corona(c, 5, .34, 40, b, d);
+      disco(c, 0, 0, 6, '#E9B949', d, 1);
+    },
+    clavel: function (c, a, b, d) {
+      trazo(c, CLAVEL[0], a, d, 1.5);
+      girado(c, 14, function () { trazo(c, CLAVEL[1], b, d, 1.5); });
+      girado(c, 30, function () { trazo(c, CLAVEL[2], a, d, 1.5); });
+      disco(c, 0, 0, 5, d);
+    },
+    capullo: function (c, a, b, d) {
+      trazo(c, CAPULLO, a, d, 1.5);
+      trazo(c, CAP_LIN, null, d, 1.4);
+      trazo(c, SEPALO, '#5C7A50');
+    },
+    hoja: function (c, a, b, d) {
+      trazo(c, HOJA, a, d, 1.2);
+      trazo(c, VENAS, null, d, 1.1);
+    },
+    gipso: function (c, a, b) {
+      GIPSO.forEach(function (g) { disco(c, g[0], g[1], g[2], '#FFFBF9', b, 1); });
+    }
+  };
+
+  var sprites = {};
+  function sprite(kind, pal) {
+    var key = kind + pal[0];
+    if (sprites[key]) return sprites[key];
+    var cv = document.createElement('canvas');
+    cv.width = cv.height = Math.ceil(R * 2 * U);
+    var c = cv.getContext('2d');
+    c.setTransform(U, 0, 0, U, R * U, R * U);
+    c.lineJoin = 'round';
+    c.lineCap = 'round';
+    DIBUJO[kind](c, pal[0], pal[1], pal[2]);
+    return (sprites[key] = cv);
+  }
+
   function pick(r, arr) { return arr[Math.floor(r() * arr.length)]; }
 
-  /* Reparte flores a lo largo de pt(t), con t de 0 a 1. Los tamaños se
-     pintan de mayor a menor para que las pequeñas queden encima. */
+  /* Reparte flores a lo largo de pt(t), con t de 0 a 1. Las grandes
+     primero, para que las pequeñas queden encima. */
   function scatter(pt, opts) {
     var r = rng(opts.seed);
-    var layers = [];
+    var out = [];
     function layer(n, kinds, pals, smin, smax, spread) {
       for (var i = 0; i < n; i++) {
-        var t = (i + r()) / n;
-        var p = pt(t);
-        layers.push(flor(pick(r, kinds), p.x + (r() - .5) * spread, p.y + (r() - .5) * spread,
-          smin + r() * (smax - smin), r() * 360, pick(r, pals), p.d != null ? p.d + r() * 120 : r() * 700));
+        var p = pt((i + r()) / n);
+        var x = p.x + (r() - .5) * spread, y = p.y + (r() - .5) * spread;
+        var s = smin + r() * (smax - smin), rot = r() * 360, kind = pick(r, kinds), pal = pick(r, pals);
+        out.push({ x: x, y: y, s: s, rot: rot, img: sprite(kind, pal), d: p.d != null ? p.d + r() * 120 : r() * 700 });
       }
     }
     var k = opts.k || 1;
@@ -686,20 +785,107 @@
     layer(Math.round(34 * k), ['peonia', 'rosa'], PAL, opts.big * .8, opts.big, opts.spread);
     layer(Math.round(44 * k), ['clavel', 'rosa'], PAL, opts.big * .5, opts.big * .75, opts.spread * 1.15);
     layer(Math.round(26 * k), ['capullo', 'gipso'], PAL, opts.big * .45, opts.big * .7, opts.spread * 1.3);
-    return layers.join('');
+    return out;
   }
 
-  function ramoMarkup(w, h, n, seed) {
+  function ramoItems(w, h, n, seed) {
     return scatter(function (t) {
       var a = Math.PI * (.08 + t * .84);
       return { x: w / 2 - Math.cos(a) * w * .36, y: h * .68 - Math.sin(a) * h * .34 };
     }, { seed: seed, spread: 46, big: .62, k: n / 40 });
   }
 
+  /* Plantas: cada composición con su canvas. `build` devuelve su lienzo
+     lógico y sus flores, y se repite si cambia el ancho de la ventana. */
+  var plantas = [];
+  var activas = [];
+  var latiendo = false;
+
+  function plantar(host, build) {
+    var cv = document.createElement('canvas');
+    host.appendChild(cv);
+    var e = { host: host, cv: cv, c: cv.getContext('2d'), build: build, items: [], t0: null, visto: false };
+    host._planta = e;
+    plantas.push(e);
+    medir(e);
+    return e;
+  }
+
+  function medir(e) {
+    var w = e.host.offsetWidth, h = e.host.offsetHeight;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var data = e.build(w, h);
+    e.items = data.items;
+    var s = data.slice ? Math.max(w / data.w, h / data.h) : w / data.w;
+    var pad = data.slice ? 0 : Math.ceil(95 * s);
+    e.s = s;
+    e.dpr = dpr;
+    e.ox = (data.slice ? (w - data.w * s) / 2 : 0) + pad;
+    e.oy = pad;
+    e.cv.style.left = e.cv.style.top = -pad + 'px';
+    e.cv.style.width = (w + pad * 2) + 'px';
+    e.cv.style.height = (h + pad * 2) + 'px';
+    e.cv.width = Math.round((w + pad * 2) * dpr);
+    e.cv.height = Math.round((h + pad * 2) * dpr);
+  }
+
+  function escala(p) {
+    if (p < .7) { var q = 1 - p / .7; return 1.1 * (1 - q * q * q); }
+    return 1.1 - .1 * (p - .7) / .3;
+  }
+
+  /* Pinta el estado en `now`; sin floración en curso, el estado final. */
+  function pintar(e, now) {
+    var c = e.c, k = e.s * e.dpr, listo = true;
+    var maxX = e.cv.width + 130 * k, maxY = e.cv.height + 130 * k;
+    c.setTransform(1, 0, 0, 1, 0, 0);
+    c.clearRect(0, 0, e.cv.width, e.cv.height);
+    c.imageSmoothingQuality = 'high';
+    for (var i = 0; i < e.items.length; i++) {
+      var it = e.items[i], sc = 1, giro = 0;
+      if (e.t0 !== null) {
+        var p = (now - e.t0 - it.d) / 720;
+        if (p <= 0) { listo = false; continue; }
+        if (p < 1) { listo = false; sc = escala(p); giro = -50 * Math.max(0, 1 - p / .7); }
+      }
+      var X = (it.x * e.s + e.ox) * e.dpr, Y = (it.y * e.s + e.oy) * e.dpr;
+      if (X < -130 * k || Y < -130 * k || X > maxX || Y > maxY) continue;
+      var S = it.s * sc * k, a = (it.rot + giro) * DEG, co = Math.cos(a) * S, si = Math.sin(a) * S;
+      c.setTransform(co, si, -si, co, X, Y);
+      c.drawImage(it.img, -R, -R, R * 2, R * 2);
+    }
+    return listo;
+  }
+
+  function latido(now) {
+    activas = activas.filter(function (e) {
+      if (!pintar(e, now)) return true;
+      e.t0 = null;
+      return false;
+    });
+    if (activas.length) requestAnimationFrame(latido);
+    else latiendo = false;
+  }
+
+  function florecer(e) {
+    e.visto = true;
+    if (REDUCED) { e.t0 = null; pintar(e, 0); return; }
+    e.t0 = performance.now();
+    if (activas.indexOf(e) < 0) activas.push(e);
+    if (!latiendo) { latiendo = true; requestAnimationFrame(latido); }
+  }
+
+  function marchitar(e) {
+    activas = activas.filter(function (x) { return x !== e; });
+    e.t0 = null;
+    e.visto = false;
+    e.c.setTransform(1, 0, 0, 1, 0, 0);
+    e.c.clearRect(0, 0, e.cv.width, e.cv.height);
+  }
+
   (function () {
     var arco = $('#arco');
     if (arco) {
-      var small = window.innerWidth < 720;
       var L = 700 + 400 + 700;
       var pt = function (t) {
         var s = t * L, x, y;
@@ -708,67 +894,67 @@
         else { x = 524; y = 130 + (s - 1100); }
         return { x: x, y: y, d: 150 + Math.min(s, L - s) / (L / 2) * 1150 };
       };
-      arco.innerHTML = scatter(pt, { seed: 7, spread: 100, big: .9, k: small ? 1.05 : 1.55 });
-      requestAnimationFrame(function () { arco.classList.add('is-in'); });
+      var arcoK = window.innerWidth < 720 ? 1.05 : 1.55;
+      var items = scatter(pt, { seed: 7, spread: 100, big: .9, k: arcoK });
+      florecer(plantar(arco, function () { return { w: 600, h: 820, items: items }; }));
     }
 
     $$('[data-flores="esquina"]').forEach(function (el) {
-      el.innerHTML = scatter(function (t) {
+      var items = scatter(function (t) {
         var s = Math.abs(t - .5) * 2, len = 250 * s;
         return t < .5 ? { x: 20, y: 20 + len, d: s * 600 } : { x: 20 + len, y: 20, d: s * 600 };
       }, { seed: +el.dataset.seed || 9, spread: 46, big: .62, k: .3 });
+      plantar(el, function () { return { w: 300, h: 300, items: items }; });
     });
 
     /* La puerta de las reseñas: el arco sigue el marco real, medido en
        píxeles, para que no se deforme en ningún ancho. */
-    function drawPorton(el) {
-      var box = el.getBoundingClientRect();
-      var hoja = el.parentNode.querySelector('.porton__hoja').getBoundingClientRect();
-      if (!box.width) return;
-      var W = box.width, H = box.height;
-      var fuera = W < 520 ? 18 : 10; // el arco va por fuera del marco, sin pisar el texto
-      var l = hoja.left - box.left - fuera, r = hoja.right - box.left + fuera, top = hoja.top - box.top - fuera, bot = hoja.bottom - box.top;
-      var leg = bot - top, span = r - l, L = 2 * leg + span;
-      el.setAttribute('viewBox', '0 0 ' + Math.round(W) + ' ' + Math.round(H));
-      el.innerHTML = scatter(function (t) {
-        var s = t * L, x, y;
-        if (s < leg) { x = l; y = bot - s; }
-        else if (s < leg + span) { x = l + s - leg; y = top; }
-        else { x = r; y = top + s - leg - span; }
-        return { x: x, y: y, d: 100 + Math.min(s, L - s) / (L / 2) * 900 };
-      }, { seed: +el.dataset.seed || 19, spread: W < 520 ? 24 : 58, big: W < 520 ? .34 : .62, k: W < 520 ? .6 : 1.1 });
-    }
     $$('[data-flores="porton"]').forEach(function (el) {
-      var lastW = window.innerWidth;
-      drawPorton(el);
-      window.addEventListener('resize', function () {
-        if (Math.abs(window.innerWidth - lastW) < 60) return;
-        lastW = window.innerWidth;
-        drawPorton(el);
-      }, { passive: true });
+      plantar(el, function (W, H) {
+        var box = el.getBoundingClientRect();
+        var hoja = el.parentNode.querySelector('.porton__hoja').getBoundingClientRect();
+        var fuera = W < 520 ? 18 : 10; // el arco va por fuera del marco, sin pisar el texto
+        var l = hoja.left - box.left - fuera, r = hoja.right - box.left + fuera, top = hoja.top - box.top - fuera, bot = hoja.bottom - box.top;
+        var leg = bot - top, span = r - l, T = 2 * leg + span;
+        return { w: W, h: H, items: scatter(function (t) {
+          var s = t * T, x, y;
+          if (s < leg) { x = l; y = bot - s; }
+          else if (s < leg + span) { x = l + s - leg; y = top; }
+          else { x = r; y = top + s - leg - span; }
+          return { x: x, y: y, d: 100 + Math.min(s, T - s) / (T / 2) * 900 };
+        }, { seed: +el.dataset.seed || 19, spread: W < 520 ? 24 : 58, big: W < 520 ? .34 : .62, k: W < 520 ? .6 : 1.1 }) };
+      });
     });
 
     $$('[data-flores="ramo"]').forEach(function (el) {
-      el.innerHTML = ramoMarkup(300, 200, 16, +el.dataset.seed || 3);
+      var items = ramoItems(300, 200, 16, +el.dataset.seed || 3);
+      plantar(el, function () { return { w: 300, h: 200, items: items }; });
     });
 
     $$('[data-flores="guirnalda"]').forEach(function (el) {
-      var pt = function (t) {
-        var x = t * 1600;
-        var y = 14 + Math.abs(Math.sin(t * Math.PI * 5)) * 44;
-        return { x: x, y: y, d: t * 1100 };
-      };
-      el.innerHTML = scatter(pt, { seed: +el.dataset.seed || 5, spread: 34, big: .5, k: 1.15 });
+      var items = scatter(function (t) {
+        return { x: t * 1600, y: 14 + Math.abs(Math.sin(t * Math.PI * 5)) * 44, d: t * 1100 };
+      }, { seed: +el.dataset.seed || 5, spread: 34, big: .5, k: 1.15 });
+      plantar(el, function () { return { w: 1600, h: 120, items: items, slice: true }; });
     });
+
+    /* Al cambiar el ancho se recoloca todo en su estado final. */
+    var ancho = window.innerWidth, espera = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(espera);
+      espera = setTimeout(function () {
+        if (window.innerWidth === ancho) return;
+        ancho = window.innerWidth;
+        plantas.forEach(function (e) {
+          if (!e.host.offsetWidth) return;
+          medir(e);
+          if (e.visto && e.t0 === null) pintar(e, 0);
+        });
+      }, 160);
+    }, { passive: true });
   })();
 
   /* == 9. NAV, SCROLL Y MENÚ MÓVIL =========================== */
-  if (window.Lenis && !REDUCED) {
-    lenis = new Lenis({ duration: 1.05, smoothWheel: true });
-    if (!location.hash) lenis.scrollTo(0, { immediate: true, force: true });
-    (function raf(t) { lenis.raf(t); requestAnimationFrame(raf); })(0);
-  }
-
   var nav = $('#nav');
   var burger = $('#burger');
   var drawer = $('#drawer');
@@ -779,9 +965,11 @@
     drawer.setAttribute('aria-hidden', String(!open));
     burger.setAttribute('aria-expanded', String(open));
     burger.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
-    if (lenis) { if (open) lenis.stop(); else lenis.start(); }
     // Las flores del menú florecen cada vez que se abre.
-    $$('.flores', drawer).forEach(function (f) { f.classList.toggle('is-in', open); });
+    $$('.flores', drawer).forEach(function (f) {
+      if (!f._planta) return;
+      if (open) florecer(f._planta); else marchitar(f._planta);
+    });
   }
 
   document.addEventListener('click', function (e) {
@@ -792,9 +980,14 @@
     if (!el) return;
     e.preventDefault();
     setDrawer(false);
-    if (lenis) lenis.scrollTo(el, { duration: 1.1, offset: href === '#top' ? 0 : -64 });
-    else el.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
+    el.scrollIntoView({ behavior: REDUCED ? 'auto' : 'smooth' });
   });
+
+  var menuQuieto = function (e) {
+    if (drawer.scrollHeight <= drawer.clientHeight) e.preventDefault();
+  };
+  drawer.addEventListener('wheel', menuQuieto, { passive: false });
+  drawer.addEventListener('touchmove', menuQuieto, { passive: false });
 
   burger.addEventListener('click', function () {
     var open = !drawer.classList.contains('is-open');
@@ -880,19 +1073,23 @@
   (function () {
     var targets = $$('[data-lines],[data-r],.flores[data-flores]').filter(function (t) { return !t.closest('.drawer'); });
     if (!('IntersectionObserver' in window)) {
-      targets.forEach(function (t) { t.classList.add('is-in'); });
+      targets.forEach(function (t) {
+        t.classList.add('is-in');
+        if (t._planta) florecer(t._planta);
+      });
       return;
     }
     $$('.ventanal, .reels').forEach(function (group) {
-      $$('[data-r]', group).forEach(function (el, i) { el.style.setProperty('--d', (i % 4) * 90 + 'ms'); });
+      $$('[data-r]', group).forEach(function (el, i) { el.style.setProperty('--d', (i % 4) * 60 + 'ms'); });
     });
     var io = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
         if (!en.isIntersecting) return;
         en.target.classList.add('is-in');
+        if (en.target._planta) florecer(en.target._planta);
         io.unobserve(en.target);
       });
-    }, { rootMargin: '0px 0px -6% 0px', threshold: .05 });
+    }, { rootMargin: '0px', threshold: 0 });
     targets.forEach(function (t) { io.observe(t); });
 
     var links = $$('.dp');

@@ -72,15 +72,24 @@ servidor con la API de WhatsApp Business o de un servicio equivalente.
 - **Redes**: lista `.canales` del HTML. Solo está lo comprobado (Instagram, WhatsApp y
   Google). Para TikTok o Facebook, copiar una fila con la URL oficial.
 - **Preguntas**: en el HTML. El `FAQPage` se genera leyendo el acordeón.
-- **Flores**: bloque 8 de `js/main.js` y piezas `#f-*` del sprite. El azar lleva
-  semilla, así que el dibujo sale siempre igual.
+- **Flores**: bloque 8 de `js/main.js` (`DIBUJO` tiene cada especie y `scatter` las
+  reparte). El azar lleva semilla, así que el dibujo sale siempre igual.
 
 ## Detalles que conviene no romper
 
 - **`[hidden]{ display:none !important }`.** Sin él, `.btn{ display:inline-flex }` gana
   al atributo y el botón Añadir no se oculta al poner cantidades.
-- **Las flores llevan `x`, `y`, `width` y `height` en `<use>`.** Sin ellos un `<symbol>`
-  se dibuja al 100 % del SVG y una flor ocupa la pantalla.
+- **Las flores van en `<canvas>`, no en SVG.** Eran 1.752 flores vectoriales y el
+  navegador las repintaba al hacer scroll: 27 fps. En canvas, 144 fps, y la floración
+  es la misma. No volver a meterlas en el DOM.
+- **La rosa suelta (`#f-rosa`) lleva `x`, `y`, `width` y `height` en `<use>`.** Sin ellos
+  un `<symbol>` se dibuja al 100 % del SVG y ocupa la pantalla.
+- **`main` y `.foot` llevan `overflow-x:clip`, no `hidden`.** Recorta los lienzos de las
+  flores sin romper los `sticky`.
+- **Fotos del `<img>` en WebP a su tamaño real** (`posters.webp`, `exterior.webp`). Los
+  JPEG grandes solo quedan para Open Graph, JSON-LD y sitemap.
+- **El scroll es el nativo.** Lenis lo pasaba al hilo principal; se quitó para que el
+  desplazamiento no dependa de lo ocupado que esté el JavaScript.
 - **`.nav` fija `grid-template-rows`.** El logo sobresale de la barra: sin la fila fija
   la agranda y el resto de la barra se descuadra.
 - **El arco de `.porton` se dibuja midiendo el marco.** Por eso no se deforma en ningún
@@ -91,7 +100,6 @@ servidor con la API de WhatsApp Business o de un servicio equivalente.
 - **El acordeón no lleva `height:0` en el CSS.** Sin JS los paneles se leen abiertos.
 - **El aviso de `scrollRestoration` y la clase `js` van en línea en el `<head>`.**
   Desde un script con `defer` llegan tarde.
-- **La cesta lleva `data-lenis-prevent`.** Si no, Lenis se queda la rueda del ratón.
 
 ## SEO
 
