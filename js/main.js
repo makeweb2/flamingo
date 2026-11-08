@@ -112,7 +112,8 @@
     host.innerHTML = labels.map(function (l, i) {
       return '<button type="button" class="tab' + (i === 0 ? ' is-active' : '') + '" id="' + prefix + i + '"' +
              ' role="tab" aria-selected="' + (i === 0) + '" tabindex="' + (i === 0 ? 0 : -1) + '"' +
-             ' data-i="' + i + '">' + esc(l) + '</button>';
+             ' data-i="' + i + '">' + esc(l) +
+             '<svg class="tab__fl" viewBox="-50 -50 100 100" aria-hidden="true"><use href="#f-rosa" x="-50" y="-50" width="100" height="100"/></svg></button>';
     }).join('');
     var els = $$('.tab', host);
     function select(i, focus) {
@@ -711,6 +712,42 @@
       requestAnimationFrame(function () { arco.classList.add('is-in'); });
     }
 
+    $$('[data-flores="esquina"]').forEach(function (el) {
+      el.innerHTML = scatter(function (t) {
+        var s = Math.abs(t - .5) * 2, len = 250 * s;
+        return t < .5 ? { x: 20, y: 20 + len, d: s * 600 } : { x: 20 + len, y: 20, d: s * 600 };
+      }, { seed: +el.dataset.seed || 9, spread: 46, big: .62, k: .3 });
+    });
+
+    /* La puerta de las reseñas: el arco sigue el marco real, medido en
+       píxeles, para que no se deforme en ningún ancho. */
+    function drawPorton(el) {
+      var box = el.getBoundingClientRect();
+      var hoja = el.parentNode.querySelector('.porton__hoja').getBoundingClientRect();
+      if (!box.width) return;
+      var W = box.width, H = box.height;
+      var fuera = W < 520 ? 18 : 10; // el arco va por fuera del marco, sin pisar el texto
+      var l = hoja.left - box.left - fuera, r = hoja.right - box.left + fuera, top = hoja.top - box.top - fuera, bot = hoja.bottom - box.top;
+      var leg = bot - top, span = r - l, L = 2 * leg + span;
+      el.setAttribute('viewBox', '0 0 ' + Math.round(W) + ' ' + Math.round(H));
+      el.innerHTML = scatter(function (t) {
+        var s = t * L, x, y;
+        if (s < leg) { x = l; y = bot - s; }
+        else if (s < leg + span) { x = l + s - leg; y = top; }
+        else { x = r; y = top + s - leg - span; }
+        return { x: x, y: y, d: 100 + Math.min(s, L - s) / (L / 2) * 900 };
+      }, { seed: +el.dataset.seed || 19, spread: W < 520 ? 24 : 58, big: W < 520 ? .34 : .62, k: W < 520 ? .6 : 1.1 });
+    }
+    $$('[data-flores="porton"]').forEach(function (el) {
+      var lastW = window.innerWidth;
+      drawPorton(el);
+      window.addEventListener('resize', function () {
+        if (Math.abs(window.innerWidth - lastW) < 60) return;
+        lastW = window.innerWidth;
+        drawPorton(el);
+      }, { passive: true });
+    });
+
     $$('[data-flores="ramo"]').forEach(function (el) {
       el.innerHTML = ramoMarkup(300, 200, 16, +el.dataset.seed || 3);
     });
@@ -743,6 +780,8 @@
     burger.setAttribute('aria-expanded', String(open));
     burger.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
     if (lenis) { if (open) lenis.stop(); else lenis.start(); }
+    // Las flores del menú florecen cada vez que se abre.
+    $$('.flores', drawer).forEach(function (f) { f.classList.toggle('is-in', open); });
   }
 
   document.addEventListener('click', function (e) {
@@ -839,7 +878,7 @@
   $$('[data-lines]').forEach(splitLines);
 
   (function () {
-    var targets = $$('[data-lines],[data-r],.flores[data-flores]');
+    var targets = $$('[data-lines],[data-r],.flores[data-flores]').filter(function (t) { return !t.closest('.drawer'); });
     if (!('IntersectionObserver' in window)) {
       targets.forEach(function (t) { t.classList.add('is-in'); });
       return;
@@ -856,7 +895,8 @@
     }, { rootMargin: '0px 0px -6% 0px', threshold: .05 });
     targets.forEach(function (t) { io.observe(t); });
 
-    var links = $$('.nav__links a');
+    var links = $$('.dp');
+    links.forEach(function (a, i) { a.style.setProperty('--i', i); });
     var spy = new IntersectionObserver(function (entries) {
       entries.forEach(function (en) {
         if (!en.isIntersecting) return;

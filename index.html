@@ -198,30 +198,30 @@
 
 <!-- La barra es el toldo negro de la fachada. -->
 <header class="nav" id="nav">
-  <a href="#top" class="nav__brand">Flamingo</a>
-  <nav class="nav__links" aria-label="Principal">
-    <a href="#local">El local</a>
-    <a href="#tienda">Tienda</a>
-    <a href="#carta">La carta</a>
-    <a href="#resenas">Reseñas</a>
-    <a href="#redes">Redes</a>
-    <a href="#visitanos">Visítanos</a>
-  </nav>
-  <a href="tel:+34607020554" class="nav__tel">607 02 05 54</a>
-  <button type="button" class="nav__cart" data-abrir-pedido>Pedido <b data-cuenta>0</b></button>
-  <button class="burger" id="burger" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="drawer">
-    <span></span><span></span>
-  </button>
+  <div class="nav__l">
+    <button class="burger" id="burger" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="drawer">
+      <span class="burger__ic" aria-hidden="true"><i></i><i></i><i></i></span><span class="burger__t" aria-hidden="true">Menú</span>
+    </button>
+  </div>
+  <a href="#top" class="nav__logo" aria-label="Flamingo Brunch &amp; Food, inicio"><img src="assets/img/logo-nav.webp" width="256" height="256" alt="" decoding="async"></a>
+  <div class="nav__r">
+    <a href="tel:+34607020554" class="nav__tel">607 02 05 54</a>
+    <button type="button" class="nav__cart" data-abrir-pedido>Pedido <b data-cuenta>0</b></button>
+  </div>
 </header>
 
-<div class="drawer" id="drawer" aria-hidden="true">
-  <a href="#local">El local</a>
-  <a href="#tienda">Tienda para recoger</a>
-  <a href="#carta">La carta</a>
-  <a href="#resenas">Reseñas</a>
-  <a href="#redes">Redes</a>
-  <a href="#visitanos">Visítanos</a>
-  <p>Todos los días de 9:00 a 21:00 · <a class="drawer__tel" href="tel:+34607020554">607 02 05 54</a></p>
+<div class="drawer" id="drawer" aria-hidden="true" data-lenis-prevent>
+  <svg class="flores guirnalda" data-flores="guirnalda" data-seed="61" viewBox="0 0 1600 120" preserveAspectRatio="xMidYMin slice" aria-hidden="true" focusable="false"></svg>
+  <nav class="drawer__win" aria-label="Secciones">
+    <a href="#local" class="dp dp--wall"><span class="dp__txt"><span class="dp__t">El local<svg class="dp__fl" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false" style="--a:#F7A8C0;--b:#EE7FA6;--c:#C93D78"><use href="#f-rosa" x="-50" y="-50" width="100" height="100"/></svg></span><span class="dp__d">La sala, la terraza y la plaza</span></span><img class="dp__ph" src="assets/img/fachada.webp" alt="" loading="lazy" decoding="async"></a>
+    <a href="#tienda" class="dp dp--blanco"><span class="dp__txt"><span class="dp__t">Tienda<svg class="dp__fl" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false" style="--a:#F7A8C0;--b:#EE7FA6;--c:#C93D78"><use href="#f-rosa" x="-50" y="-50" width="100" height="100"/></svg></span><span class="dp__d">Encarga y recoge en el local</span></span><img class="dp__ph" src="assets/img/reel3-poster.jpg" alt="" loading="lazy" decoding="async"></a>
+    <a href="#carta" class="dp dp--wall"><span class="dp__txt"><span class="dp__t">La carta<svg class="dp__fl" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false" style="--a:#F7A8C0;--b:#EE7FA6;--c:#C93D78"><use href="#f-rosa" x="-50" y="-50" width="100" height="100"/></svg></span><span class="dp__d">La misma de 9:00 a 21:00</span></span><img class="dp__ph" src="assets/img/reel1-poster.jpg" alt="" loading="lazy" decoding="async"></a>
+    <a href="#resenas" class="dp dp--blanco"><span class="dp__txt"><span class="dp__t">Reseñas<svg class="dp__fl" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false" style="--a:#F7A8C0;--b:#EE7FA6;--c:#C93D78"><use href="#f-rosa" x="-50" y="-50" width="100" height="100"/></svg></span><span class="dp__d">Lo que dice la bandada</span></span><span class="dp__ph dp__ph--bird"><svg viewBox="0 0 262 464" aria-hidden="true" focusable="false"><use href="#bird"/></svg></span></a>
+    <a href="#redes" class="dp dp--wall"><span class="dp__txt"><span class="dp__t">Redes<svg class="dp__fl" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false" style="--a:#F7A8C0;--b:#EE7FA6;--c:#C93D78"><use href="#f-rosa" x="-50" y="-50" width="100" height="100"/></svg></span><span class="dp__d">El día a día en Instagram</span></span><img class="dp__ph" src="assets/img/reel4-poster.jpg" alt="" loading="lazy" decoding="async"></a>
+    <a href="#visitanos" class="dp dp--blanco"><span class="dp__txt"><span class="dp__t">Visítanos<svg class="dp__fl" viewBox="-50 -50 100 100" aria-hidden="true" focusable="false" style="--a:#F7A8C0;--b:#EE7FA6;--c:#C93D78"><use href="#f-rosa" x="-50" y="-50" width="100" height="100"/></svg></span><span class="dp__d">Reservar mesa y cómo llegar</span></span><img class="dp__ph" src="assets/img/exterior.jpg" alt="" loading="lazy" decoding="async"></a>
+  </nav>
+  <p class="drawer__foot">Todos los días de 9:00 a 21:00 <a class="lnk" href="tel:+34607020554">607 02 05 54</a></p>
+  <div class="acera acera--menu" aria-hidden="true"><svg class="acera__flam flam" viewBox="0 0 262 464" focusable="false"><use href="#bird"/></svg></div>
 </div>
 
 <main id="top" tabindex="-1">
@@ -233,7 +233,6 @@
 <section class="front" aria-labelledby="h-front">
   <div class="front__sign">
     <p class="rotulo" aria-label="Flamingo Brunch &amp; Food">FLAMINGO<small>BRUNCH &amp; FOOD</small></p>
-    <img class="front__banner" src="assets/img/logo.jpg" width="1057" height="1057" alt="" decoding="async">
   </div>
 
   <div class="front__wall">
@@ -262,6 +261,7 @@
     <div class="front__side">
       <div class="toldo" aria-hidden="true"></div>
       <div class="win">
+        <svg class="flores esq esq--tr" data-flores="esquina" data-seed="71" viewBox="0 0 300 300" aria-hidden="true" focusable="false"></svg>
         <figure><img src="assets/img/terraza.webp" width="382" height="510" alt="Sombrilla de rayas y sillas rosas en la terraza de Flamingo" decoding="async"></figure>
         <figure><img src="assets/img/barra.webp" width="382" height="510" alt="Barra de mármol con flores y lámparas de aro" decoding="async"></figure>
       </div>
@@ -278,6 +278,8 @@
   <div class="valance" aria-hidden="true"></div>
   <div class="wrap">
     <div class="ventanal">
+      <svg class="flores esq esq--tr" data-flores="esquina" data-seed="31" viewBox="0 0 300 300" aria-hidden="true" focusable="false"></svg>
+      <svg class="flores esq esq--bl" data-flores="esquina" data-seed="37" viewBox="0 0 300 300" aria-hidden="true" focusable="false"></svg>
       <div class="pane pane--w2 pane--wall" data-r>
         <h2 class="dis dis--m" data-lines id="h-local">Una cafetería de brunch<br>en la Plaza de España</h2>
         <p>Mármol, carpintería negra y terraza con sillas de ratán a pie de plaza, en el centro histórico de Elche. Sala y terraza sirven la carta completa desde la apertura hasta el cierre, sin franjas ni turnos.</p>
@@ -334,6 +336,7 @@
 <!-- ══ 4. LA CARTA ═════════════════════════════════════════════
      El único bloque negro de la página: el toldo de la fachada. -->
 <section class="carta" id="carta" aria-labelledby="h-carta">
+  <svg class="flores guirnalda" data-flores="guirnalda" data-seed="83" viewBox="0 0 1600 120" preserveAspectRatio="xMidYMin slice" aria-hidden="true" focusable="false"></svg>
   <div class="wrap carta__grid">
     <div class="carta__main">
       <h2 class="dis" data-lines id="h-carta">La carta de brunch,<br>de 9:00 a 21:00</h2>
@@ -350,6 +353,7 @@
     </div>
     <aside class="deal" aria-labelledby="h-deal">
       <figure class="deal__ph" data-r>
+        <svg class="flores esq esq--br" data-flores="esquina" data-seed="43" viewBox="0 0 300 300" aria-hidden="true" focusable="false"></svg>
         <video src="assets/video/reel1.mp4" poster="assets/img/reel1-poster.jpg" width="480" height="854" muted loop playsinline preload="none" aria-label="Bowl de açaí con granola, kiwi y frutos rojos"></video>
       </figure>
       <h2 class="dis dis--s" id="h-deal">Los platos más pedidos</h2>
@@ -369,7 +373,7 @@
     <div class="bandada__head">
       <h2 class="dis" data-lines id="h-resenas">Lo que dice<br>la bandada</h2>
       <p>En El Hondo, a las afueras de Elche, hay flamencos de verdad. Los de la Plaza de España vienen a desayunar y luego lo cuentan en Google.</p>
-      <a class="flock" href="https://www.google.com/maps/search/?api=1&amp;query=Flamingo+Brunch+%26+Food+Plaza+de+Espa%C3%B1a+3+Elche" target="_blank" rel="noopener" data-r aria-label="4,2 de 5 sobre 776 reseñas en Google. Abrir en Google Maps">
+      <a class="flock" href="https://www.google.com/search?q=flamingo+brunch+elche&amp;oq=&amp;gs_lcrp=EgZjaHJvbWUqBggAEEUYOzIGCAAQRRg7MgYIARBFGDsyEwgCEC4YrwEYxwEYgAQYmAUYmQUyBwgDEAAYgAQyFggEEC4YrwEYxwEYgAQYmAUYmQUYngUyBggFEEUYPDIGCAYQRRg8MgYIBxBFGD3SAQgxMDc1ajBqN6gCALACAA&amp;sourceid=chrome&amp;source=chrome.ob&amp;ie=UTF-8" target="_blank" rel="noopener" data-r aria-label="4,2 de 5 sobre 776 reseñas en Google. Ver las reseñas">
         <span class="flock__birds" aria-hidden="true">
           <span class="flock__off"><svg viewBox="0 0 262 464"><use href="#bird"/></svg><svg viewBox="0 0 262 464"><use href="#bird"/></svg><svg viewBox="0 0 262 464"><use href="#bird"/></svg><svg viewBox="0 0 262 464"><use href="#bird"/></svg><svg viewBox="0 0 262 464"><use href="#bird"/></svg></span>
           <span class="flock__on"><span class="flock__in"><svg viewBox="0 0 262 464"><use href="#bird"/></svg><svg viewBox="0 0 262 464"><use href="#bird"/></svg><svg viewBox="0 0 262 464"><use href="#bird"/></svg><svg viewBox="0 0 262 464"><use href="#bird"/></svg><svg viewBox="0 0 262 464"><use href="#bird"/></svg></span></span>
@@ -379,6 +383,7 @@
     </div>
 
     <div class="cuaderno" data-r>
+      <svg class="flores esq esq--tr" data-flores="esquina" data-seed="47" viewBox="0 0 300 300" aria-hidden="true" focusable="false"></svg>
       <h3>Cuaderno de campo</h3>
       <dl>
         <div><dt>Alimentación</dt><dd>La bandada vuelve por la repostería y el café. Las raciones se comentan por generosas.</dd></div>
@@ -386,8 +391,19 @@
         <div><dt>Conducta</dt><dd>Repite y lo recomienda. Cuando hay algo que afinar, suele ser la rapidez al tomar nota.</dd></div>
       </dl>
       <p class="cuaderno__src">Resumen con nuestras palabras de las opiniones públicas en GastroRanking. No son citas literales.</p>
-      <a class="btn btn--ink btn--sm" href="https://www.google.com/maps/search/?api=1&amp;query=Flamingo+Brunch+%26+Food+Plaza+de+Espa%C3%B1a+3+Elche" target="_blank" rel="noopener">Leer y dejar reseñas en Google</a>
     </div>
+
+    <a class="porton" id="porton" href="https://www.google.com/search?q=flamingo+brunch+elche&amp;oq=&amp;gs_lcrp=EgZjaHJvbWUqBggAEEUYOzIGCAAQRRg7MgYIARBFGDsyEwgCEC4YrwEYxwEYgAQYmAUYmQUyBwgDEAAYgAQyFggEEC4YrwEYxwEYgAQYmAUYmQUYngUyBggFEEUYPDIGCAYQRRg8MgYIBxBFGD3SAQgxMDc1ajBqN6gCALACAA&amp;sourceid=chrome&amp;source=chrome.ob&amp;ie=UTF-8" target="_blank" rel="noopener">
+      <svg class="flores porton__arco" data-flores="porton" data-seed="19" aria-hidden="true" focusable="false"></svg>
+      <span class="porton__hoja">
+        <span class="porton__t">¿Ya has aterrizado por aquí?</span>
+        <span class="porton__d">Cuéntaselo a la bandada en Google.</span>
+        <span class="btn btn--ink btn--sm">Ver y dejar reseñas</span>
+      </span>
+      <svg class="porton__flam flam" viewBox="0 0 262 464" aria-hidden="true" focusable="false"><use href="#bird"/></svg>
+      <svg class="porton__flam porton__flam--r flam" viewBox="0 0 262 464" aria-hidden="true" focusable="false"><use href="#bird"/></svg>
+      <span class="acera" aria-hidden="true"></span>
+    </a>
 
     <div class="resenas" id="resenasCards" hidden></div>
   </div>
@@ -406,12 +422,16 @@
       </div>
     </header>
 
+    <div class="reels__w">
+    <svg class="flores esq esq--tl" data-flores="esquina" data-seed="53" viewBox="0 0 300 300" aria-hidden="true" focusable="false"></svg>
+    <svg class="flores esq esq--br" data-flores="esquina" data-seed="59" viewBox="0 0 300 300" aria-hidden="true" focusable="false"></svg>
     <ul class="reels">
       <li><figure class="reel" data-r><video src="assets/video/reel4.mp4" poster="assets/img/reel4-poster.jpg" width="480" height="854" muted loop playsinline preload="none" aria-label="Arco de flores rosas en la entrada de Flamingo"></video><figcaption>El arco de flores</figcaption></figure></li>
       <li><figure class="reel" data-r><video src="assets/video/reel2.mp4" poster="assets/img/reel2-poster.jpg" width="360" height="640" muted loop playsinline preload="none" aria-label="Rincón del interior con un cartel de París"></video><figcaption>El rincón de París</figcaption></figure></li>
       <li><figure class="reel" data-r><video src="assets/video/reel3.mp4" poster="assets/img/reel3-poster.jpg" width="480" height="854" muted loop playsinline preload="none" aria-label="Café y macarons en una mesa de la terraza"></video><figcaption>Café y macarons</figcaption></figure></li>
       <li><figure class="reel" data-r><video src="assets/video/reel1.mp4" poster="assets/img/reel1-poster.jpg" width="480" height="854" muted loop playsinline preload="none" aria-label="Bowl de açaí con granola, kiwi y frutos rojos"></video><figcaption>El bowl de açaí</figcaption></figure></li>
     </ul>
+    </div>
 
     <ul class="canales">
       <li><a href="https://www.instagram.com/flamingo.bf/" target="_blank" rel="noopener">
@@ -420,9 +440,9 @@
       <li><a href="https://wa.me/34607020554" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>
         <span><b>WhatsApp</b>607 02 05 54</span></a></li>
-      <li><a href="https://www.google.com/maps/search/?api=1&amp;query=Flamingo+Brunch+%26+Food+Plaza+de+Espa%C3%B1a+3+Elche" target="_blank" rel="noopener">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
-        <span><b>Google Maps</b>Fotos y reseñas</span></a></li>
+      <li><a href="https://www.google.com/search?q=flamingo+brunch+elche&amp;oq=&amp;gs_lcrp=EgZjaHJvbWUqBggAEEUYOzIGCAAQRRg7MgYIARBFGDsyEwgCEC4YrwEYxwEYgAQYmAUYmQUyBwgDEAAYgAQyFggEEC4YrwEYxwEYgAQYmAUYmQUYngUyBggFEEUYPDIGCAYQRRg8MgYIBxBFGD3SAQgxMDc1ajBqN6gCALACAA&amp;sourceid=chrome&amp;source=chrome.ob&amp;ie=UTF-8" target="_blank" rel="noopener">
+        <svg class="canales__bird" viewBox="0 0 262 464" aria-hidden="true" focusable="false"><use href="#bird"/></svg>
+        <span><b>Google</b>Lee y deja reseñas</span></a></li>
     </ul>
   </div>
 </section>
@@ -430,6 +450,8 @@
 <!-- ══ 7. EL CARTEL ════════════════════════════════════════════ -->
 <aside class="wall" aria-label="Cartel del local">
   <svg class="wall__bird flam" viewBox="0 0 262 464" aria-hidden="true" focusable="false"><use href="#bird"/></svg>
+  <svg class="flores esq esq--tr" data-flores="esquina" data-seed="67" viewBox="0 0 300 300" aria-hidden="true" focusable="false"></svg>
+  <svg class="flores esq esq--br" data-flores="esquina" data-seed="73" viewBox="0 0 300 300" aria-hidden="true" focusable="false"></svg>
   <p class="wall__txt" data-lines>Please no dancing<br>on tables</p>
   <p class="wall__src">Cartel de la pared del fondo</p>
 </aside>
@@ -454,6 +476,7 @@
 
     <div class="book__info">
       <div class="book__map">
+        <svg class="flores esq esq--tr" data-flores="esquina" data-seed="79" viewBox="0 0 300 300" aria-hidden="true" focusable="false"></svg>
         <iframe title="Mapa con la ubicación de Flamingo Brunch &amp; Food en la Plaza de España de Elche" src="https://www.google.com/maps?q=Plaza%20de%20Espa%C3%B1a%203%2C%2003201%20Elche%2C%20Alicante&amp;z=17&amp;output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
       <div class="tiles">
@@ -510,6 +533,7 @@
       </div>
     </div>
     <figure class="faq__ph" data-r>
+      <svg class="flores esq esq--bl" data-flores="esquina" data-seed="89" viewBox="0 0 300 300" aria-hidden="true" focusable="false"></svg>
       <img src="assets/img/exterior.jpg" width="1440" height="1800" alt="Fachada rosa y terraza de Flamingo en la Plaza de España de Elche" loading="lazy" decoding="async">
     </figure>
   </div>

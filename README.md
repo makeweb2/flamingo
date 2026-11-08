@@ -20,7 +20,9 @@ Todo sale de la calle, no de una plantilla:
 | Toldos negros | La barra de navegación y la sección de la carta |
 | Sombrilla de rayas | `.valance`, bajo la portada |
 | Ratán de las sillas | `.ratan`, encima de la tienda y en la cesta |
-| Baldosa ocre octogonal | `.acera`, el suelo de la portada y del pie |
+| Baldosa ocre octogonal | `.acera`, el suelo de la portada, del pie, del menú y de la puerta de reseñas |
+| Letrero redondo colgado | `.nav__logo`, el logo centrado en la barra, que se mece al aparecer |
+| La puerta con flores, en pequeño | `.porton`, el enlace a las reseñas de Google |
 
 Tokens en `:root` de `css/style.css`. El rosa `--wall` es la pared al sol y el negro
 `--steel` está medido en la carpintería.
@@ -63,6 +65,10 @@ servidor con la API de WhatsApp Business o de un servicio equivalente.
   `{ autor, fecha, nota, texto }`. Con el array vacío las tarjetas no aparecen. La
   nota en flamencos (4,2) está en el HTML de `#resenas`: el ancho de `.flock__on` y su
   regla `.is-in` del CSS van a juego (84 % = 4,2 / 5).
+- **Enlace de reseñas**: está en tres sitios del HTML: `.flock`, `.porton` y la fila
+  Google de `.canales`.
+- **Menú**: el botón hamburguesa abre `.drawer`, un ventanal con un cristal por sección
+  (`.dp`). La flor marca la sección en la que estás.
 - **Redes**: lista `.canales` del HTML. Solo está lo comprobado (Instagram, WhatsApp y
   Google). Para TikTok o Facebook, copiar una fila con la URL oficial.
 - **Preguntas**: en el HTML. El `FAQPage` se genera leyendo el acordeón.
@@ -75,6 +81,10 @@ servidor con la API de WhatsApp Business o de un servicio equivalente.
   al atributo y el botón Añadir no se oculta al poner cantidades.
 - **Las flores llevan `x`, `y`, `width` y `height` en `<use>`.** Sin ellos un `<symbol>`
   se dibuja al 100 % del SVG y una flor ocupa la pantalla.
+- **`.nav` fija `grid-template-rows`.** El logo sobresale de la barra: sin la fila fija
+  la agranda y el resto de la barra se descuadra.
+- **El arco de `.porton` se dibuja midiendo el marco.** Por eso no se deforma en ningún
+  ancho; un `viewBox` fijo aplastaría las flores en móvil.
 - **`.dis` usa `opsz` bajo.** Subido, Fraunces se afina y parece una didona fría.
 - **`.ln` lleva `padding` arriba y margen negativo.** Si no, el recorte se come la tilde
   de "día".
